@@ -2,6 +2,7 @@
 #define INTERPRETER_H
 
 #include "pch.h"
+#include "catalog.h"
 
 typedef enum {
   CREATE_TABLE = 0,
@@ -27,16 +28,13 @@ public:
 
   user_status status;
   operation_type operation;
+  table_info table;
 
   void read_operation(); // read sql sentense
 
   Interpreter();
 
   ~Interpreter();
-
-private:
-
-  string get_word(string command,int* position); // get a word for an sentense from the position
 
 };
 
