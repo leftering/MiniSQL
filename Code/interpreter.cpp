@@ -48,10 +48,6 @@ void Interpreter::read_operation() {
 	  this->operation = EMPTY;
 	}
   }
-  else if (strcmp(operation.c_str(), "quit") == 0) {
-	this->operation = QUIT;
-	this->status = FINISH;
-  }
   else if (strcmp(operation.c_str(), "select") == 0) {
 	this->operation = SELECT;
   }
@@ -95,7 +91,7 @@ string Interpreter::get_word(string command,int *position) {
 }
 
 bool is_break_char(char ch) {
-  if (ch == ' ' || ch == '\n' || ch == ';' || ch == '\0')
+  if (ch == ' ' || ch == '\n' || ch == ',' || ch == '\0')
 	return true;
   return false;
 }
