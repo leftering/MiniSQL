@@ -22,7 +22,7 @@ void Interpreter::read_operation() {
   getline(cin, command, ';'); // command = SQL sentence
   transform(command.begin(), command.end(), command.begin(), tolower);	// all words in lowercase
   string operation = get_word(command, position); // get first word ( 'create', 'drop', 'select', 'delete', 'insert', 'execfile', 'quit' )
-  if (strcmp(operation.c_str(), "ERROR") == 0) {
+  if (operation == str_ERROR) {
 	this->status = ERROR;
 	this->operation = EMPTY;
   }
@@ -158,7 +158,7 @@ void Interpreter::read_operation() {
 
 string get_word(string command,int& position) {
   if (position == command.length())
-	return "ERROR";
+	return str_ERROR;
   int L = position, R;
   while (is_break_char(command[L])) {
 	L++;
@@ -168,7 +168,7 @@ string get_word(string command,int& position) {
 	R++;
   }
   if (R == L) {
-	return "ERROR";
+	return str_ERROR;
   }
   else {
 	position = R;
@@ -184,20 +184,20 @@ bool is_break_char(char ch) {
 
 string get_brackets(string command, int& position) {
   if (position == command.length())
-	return "ERROR";
+	return str_ERROR;
   int L = position, R;
   while (is_break_char(command[L]) && command[L] != '(') {
 	L++;
   }
   if (command[L] != '(') {
-	return "ERROR";
+	return str_ERROR;
   }
   R = L;
   while (command[R] != ')' && R < command.length()) {
 	R++;
   }
   if (command[R] != ')') {
-	return "ERROR";
+	return str_ERROR;
   }
   position = R;
   return command.substr(L + 1, R - L -1);
@@ -210,20 +210,20 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
   bool end = false; // whether all columns are parsed;
   while (!end) {
 	string col = get_comma(cols_str, position, end);  // get a column info
-	if (strcmp(col.c_str(), "ERROR") == 0) {
+	if (col.c_str() == str_ERROR) {
 	  return false;
 	}
 	else {
 	  int col_position = 0;
 	  string name = get_word(col, col_position);  // get column name
-	  if (strcmp(name.c_str(), "ERROR") == 0) {
+	  if (name == str_ERROR) {
 		return false;
 	  }
 	  if (strcmp(name.c_str(), "primary") == 0) { // name == 'primary' ?
 		name = get_word(col, col_position);
 		if (strcmp(name.c_str(), "key") == 0) {
 		  name = get_word(col, col_position); // get primary key name
-		  if (strcmp(name.c_str(), "ERROR") == 0) {
+		  if (name == str_ERROR) {
 			return false;
 		  }
 		  else {
@@ -241,7 +241,7 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 		colunm_type type;
 		int char_length = 0;
 		bool unique = false;
-		if (strcmp(typestr.c_str(), "ERROR") == 0) {
+		if (typestr == str_ERROR) {
 		  return false;
 		}
 		else if (strcmp(typestr.c_str(), "int") == 0) { // int
@@ -259,7 +259,7 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 		else if (strcmp(typestr.c_str(), "char") == 0) {  // char
 		  type = COL_CHAR;
 		  string char_length_str = get_word(col, col_position);
-		  if (strcmp(char_length_str.c_str(), "ERROR") == 0) {
+		  if (char_length_str == str_ERROR) {
 			return false;
 		  }
 		  char_length = atoi(char_length_str.c_str());	// get char length
@@ -288,7 +288,7 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 string get_comma(string str, int& position, bool& end) {
   int L = position + 1, R;
   if (L >= str.length()) {
-	return "ERROR";
+	return str_ERROR;
   }
   R = L;
   while (str[R] != ',' && R < str.length()) {
