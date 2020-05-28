@@ -94,8 +94,16 @@ void Interpreter::read_operation() {
 	string str_from = get_word(command, position);	// get table name
 	string table_name = get_word(command, position);
 	if (strcmp(str_star.c_str(), "*") == 0 && strcmp(str_from.c_str(), "from") == 0 && table_name != str_ERROR) {
-	  // call API here
-	  this->operation = SELECT;
+	  string str_where = get_word(command, position);
+	  if (strcmp(str_where.c_str(), "where") == 0) {  // select with where
+		string where_clause = command.substr(position);
+		// call API here
+		this->operation = SELECT;
+	  }
+	  else {  // select without where
+		// call API here
+		this->operation = SELECT;
+	  }
 	}
 	else {
 	  this->status = ERROR;
@@ -108,6 +116,7 @@ void Interpreter::read_operation() {
 	if (strcmp(str_from.c_str(), "from") == 0 && table_name != str_ERROR) {
 	  string str_where = get_word(command, position);
 	  if (strcmp(str_where.c_str(), "where") == 0) {  // delete with where
+		string where_clause = command.substr(position);
 		// call API here
 		this->operation = DELETE;
 	  }
