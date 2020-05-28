@@ -7,6 +7,8 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in); // parse c
 string get_comma(string str, int& position , bool& end);  // get next string form positon, from ',' to next ','
 bool set_primary(string col_name, Interpreter* in);	// set 'col_name' as primary key
 
+const string str_ERROR = "ERROR";
+
 Interpreter::Interpreter() { 
   this->status = READING;
   this->operation = EMPTY;
@@ -30,6 +32,7 @@ void Interpreter::read_operation() {
 	  string new_table_name = get_word(command, position);	// get table name
 	  string cols_info = get_brackets(command, position); // get all columns info
 	  if (parse_cols(cols_info, new_table_name, this)) {  // parse columns info
+		// call API here
 		this->operation = CREATE_TABLE;
 	  }
 	  else {
@@ -38,7 +41,19 @@ void Interpreter::read_operation() {
 	  }
 	}
 	else if (strcmp(create_type.c_str(), "index") == 0) { // create index
-	  this->operation = CREATE_INDEX;
+	  string index_name = get_word(command, position);	// get index name
+	  string str_on = get_word(command, position);
+	  string table_name = get_word(command, position);	// get table name
+	  string col_name = get_word(command, position);  // get index column name
+	  cout << index_name << str_on << table_name << col_name;
+	  if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
+		// call API here
+		this->operation = CREATE_INDEX;
+	  }
+	  else {
+		this->status = ERROR;
+		this->operation = EMPTY;
+	  }
 	}
 	else {
 	  this->status = ERROR;
@@ -47,11 +62,27 @@ void Interpreter::read_operation() {
   }
   else if (strcmp(operation.c_str(), "drop") == 0) {
 	string drop_type = get_word(command, position);
-	if (strcmp(drop_type.c_str(), "table") == 0) {	// drop tale
-	  this->operation = DROP_TABLE;
+	if (strcmp(drop_type.c_str(), "table") == 0) {	// drop table
+	  string table_name = get_word(command, position); // get table name
+	  if (table_name != str_ERROR) {
+		// call API here
+		this->operation = DROP_TABLE;
+	  }
+	  else {
+		this->status = ERROR;
+		this->operation = EMPTY;
+	  }
 	}
 	else if (strcmp(drop_type.c_str(), "index") == 0) {	// drop index
-	  this->operation = DROP_INDEX;
+	  string index_name = get_word(command, position); // get index name
+	  if (index_name != str_ERROR) {
+		// call API here
+		this->operation = DROP_INDEX;
+	  }
+	  else {
+		this->status = ERROR;
+		this->operation = EMPTY;
+	  }
 	}
 	else {
 	  this->status = ERROR;
@@ -59,16 +90,61 @@ void Interpreter::read_operation() {
 	}
   }
   else if (strcmp(operation.c_str(), "select") == 0) {	// select
-	this->operation = SELECT;
+	string str_star = get_word(command, position);
+	string str_from = get_word(command, position);	// get table name
+	string table_name = get_word(command, position);
+	if (strcmp(str_star.c_str(), "*") == 0 && strcmp(str_from.c_str(), "from") == 0 && table_name != str_ERROR) {
+	  // call API here
+	  this->operation = SELECT;
+	}
+	else {
+	  this->status = ERROR;
+	  this->operation = EMPTY;
+	}
   }
   else if (strcmp(operation.c_str(), "delete") == 0) {	// delete
-	this->operation = DELETE;
+	string str_from = get_word(command, position);
+	string table_name = get_word(command, position);  // get table name
+	if (strcmp(str_from.c_str(), "from") == 0 && table_name != str_ERROR) {
+	  string str_where = get_word(command, position);
+	  if (strcmp(str_where.c_str(), "where") == 0) {  // delete with where
+		// call API here
+		this->operation = DELETE;
+	  }
+	  else {  // delete without where
+		// call API here
+		this->operation = DELETE;
+	  }
+	}
+	else {
+	  this->status = ERROR;
+	  this->operation = EMPTY;
+	}
   }
   else if (strcmp(operation.c_str(), "insert") == 0) {	// insert
-	this->operation = INSERT;
+	string str_into = get_word(command, position);
+	string table_name = get_word(command, position);  // get table name
+	string str_values = get_word(command, position);
+	string values = get_brackets(command, position);  // get insert values
+	if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && values != str_ERROR) {
+	  // call API here
+	  this->operation = INSERT;
+	}
+	else {
+	  this->status = ERROR;
+	  this->operation = EMPTY;
+	}
   }
   else if (strcmp(operation.c_str(), "execfile") == 0) {  // execfile
-	this->operation = EXECFILE;
+	string file_name = get_word(command, position); // get file name
+	if (file_name != str_ERROR) {
+	  // call api here
+	  this->operation = EXECFILE;
+	}
+	else {
+	  this->status = ERROR;
+	  this->operation = EMPTY;
+	}
   }
   else if (strcmp(operation.c_str(), "quit") == 0) {  // quit
 	this->operation = QUIT;
