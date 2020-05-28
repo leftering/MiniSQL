@@ -5,6 +5,6 @@
 // BLOCK的大小为4KB
 #define BLOCKSIZE 4096
 #define INF 65535
-#define RECORDPATH "..\\record\\"
+#define RECORDPATH "../record/"
 
 #endif
