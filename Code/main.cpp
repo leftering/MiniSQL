@@ -10,17 +10,15 @@ int main() {
 	In.operation = EMPTY;
 	In.read_operation();
 	if (In.status != ERROR) {
+	  cout << "Operation: " << In.operation << endl;
 	  if (In.operation == QUIT) {
 		break;
 	  }
 	  if (In.operation == CREATE_TABLE) {
 		cout << "create table" << endl;
 	  }
-	  else {
-		cout << "Operation: " << In.operation << endl;
-	  }
 	}
-	else if (In.status == ERROR) {
+	else{
 	  cout << "ERROR" << endl;
 	}
   }
