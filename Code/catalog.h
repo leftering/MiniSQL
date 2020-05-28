@@ -16,7 +16,6 @@ public:
   int char_length;
   bool unique;
   bool primary_key;
-  column_info* next;
   column_info() {};
 };
 
@@ -24,7 +23,7 @@ class table_info {
 public:
   string table_name;
   int col_num;
-  column_info col;
+  column_info col[32];
   table_info() {};
 };
 

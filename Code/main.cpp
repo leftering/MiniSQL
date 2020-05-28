@@ -4,7 +4,7 @@
 int main() {
   Interpreter In;
 
-  while (1) { // event loop
+  while (true) { // event loop
 	cout << "MiniSQL >> ";
 	In.status = READING;
 	In.operation = EMPTY;
@@ -13,10 +13,15 @@ int main() {
 	  if (In.operation == QUIT) {
 		break;
 	  }
-	  cout << "Operation: " << In.operation << "\n";
+	  if (In.operation == CREATE_TABLE) {
+		cout << "create table" << endl;
+	  }
+	  else {
+		cout << "Operation: " << In.operation << endl;
+	  }
 	}
 	else if (In.status == ERROR) {
-	  cout << "ERROR\n";
+	  cout << "ERROR" << endl;
 	}
   }
 
