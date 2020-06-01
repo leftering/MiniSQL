@@ -8,14 +8,14 @@ class Block
 {
 private:
 	char data[BLOCKSIZE];
-	std::string filename;
+	std::string table_name;
 	int block_id;
 	bool dirty_bit;
 	bool use_bit;
 	bool is_pinned;
 public:
 	Block(std::string table = "", int _block_id = -1, bool _dirty_bit = false, bool _use_bit = false, bool _is_pinned = false) {
-		filename = RECORDPATH + table + ".data";
+		table_name = RECORDPATH + table + ".data";
 		block_id = _block_id;
 		dirty_bit = _dirty_bit;
 		use_bit = _use_bit;
@@ -26,6 +26,9 @@ public:
 		data[1] = sprintf(data + 1, "%08x", BLOCKSIZE - 1);
 	}
 	~Block();
+	void setTableName(std::string table);
+	std::string getTableName();
+	void setBlockId(int _block_id);
 	int getBlockId();
 	void setDirty(bool _dirty);
 	bool isDirty();

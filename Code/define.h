@@ -6,5 +6,6 @@
 #define BLOCKSIZE 4096
 #define INF 65535
 #define RECORDPATH "../record/"
+#define MAXBUFFERSIZE 100
 
 #endif
