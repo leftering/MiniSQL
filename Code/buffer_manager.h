@@ -14,17 +14,14 @@
 // BufferManager类。对外提供操作缓冲区的接口。
 class BufferManager {
 private:
-    Block* Pages;//缓冲池，实际上就是一个元素为Page的数组，实际内存空间将分配在堆上
-    int page_num;//记录总页数
-    int current_position_;//时钟替换策略需要用到的变量
-    void initialize(int frame_size);//实际初始化函数
-    // 获取一个闲置的页的页号(内部封装了时钟替换策略，但使用者不需要知道这些)
+    Block* Pages;           // 缓冲池，实际上就是一个元素为Page的数组，实际内存空间将分配在堆上
+    int page_num;           // 记录总页数
+    int current_position;   // 时钟替换策略需要用到的变量
     int getEmptyPageId();
     // 讲对应文件的对应块载入对应内存页，对于文件不存在返回-1，否则返回0
     int loadDiskBlock(int page_id, std::string file_name, int block_id);
 public:
-    //  构造函数
-    BufferManager();
+    // 构造函数
     BufferManager(int frame_size);
     // 析构函数
     ~BufferManager();
