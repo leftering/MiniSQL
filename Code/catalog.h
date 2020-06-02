@@ -16,6 +16,7 @@ public:
   int char_length;
   bool unique;
   bool primary_key;
+  bool have_index;
   column_info() {};
 };
 
@@ -25,6 +26,7 @@ public:
   int col_num;
   column_info col[32];	// a table at most have 32 columns
   table_info() {};
+  
 };
 
 #endif // !API_H

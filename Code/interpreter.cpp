@@ -287,6 +287,7 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 		in->table.col[in->table.col_num].char_length = char_length;
 		in->table.col[in->table.col_num].primary_key = false;
 		in->table.col[in->table.col_num].unique = unique;
+		in->table.col[in->table.col_num].have_index = false;
 		in->table.col_num++;
 	  }
 	}
