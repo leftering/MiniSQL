@@ -54,7 +54,7 @@ class RecordManager
 public:
 
 	// Select record from table. Return number of records selected
-	int select(std::string table_name, std::sring colName, const int op, const char* opValue, vector<char*>* records);
+	int select(std::string table_name, const int* type, const int colId, const int op, const char* opValue, vector<char*>* records);
 
 	// Insert record into table. Return new index id
 	int insert(const char* table_name, const int* type, const char* data);
@@ -69,7 +69,7 @@ public:
 	bool dropTable(const char* tableName);
 
 	// Check if record satisfy all conditions
-	bool checkRecord(const char* record, std::string table_name, const int colId, const int op, const char* opValue);
+	bool checkRecord(const char* record, std::string table_name, const int* type, const int colId, const int op, const char* opValue);
 
 private:
 

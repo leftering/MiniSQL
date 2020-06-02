@@ -70,20 +70,52 @@ int RecordManager::getBlockNum(std::string table_name) {
 	return block_num;
 }
 
-bool RecordManager::checkRecord(const char* record, std::string table_name, const int colId, const int op, const char* opValue)
+bool RecordManager::checkRecord(const char* record, std::string table_name, const int* type, const int colId, const int op, const char* opValue)
 {
+	int offset = 0;
 	std::string record_value;
-	table_info TABLE;
-	TABLE.get_table_info(table_name);
-	std::string attriName = TABLE.col[colId].col_name;
-	if (attriName == "int") {
-		record_value = ;
+	for (int i = 0; i < colId; i++) {
+		if (type[i] == -2) {
+			offset += sizeof(int) / sizeof(char);
+		}
+		else if (type[i] == -1) {
+			offset += sizeof(float) / sizeof(char);
+		}
+		else {
+			offset += type[i];
+		}
 	}
-
-	return true;
+	if (type[colId] == -2) {
+		int rv;
+		memcpy(&rv, record + offset, sizeof(rv));
+		record_value = to_string(rv);
+	}
+	else if (type[colId] == -1) {
+		float rv;
+		memcpy(&rv, record + offset, sizeof(float));
+		record_value = to_string(rv);
+	}
+	else {
+		for (int i = 0; i < type[colId]; i++) {
+			record_value = record_value + record[offset + i];
+		}
+	}
+	// <, <=, <>, =, >=, >
+	switch (op)
+	{
+	case 0:if (strcmp(record_value.c_str(), opValue) < 0) return true; break;
+	case 1:if (strcmp(record_value.c_str(), opValue) <= 0) return true; break;
+	case 2:if (strcmp(record_value.c_str(), opValue) != 0) return true; break;
+	case 3:if (strcmp(record_value.c_str(), opValue) == 0) return true; break;
+	case 4:if (strcmp(record_value.c_str(), opValue) >= 0) return true; break;
+	case 5:if (strcmp(record_value.c_str(), opValue) > 0) return true; break;
+	default:
+		break;
+	}
+	return false;
 }
 
-int RecordManager::select(std::string table_name, std::string colName, const int op, const char* opValue, vector<char*>* records)
+int RecordManager::select(std::string table_name, const int* type, const int colId, const int op, const char* opValue, vector<char*>* records)
 {
 	int cnt = 0;
 	table_info TABLE;
