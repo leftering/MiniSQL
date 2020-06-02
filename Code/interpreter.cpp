@@ -224,7 +224,13 @@ string get_brackets(string command, int& position) {
 	return str_ERROR;
   }
   R = L;
-  while (command[R] != ')' && R < command.length()) {
+  int ct = 0;
+  while (R < command.length()) {
+	if (command[R] == '(')
+	  ct++;
+	if (command[R] == ')' && --ct == 0) {
+	  break;
+	}
 	R++;
   }
   if (command[R] != ')') {
@@ -239,8 +245,10 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
   in->table.col_num = 0;
   int position = 0;
   bool end = false; // whether all columns are parsed;
+  cout << cols_str << endl;
   while (!end) {
 	string col = get_comma(cols_str, position, end);  // get a column info
+	cout << col << endl;
 	if (col.c_str() == str_ERROR) {
 	  return false;
 	}
