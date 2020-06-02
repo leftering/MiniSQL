@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include "api.h"
 
 string get_word(string command, int& position);	// get next word from postion
 bool is_break_char(char ch);  // whether ch is a break char
@@ -292,7 +293,10 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 	  }
 	}
   }
-  return true;
+  if (Create_table(in)) {
+	return true;
+  }
+  return false;
 }
 
 string get_comma(string str, int& position, bool& end) {

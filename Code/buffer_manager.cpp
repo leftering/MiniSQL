@@ -1,4 +1,6 @@
 #include "buffer_manager.h"
+#include "pch.h"
+
 BufferManager::~BufferManager()
 {
 	for (int i = 0; i < page_num; i ++) {

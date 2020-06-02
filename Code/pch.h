@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
