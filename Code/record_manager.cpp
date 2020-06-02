@@ -3,6 +3,18 @@ Block::~Block()
 {
 	delete[]data;
 }
+void Block::setTableName(std::string table)
+{
+	table_name = table;
+}
+std::string Block::getTableName()
+{
+	return table_name;
+}
+void Block::setBlockId(int _block_id)
+{
+	block_id = _block_id;
+}
 int Block::getBlockId()
 {
 	return block_id;

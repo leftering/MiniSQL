@@ -18,26 +18,24 @@ private:
     int page_num;           // 记录总页数
     int current_position;   // 时钟替换策略需要用到的变量
     int getEmptyPageId();
-    // 讲对应文件的对应块载入对应内存页，对于文件不存在返回-1，否则返回0
-    int loadDiskBlock(int page_id, std::string file_name, int block_id);
+    // 将对应文件的对应块载入对应内存页，对于文件不存在返回-1，否则返回0
+    bool loadDiskBlock(int page_id, std::string table_name, int block_id);
 public:
     // 构造函数
-    BufferManager(int frame_size);
+    BufferManager(int buffer_size = MAXBUFFERSIZE) :current_position(0), page_num(min(buffer_size, MAXBUFFERSIZE)), Pages(new Block[buffer_size]) {};
     // 析构函数
     ~BufferManager();
     // 通过页号得到页的句柄(一个页的头地址)
-    char* getPage(std::string file_name, int block_id);
+    char* getPage(std::string table_name, int block_id);
     // 标记page_id所对应的页已经被修改
     void modifyPage(int page_id);
     // 钉住一个页
     void pinPage(int page_id);
     // 解除一个页的钉住状态(需要注意的是一个页可能被多次钉住，该函数只能解除一次)
     // 如果对应页的pin_count_为0，则返回-1
-    int unpinPage(int page_id);
-    // 将对应内存页写入对应文件的对应块。这里的返回值为int，但感觉其实没什么用，可以设为void
-    int flushPage(int page_id, std::string file_name, int block_id);
-    // 获取对应文件的对应块在内存中的页号，没有找到返回-1
-    int getPageId(std::string file_name, int block_id);
+    void unpinPage(int page_id);
+    // 将对应内存页写入对应文件的对应块。
+    void flushPage(int page_id);
 };
 
 #endif

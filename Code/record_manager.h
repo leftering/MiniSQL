@@ -15,7 +15,7 @@ private:
 	bool is_pinned;
 public:
 	Block(std::string table = "", int _block_id = -1, bool _dirty_bit = false, bool _use_bit = false, bool _is_pinned = false) {
-		table_name = RECORDPATH + table + ".data";
+		table_name = table;
 		block_id = _block_id;
 		dirty_bit = _dirty_bit;
 		use_bit = _use_bit;
