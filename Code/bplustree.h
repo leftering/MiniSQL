@@ -249,10 +249,10 @@ address bptree<K>::upperbound_of_key(K k)
 template <class K>
 void bptree<K>::insertindex(K k, address a)
 {
-	cout<<"begin insert index"<<endl;
+	// cout<<"begin insert index"<<endl;
 	indexnode<K> *temp;
 	temp = (this->rootnode);
-	cout<<"root state:"<<this->rootnode->NodeState<<endl;
+	// cout<<"root state:"<<this->rootnode->NodeState<<endl;
 	int i = 0;
 	while(temp->NodeState != leafstate)
 	{
@@ -288,7 +288,7 @@ void bptree<K>::insertindex(K k, address a)
 		}
 		else if(temp->key[i] > k)//insert
 		{
-			cout<<"ori: > k"<<endl;
+			// cout<<"ori: > k"<<endl;
 			int j;
 			temp->page.push_back(0);
 			for(j = temp->page.size()-1;j>i;j--)
@@ -314,7 +314,7 @@ void bptree<K>::insertindex(K k, address a)
 		}
 		else if(temp->key[temp->key.size()-1] < k)
 		{
-			cout<<"ori all < k"<<endl;
+			// cout<<"ori all < k"<<endl;
 			int j;
 			i = temp->key.size();
 			temp->page.push_back(0);
@@ -340,17 +340,18 @@ void bptree<K>::insertindex(K k, address a)
 		temp->page.push_back(0);
 		temp->page[0] = a;
 	}
-	cout<<"insert over"<<endl;
+	// cout<<"insert over"<<endl;
 }
 
 template <class K>
 void bptree<K>::split(indexnode<K> *temp)
 {
-	cout<<"begin to split"<<endl;
+	// cout<<"begin to split"<<endl;
 	int i,j;
 	int breakpoint;
-	indexnode<K> *newnode;//may be you need static
-	newnode = new indexnode<K>;
+	static indexnode<K> newnodes;
+	indexnode<K> *newnode = &newnodes; //may be you need static
+	// newnode = new indexnode<K>;
 	if(temp->NodeState == leafstate&&temp->parent != NULL)//leaf not root
 	{
 		breakpoint = temp->key.size()/2;
@@ -384,7 +385,7 @@ void bptree<K>::split(indexnode<K> *temp)
 	}
 	else if(temp->NodeState == leafstate&&temp->parent == NULL)//leaf and root
 	{
-		cout<<"leaf and root"<<endl;
+		// cout<<"leaf and root"<<endl;
 		breakpoint = temp->key.size()/2;
 		for(i = breakpoint;i<temp->key.size();i++)
 		{
@@ -393,7 +394,7 @@ void bptree<K>::split(indexnode<K> *temp)
 			newnode->key[i-breakpoint] = temp->key[i];
 			newnode->page[i-breakpoint] = temp->page[i];
 		}
-		indexnode<K> newroot;
+		static indexnode<K> newroot;
 		indexnode<K>* root = &newroot;
 		newnode->NodeState = leafstate;
 		temp->NodeState = leafstate;
@@ -421,7 +422,7 @@ void bptree<K>::split(indexnode<K> *temp)
 			newnode->children[i-breakpoint] = temp->children[i];
 		}
 		newnode->NodeState = interstate;
-		indexnode<K> newroot;
+		static indexnode<K> newroot;
 		indexnode<K>* root = &newroot;
 		root->NodeState = rootstate;
 		temp->NodeState = interstate;
@@ -668,3 +669,4 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 
 
 #endif// bplustree.h
+
