@@ -79,6 +79,8 @@ bool RecordManager::checkRecord(const char* record, std::string table_name, cons
 	if (attriName == "int") {
 		record_value = ;
 	}
+
+	return true;
 }
 
 int RecordManager::select(std::string table_name, std::string colName, const int op, const char* opValue, vector<char*>* records)
