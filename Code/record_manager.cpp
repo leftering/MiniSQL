@@ -1,65 +1,4 @@
 #include "record_manager.h"
-Block::~Block()
-{
-	delete[]data;
-}
-void Block::setTableName(std::string table)
-{
-	table_name = table;
-}
-std::string Block::getTableName()
-{
-	return table_name;
-}
-void Block::setBlockId(int _block_id)
-{
-	block_id = _block_id;
-}
-int Block::getBlockId()
-{
-	return block_id;
-}
-void Block::setDirty(bool _dirty)
-{
-	dirty_bit = _dirty;
-}
-bool Block::isDirty()
-{
-	return dirty_bit;
-}
-void Block::setUsed(bool _use)
-{
-	use_bit = _use;
-}
-bool Block::isUsed()
-{
-	return use_bit;
-}
-void Block::setPinned(bool _pinned)
-{
-	is_pinned = _pinned;
-}
-bool Block::isPinned()
-{
-	return is_pinned;
-}
-char* Block::getData()
-{
-	return data;
-}
-char* Block::getNextRecord()
-{
-	if (ptr == 0 || ptr > data[0]) {
-		return NULL;
-	}
-	int start = data[ptr * 2 + 1], end = data[ptr * 2 + 3] - 1;
-	char* record = new char[end - start + 1];;
-	for (int i = start; i <= end; i++) {
-		record[i - start] = data[i];
-	}
-	ptr = ptr + 1;
-	return record;
-}
 
 int RecordManager::getBlockNum(std::string table_name) {
 	char* p;
@@ -133,8 +72,10 @@ int RecordManager::select(std::string table_name, const int* type, const int col
 			int start = page[2 * i + 1], end = page[2 * i + 3] - 1;
 			char* record = new char[end - start + 1];
 			memcpy(record, page + start, sizeof(record));
-			cnt++;
-			records->push_back(record);
+			if (checkRecord(record, table_name, type, colId, op, opValue)) {
+				cnt++;
+				records->push_back(record);
+			}
 		}
 	}
 	return cnt;
@@ -142,5 +83,102 @@ int RecordManager::select(std::string table_name, const int* type, const int col
 
 int RecordManager::insert(const char* table_name, const int* type, const char* data)
 {
+    std::string filename = RECORDPATH + table_name + ".data";
+    table_info TABLE;
+    //检测表是否存在
+    if (TABLE.get_table_info(table_name) == false) {
+        return -1;
+    }
+    Attribute attr = catalog_manager.getAttribute(tmp_name);
+    std::vector<Data> v = tuple.getData();
+    //检测插入的元组的各个属性是否合法
+    for (int i = 0; i < v.size(); i++) {
+        if (v[i].type != attr.type[i])
+            throw tuple_type_conflict();
+    }
+    Table table = selectRecord(tmp_name);
+    std::vector<Tuple>& tuples = table.getTuple();
+    //检测是否存在主键冲突
+    if (attr.primary_key >= 0) {
+        if (isConflict(tuples, v, attr.primary_key) == true)
+            throw primary_key_conflict();
+    }
+    //检测是否存在unqiue冲突
+    for (int i = 0; i < attr.num; i++) {
+        if (attr.unique[i] == true) {
+            if (isConflict(tuples, v, i) == true)
+                throw unique_conflict();
+        }
+    }
 
+    //异常检测完成
+
+    //获取表所占的块的数量
+    // int block_num = getFileSize(table_name) / PAGESIZE;
+    // 改为
+    int block_num = getBlockNum(table_name);
+    //处理表文件大小为0的特殊情况
+    if (block_num <= 0)
+        block_num = 1;
+    //获取表的最后一块的句柄
+    char* p = buffer_manager.getPage(table_name, block_num - 1);
+    int i;
+    //寻找第一个空位
+    for (i = 0; p[i] != '\0' && i < PAGESIZE; i++);
+    int j;
+    int len = 0;
+    //计算插入的tuple的长度
+    for (j = 0; j < v.size(); j++) {
+        Data d = v[j];
+        switch (d.type) {
+        case -1: {
+            int t = getDataLength(d.datai);
+            len += t;
+        }; break;
+        case 0: {
+            float t = getDataLength(d.dataf);
+            len += t;
+        }; break;
+        default: {
+            len += d.datas.length();
+        };
+        }
+    }
+    len += v.size() + 7;
+    int block_offset;//最终记录所插入的块的编号
+    //如果剩余的空间足够插入该tuple
+    if (PAGESIZE - i >= len) {
+        block_offset = block_num - 1;
+        //插入该元组
+        insertRecord1(p, i, len, v);
+        //写回表文件
+        int page_id = buffer_manager.getPageId(table_name, block_num - 1);
+        // buffer_manager.flushPage(page_id , table_name , block_num - 1);
+        // 改为
+        buffer_manager.modifyPage(page_id);
+    }
+    //如果剩余的空间不够
+    else {
+        block_offset = block_num;
+        //新增一个块
+        char* p = buffer_manager.getPage(table_name, block_num);
+        //在新增的块中插入该元组
+        insertRecord1(p, 0, len, v);
+        //写回表文件
+        int page_id = buffer_manager.getPageId(table_name, block_num);
+        // buffer_manager.flushPage(page_id , table_name , block_num);
+        // 改为
+        buffer_manager.modifyPage(page_id);
+    }
+
+    //更新索引
+    IndexManager index_manager(tmp_name);
+    for (int i = 0; i < attr.num; i++) {
+        if (attr.has_index[i] == true) {
+            std::string attr_name = attr.name[i];
+            std::string file_path = "INDEX_FILE_" + attr_name + "_" + tmp_name;
+            std::vector<Data> d = tuple.getData();
+            index_manager.insertIndex(file_path, d[i], block_offset);
+        }
+    }
 }
