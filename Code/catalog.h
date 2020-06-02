@@ -26,7 +26,8 @@ public:
   int col_num;
   column_info col[32];	// a table at most have 32 columns
   table_info() {};
-  
+  bool get_table_info(string table_name);
+  bool write_table_info();
 };
 
 #endif // !API_H
