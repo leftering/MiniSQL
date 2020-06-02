@@ -22,7 +22,10 @@ private:
     bool loadDiskBlock(int page_id, std::string table_name, int block_id);
 public:
     // 构造函数
-    BufferManager(int buffer_size = MAXBUFFERSIZE) :current_position(0), page_num(min(buffer_size, MAXBUFFERSIZE)), Pages(new Block[page_num]) {};
+    BufferManager(int buffer_size = MAXBUFFERSIZE) :current_position(0), page_num(min(buffer_size, MAXBUFFERSIZE))
+    {
+        Pages = new Block[page_num];
+    };
     // 析构函数
     ~BufferManager();
     // 通过页号得到页的句柄(一个页的头地址)
