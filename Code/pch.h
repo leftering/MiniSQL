@@ -8,6 +8,7 @@
 #include <string.h>
 #include <algorithm>
 #include <cctype>
+#include <vector>
 
 using namespace std;
 
