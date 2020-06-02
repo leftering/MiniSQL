@@ -48,6 +48,10 @@ bool BufferManager::loadDiskBlock(int page_id, std::string table_name, int block
 
     fseek(f, BLOCKSIZE * block_id, SEEK_SET);
     char* data = Pages[page_id].getData();
+    if (fread(data, BLOCKSIZE, 1, f) == 0) {
+        fclose(f);
+        return false;
+    }
     fclose(f);
     return true;
 }
