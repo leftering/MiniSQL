@@ -1,5 +1,6 @@
 #include "interpreter.h"
 #include "api.h"
+#include "pch.h"
 
 string get_word(string command, int& position);	// get next word from postion
 bool is_break_char(char ch);  // whether ch is a break char
@@ -32,8 +33,7 @@ void Interpreter::read_operation() {
 	if (strcmp(create_type.c_str(), "table") == 0) {  // create table
 	  string new_table_name = get_word(command, position);	// get table name
 	  string cols_info = get_brackets(command, position); // get all columns info
-	  if (parse_cols(cols_info, new_table_name, this)) {  // parse columns info
-		// call API here
+	  if (parse_cols(cols_info, new_table_name, this)) {  // parse columns info and create table
 		this->operation = CREATE_TABLE;
 	  }
 	  else {
@@ -135,8 +135,16 @@ void Interpreter::read_operation() {
 	string str_into = get_word(command, position);
 	string table_name = get_word(command, position);  // get table name
 	string str_values = get_word(command, position);
-	string values = get_brackets(command, position);  // get insert values
-	if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && values != str_ERROR) {
+	string value = get_brackets(command, position);  // get insert values
+	string values[32];
+	bool end = false;
+	while (!end) {
+	  int i = 0, zero = 0;
+	  int position = 0;
+	  values[i++] = get_word(get_comma(value, position, end), zero);
+	  zero = 0;
+	}
+	if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR && insert_record(table_name, values)) {
 	  // call API here
 	  this->operation = INSERT;
 	}
@@ -293,7 +301,7 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 	  }
 	}
   }
-  if (Create_table(in)) {
+  if (create_table(in)) {
 	return true;
   }
   return false;
