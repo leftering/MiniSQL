@@ -55,7 +55,7 @@ void Interpreter::read_operation() {
 	  string col_name = get_word(command, position);  // get index column name
 	  cout << index_name << str_on << table_name << col_name;
 	  if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
-		// call API here
+		// call create index
 		this->operation = CREATE_INDEX;
 	  }
 	  else {
@@ -75,7 +75,7 @@ void Interpreter::read_operation() {
 	if (strcmp(drop_type.c_str(), "table") == 0) {	// drop table
 	  string table_name = get_word(command, position); // get table name
 	  if (table_name != str_ERROR) {
-		// call API here
+		// call drop table
 		this->operation = DROP_TABLE;
 	  }
 	  else {
@@ -87,7 +87,7 @@ void Interpreter::read_operation() {
 	else if (strcmp(drop_type.c_str(), "index") == 0) {	// drop index
 	  string index_name = get_word(command, position); // get index name
 	  if (index_name != str_ERROR) {
-		// call API here
+		// call drop index
 		this->operation = DROP_INDEX;
 	  }
 	  else {
@@ -114,11 +114,11 @@ void Interpreter::read_operation() {
 		this->w_clouse.attr = get_word(where_clause, position);
 		this->w_clouse.operation = get_word(where_clause, position);
 		this->w_clouse.value = get_word(where_clause, position);
-		// call API here
+		// call select
 		this->operation = SELECT;
 	  }
 	  else {  // select without where
-		// call API here
+		// call select
 		this->operation = SELECT;
 	  }
 	}
@@ -139,11 +139,11 @@ void Interpreter::read_operation() {
 		this->w_clouse.attr = get_word(where_clause, position);
 		this->w_clouse.operation = get_word(where_clause, position);
 		this->w_clouse.value = get_word(where_clause, position);
-		// call API here
+		// call delete
 		this->operation = DELETE;
 	  }
 	  else {  // delete without where
-		// call API here
+		// call delete
 		this->operation = DELETE;
 	  }
 	}
@@ -167,7 +167,7 @@ void Interpreter::read_operation() {
 	  zero = 0;
 	}
 	if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR && insert_record(table_name, values)) {
-	  // call API here
+	  // call insert
 	  this->operation = INSERT;
 	}
 	else {
