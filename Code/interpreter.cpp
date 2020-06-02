@@ -184,6 +184,7 @@ void Interpreter::read_operation() {
 	this->operation = EMPTY;
   }
   this->finish = clock();
+  this->log_status();
 }
 
 string get_word(string command,int& position) {
@@ -344,3 +345,41 @@ bool set_primary(string col_name, Interpreter* in) {
   }
   return false;
 }
+
+void Interpreter::log_status() {
+  if (this->status != ERROR) {
+	cout << "Success: ";
+	if (this->operation == CREATE_TABLE) {
+	  cout << "create table" << endl;
+	}
+	if (this->operation == CREATE_INDEX) {
+	  cout << "create index" << endl;
+	}
+	if (this->operation == DROP_TABLE) {
+	  cout << "drop table" << endl;
+	}
+	if (this->operation == DROP_INDEX) {
+	  cout << "drop index" << endl;
+	}
+	if (this->operation == SELECT) {
+	  cout << "select" << endl;
+	}
+	if (this->operation == DELETE) {
+	  cout << "delete" << endl;
+	}
+	if (this->operation == INSERT) {
+	  cout << "insert" << endl;
+	}
+	if (this->operation == EXECFILE) {
+	  cout << "execfile" << endl;
+	}
+	if (this->operation == EMPTY) {
+	  cout << "empty" << endl;
+	}
+  }
+  else {
+	cout << "ERROR" << endl;
+  }
+  cout << "( " << ((this->start - this->finish) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
+}
+

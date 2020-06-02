@@ -41,6 +41,8 @@ public:
 
   void read_operation(); // read sql sentense
 
+  void log_status();
+
   Interpreter();
 
   ~Interpreter();
