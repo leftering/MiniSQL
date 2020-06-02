@@ -10,6 +10,7 @@ int main() {
 	In.operation = EMPTY;
 	In.read_operation();
 	if (In.status != ERROR) {
+	  cout << "Success: ";
 	  if (In.operation == QUIT) {
 		break;
 	  }
@@ -44,6 +45,7 @@ int main() {
 	else{
 	  cout << "ERROR" << endl;
 	}
+	cout << "( " << ((In.start - In.finish) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
   }
 
 

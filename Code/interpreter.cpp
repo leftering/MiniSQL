@@ -22,6 +22,10 @@ void Interpreter::read_operation() {
   string command;
   int position = 0;
   getline(cin, command, ';'); // command = SQL sentence
+  if (command.length() < 3)
+	return;
+  cout << "Command: " << command << ";" << endl;
+  this->start = clock();
   transform(command.begin(), command.end(), command.begin(), tolower);	// all words in lowercase
   string operation = get_word(command, position); // get first word ( 'create', 'drop', 'select', 'delete', 'insert', 'execfile', 'quit' )
   if (operation == str_ERROR) {
@@ -98,6 +102,10 @@ void Interpreter::read_operation() {
 	  string str_where = get_word(command, position);
 	  if (strcmp(str_where.c_str(), "where") == 0) {  // select with where
 		string where_clause = command.substr(position);
+		int position = 0;
+		this->w_clouse.attr = get_word(where_clause, position);
+		this->w_clouse.operation = get_word(where_clause, position);
+		this->w_clouse.value = get_word(where_clause, position);
 		// call API here
 		this->operation = SELECT;
 	  }
@@ -118,6 +126,10 @@ void Interpreter::read_operation() {
 	  string str_where = get_word(command, position);
 	  if (strcmp(str_where.c_str(), "where") == 0) {  // delete with where
 		string where_clause = command.substr(position);
+		int position = 0;
+		this->w_clouse.attr = get_word(where_clause, position);
+		this->w_clouse.operation = get_word(where_clause, position);
+		this->w_clouse.value = get_word(where_clause, position);
 		// call API here
 		this->operation = DELETE;
 	  }
@@ -138,10 +150,10 @@ void Interpreter::read_operation() {
 	string value = get_brackets(command, position);  // get insert values
 	string values[32];
 	bool end = false;
+	int i = 0, v_posi = 0;
 	while (!end) {
-	  int i = 0, zero = 0;
-	  int position = 0;
-	  values[i++] = get_word(get_comma(value, position, end), zero);
+	  int zero = 0;
+	  values[i++] = get_word(get_comma(value, v_posi, end), zero);
 	  zero = 0;
 	}
 	if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR && insert_record(table_name, values)) {
@@ -155,8 +167,7 @@ void Interpreter::read_operation() {
   }
   else if (strcmp(operation.c_str(), "execfile") == 0) {  // execfile
 	string file_name = get_word(command, position); // get file name
-	if (file_name != str_ERROR) {
-	  // call api here
+	if (file_name != str_ERROR && execfile(this, file_name)) {
 	  this->operation = EXECFILE;
 	}
 	else {
@@ -172,6 +183,7 @@ void Interpreter::read_operation() {
 	this->status = ERROR;
 	this->operation = EMPTY;
   }
+  this->finish = clock();
 }
 
 string get_word(string command,int& position) {
@@ -195,7 +207,7 @@ string get_word(string command,int& position) {
 }
 
 bool is_break_char(char ch) {
-  if (ch == ' ' || ch == '\n' || ch == ',' || ch == '\0' || ch == '(' || ch == ')')
+  if (ch == ' ' || ch == '\n' || ch == ',' || ch == '\0' || ch == '(' || ch == ')' || ch == '\'' || ch == '\t')
 	return true;
   return false;
 }

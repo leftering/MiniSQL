@@ -10,6 +10,7 @@
 #include <cctype>
 #include <vector>
 #include <fstream>
+#include <ctime>
 
 using namespace std;
 

@@ -39,11 +39,26 @@ bool insert_record(string table_name, string values[]) {
 	  else {
 		return false;
 	  }
-	  return true;
 	}
 	// call record;
+	return true;
   }
   else {
 	return false;
   }
+}
+
+bool execfile(Interpreter* in,string file_name) {
+  ifstream fin(file_name);
+  if (!fin) {
+	cout << file_name;
+	return false;
+  }
+  streambuf *oldcin = cin.rdbuf(fin.rdbuf());
+  while (!cin.eof()) {
+	in->read_operation();
+  }
+  cin.rdbuf(oldcin);
+  fin.close();
+  return true;
 }

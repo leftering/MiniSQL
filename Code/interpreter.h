@@ -23,12 +23,21 @@ typedef enum {
   ERROR
 }user_status; // user input status
 
+struct Where_clouse {
+  string attr;
+  string value;
+  string operation;
+};
+
+
 class Interpreter {
 public:
 
   user_status status;
   operation_type operation;
   table_info table;
+  Where_clouse w_clouse;
+  clock_t start, finish;
 
   void read_operation(); // read sql sentense
 
