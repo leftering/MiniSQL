@@ -1,6 +1,6 @@
 #pragma once
 #ifndef _BUFFER_MANAGER_H_
-#define _BUFFER_MANAGER_H_ 1
+#define _BUFFER_MANAGER_H_
 
 #include <cstdio>
 #include <iostream>
