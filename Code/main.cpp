@@ -7,7 +7,7 @@ BufferManager buffer_manager;
 
 int main() {
   Interpreter In;
-
+  cout << "Welcome to MiniSQL !" << endl << endl;
   while (true) { // event loop
 	cout << "MiniSQL >> ";
 	In.status = READING;
@@ -17,5 +17,6 @@ int main() {
 	  break;
 	}
   }
+  cout << "Quit MiniSQL, bye !" << endl << endl;
   return 0;
 }
