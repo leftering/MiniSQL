@@ -3,9 +3,10 @@
 #include "record_manager.h"
 #include "buffer_manager.h"
 
+BufferManager buffer_manager;
+
 int main() {
   Interpreter In;
-  BufferManager buffer_manager;
 
   while (true) { // event loop
 	cout << "MiniSQL >> ";

@@ -16,7 +16,7 @@ public:
 	int select(std::string table_name, const int* type, const int colId, const int op, const char* opValue, vector<char*>* records);
 
 	// Insert record into table. Return new index id
-	int insert(const char* table_name, const int* type, const char* data);
+	/*int insert(const char* table_name, const int* type, const char* data);
 
 	// Delete id-th record from table. Return true if success
 	bool remove(const char* tableName, const vector<int>* ids);
@@ -25,13 +25,13 @@ public:
 	bool createTable(const char* tableName);
 
 	// Drop table. Return true if success
-	bool dropTable(const char* tableName);
+	bool dropTable(const char* tableName);*/
 
 	// Check if record satisfy all conditions
 	bool checkRecord(const char* record, std::string table_name, const int* type, const int colId, const int op, const char* opValue);
 
 private:
-
+	/*
 	// Compare string
 	bool charCmp(const char* a, const char* b, int op);
 
@@ -39,7 +39,7 @@ private:
 	bool intCmp(const char* a, const char* b, int op);
 
 	// Compare float
-	bool floatCmp(const char* a, const char* b, int op);
+	bool floatCmp(const char* a, const char* b, int op);*/
 
 	int getBlockNum(std::string table_name);
 };
