@@ -61,3 +61,24 @@ void BufferManager::unpinPage(int page_id)
 {
     Pages[page_id].setPinned(false);
 }
+int BufferManager::getEmptyPageId()
+{
+    int empty = current_position;
+    if (Pages[current_position].isUsed() == false && Pages[current_position].isDirty() == false) {
+        current_position = (current_position + 1) % page_num;
+        return empty;
+    }
+    else {
+        int current = current_position;
+        while (1) {
+            for (int i = 0; i < page_num; i++) {
+                if (Pages[current].isUsed() == false && Pages[current].isDirty() == true) {
+                    current_position = current + 1;
+                    return current;
+                }
+                Pages[current].setUsed(false);
+                current = (current + 1) % page_num;
+            }
+        }
+    }
+}
