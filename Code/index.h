@@ -73,9 +73,9 @@ bptree<int>* type_tablelist::create_tree_int(string table_name,string attributen
     this->int_treelist.push_back(0);
     static bptree<int> x(table_name,attributename,'i');
     this->int_treelist[int_treelist.size()-1] = &x;
-    cout<<"in the create_tree_int: x = "<<x.index_filename<<"-"<<x.index_attributename<<"-"<<x.rootnode->NodeState<<endl;
-    cout<<"in the create_tree_int: int_treelist["<<int_treelist.size()-1 <<"] = "<<int_treelist[int_treelist.size()-1]->index_filename;
-    cout<<"-"<<int_treelist[int_treelist.size()-1]->index_attributename<<"-"<<int_treelist[int_treelist.size()-1]->rootnode->NodeState<<endl;
+    // cout<<"in the create_tree_int: x = "<<x.index_filename<<"-"<<x.index_attributename<<"-"<<x.rootnode->NodeState<<endl;
+    // cout<<"in the create_tree_int: int_treelist["<<int_treelist.size()-1 <<"] = "<<int_treelist[int_treelist.size()-1]->index_filename;
+    // cout<<"-"<<int_treelist[int_treelist.size()-1]->index_attributename<<"-"<<int_treelist[int_treelist.size()-1]->rootnode->NodeState<<endl;
     return int_treelist[int_treelist.size()-1];
 }
 
@@ -111,9 +111,9 @@ void create_index_int(string table_name, string attributename, int key, address 
     }
     else if(aimtree == NULL)
     {
-        cout<<"find_int_tree returns null"<<endl;
+        // cout<<"find_int_tree returns null"<<endl;
         aimtree = t->create_tree_int(table_name,attributename,'i');
-        cout<<"create_index_int"<<aimtree->index_filename<<aimtree->rootnode->NodeState<<endl;
+        // cout<<"create_index_int"<<aimtree->index_filename<<aimtree->rootnode->NodeState<<endl;
         aimtree->insertindex(key,a);
     }
 }
@@ -154,12 +154,12 @@ void delete_index_int(string table_name, string attributename, int key)
     aimtree = t->find_int_tree(table_name,attributename);
     if(aimtree != NULL)
     {
-        cout<<"delete_index_int"<<endl;
+        // cout<<"delete_index_int"<<endl;
         aimtree->deleteindex(key);
     }
     else if(aimtree == NULL)
     {
-        cout<<"not find this index"<<endl;
+        // cout<<"not find this index"<<endl;
     }
 }
 
@@ -233,6 +233,8 @@ address find_index_float(string table_name, string attributename, float key)
     }
 }
 
-//先实现基本的插入，删除，查找单个。删除多个和查找多个之后再添加。
+//先实现基本的插入，删除，查找单个。删除多个和查找多个之后再添加。在bplustree的修改中有一个addr的连接不再支持多个同值的搜索。
+//目前可以实现的是：只能不同的值作为key来检索，同一个key只能对应一个addr
+//范围搜索、批量删除和查找，同一个key可以检测到多个addr功能，后续添加。
 
 #endif // index.h
