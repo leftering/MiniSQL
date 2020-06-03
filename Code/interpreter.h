@@ -29,6 +29,11 @@ struct Where_clouse {
   string operation;
 };
 
+struct DB_exception{
+  int code;
+  string title;
+  string msg;
+};
 
 class Interpreter {
 public:
@@ -38,10 +43,13 @@ public:
   table_info table;
   Where_clouse w_clouse;
   clock_t start, finish;
+  DB_exception error;
 
   void read_operation(); // read sql sentense
 
   void log_status();
+
+  void set_error(int code);
 
   Interpreter();
 

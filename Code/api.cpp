@@ -40,7 +40,7 @@ bool insert_record(string table_name, string values[]) {
 		return false;
 	  }
 	}
-	// call record;
+	// call insert;
 	return true;
   }
   else {

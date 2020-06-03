@@ -19,6 +19,7 @@ Interpreter::Interpreter() {
 Interpreter::~Interpreter() {}
 
 void Interpreter::read_operation() {
+  this->set_error(0);
   string command;
   int position = 0;
   getline(cin, command, ';'); // command = SQL sentence
@@ -31,6 +32,7 @@ void Interpreter::read_operation() {
   if (operation == str_ERROR) {
 	this->status = ERROR;
 	this->operation = EMPTY;
+	this->set_error(0);
   }
   else if (strcmp(operation.c_str(), "create") == 0) {
 	string create_type = get_word(command, position);
@@ -43,6 +45,7 @@ void Interpreter::read_operation() {
 	  else {
 		this->status = ERROR;
 		this->operation = EMPTY;
+		this->set_error(2001); // syntax error table info error
 	  }
 	}
 	else if (strcmp(create_type.c_str(), "index") == 0) { // create index
@@ -52,17 +55,19 @@ void Interpreter::read_operation() {
 	  string col_name = get_word(command, position);  // get index column name
 	  cout << index_name << str_on << table_name << col_name;
 	  if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
-		// call API here
+		// call create index
 		this->operation = CREATE_INDEX;
 	  }
 	  else {
 		this->status = ERROR;
 		this->operation = EMPTY;
+		this->set_error(2002); // syntax error create index 
 	  }
 	}
 	else {
 	  this->status = ERROR;
 	  this->operation = EMPTY;
+	  this->set_error(2003); //syntax error create;
 	}
   }
   else if (strcmp(operation.c_str(), "drop") == 0) {
@@ -70,28 +75,31 @@ void Interpreter::read_operation() {
 	if (strcmp(drop_type.c_str(), "table") == 0) {	// drop table
 	  string table_name = get_word(command, position); // get table name
 	  if (table_name != str_ERROR) {
-		// call API here
+		// call drop table
 		this->operation = DROP_TABLE;
 	  }
 	  else {
 		this->status = ERROR;
 		this->operation = EMPTY;
+		this->set_error(2010);
 	  }
 	}
 	else if (strcmp(drop_type.c_str(), "index") == 0) {	// drop index
 	  string index_name = get_word(command, position); // get index name
 	  if (index_name != str_ERROR) {
-		// call API here
+		// call drop index
 		this->operation = DROP_INDEX;
 	  }
 	  else {
 		this->status = ERROR;
 		this->operation = EMPTY;
+		this->set_error(2009);
 	  }
 	}
 	else {
 	  this->status = ERROR;
 	  this->operation = EMPTY;
+	  this->set_error(2008);
 	}
   }
   else if (strcmp(operation.c_str(), "select") == 0) {	// select
@@ -106,17 +114,18 @@ void Interpreter::read_operation() {
 		this->w_clouse.attr = get_word(where_clause, position);
 		this->w_clouse.operation = get_word(where_clause, position);
 		this->w_clouse.value = get_word(where_clause, position);
-		// call API here
+		// call select
 		this->operation = SELECT;
 	  }
 	  else {  // select without where
-		// call API here
+		// call select
 		this->operation = SELECT;
 	  }
 	}
 	else {
 	  this->status = ERROR;
 	  this->operation = EMPTY;
+	  this->set_error(2007);
 	}
   }
   else if (strcmp(operation.c_str(), "delete") == 0) {	// delete
@@ -130,17 +139,18 @@ void Interpreter::read_operation() {
 		this->w_clouse.attr = get_word(where_clause, position);
 		this->w_clouse.operation = get_word(where_clause, position);
 		this->w_clouse.value = get_word(where_clause, position);
-		// call API here
+		// call delete
 		this->operation = DELETE;
 	  }
 	  else {  // delete without where
-		// call API here
+		// call delete
 		this->operation = DELETE;
 	  }
 	}
 	else {
 	  this->status = ERROR;
 	  this->operation = EMPTY;
+	  this->set_error(2006);
 	}
   }
   else if (strcmp(operation.c_str(), "insert") == 0) {	// insert
@@ -157,12 +167,13 @@ void Interpreter::read_operation() {
 	  zero = 0;
 	}
 	if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR && insert_record(table_name, values)) {
-	  // call API here
+	  // call insert
 	  this->operation = INSERT;
 	}
 	else {
 	  this->status = ERROR;
 	  this->operation = EMPTY;
+	  this->set_error(2005);
 	}
   }
   else if (strcmp(operation.c_str(), "execfile") == 0) {  // execfile
@@ -173,6 +184,7 @@ void Interpreter::read_operation() {
 	else {
 	  this->status = ERROR;
 	  this->operation = EMPTY;
+	  this->set_error(2004);
 	}
   }
   else if (strcmp(operation.c_str(), "quit") == 0) {  // quit
@@ -182,6 +194,7 @@ void Interpreter::read_operation() {
   else {
 	this->status = ERROR;
 	this->operation = EMPTY;
+	this->set_error(2000);
   }
   this->finish = clock();
   this->log_status();
@@ -224,7 +237,13 @@ string get_brackets(string command, int& position) {
 	return str_ERROR;
   }
   R = L;
-  while (command[R] != ')' && R < command.length()) {
+  int ct = 0;
+  while (R < command.length()) {
+	if (command[R] == '(')
+	  ct++;
+	if (command[R] == ')' && --ct == 0) {
+	  break;
+	}
 	R++;
   }
   if (command[R] != ')') {
@@ -239,8 +258,10 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
   in->table.col_num = 0;
   int position = 0;
   bool end = false; // whether all columns are parsed;
+  cout << cols_str << endl;
   while (!end) {
 	string col = get_comma(cols_str, position, end);  // get a column info
+	cout << col << endl;
 	if (col.c_str() == str_ERROR) {
 	  return false;
 	}
@@ -378,8 +399,63 @@ void Interpreter::log_status() {
 	}
   }
   else {
-	cout << "ERROR" << endl;
+	cout << "ERROR: " << this->error.code << " " << this->error.title <<endl;
+	cout << "message: " << this->error.msg << endl << endl;
   }
   cout << "( " << ((this->start - this->finish) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
 }
 
+void Interpreter::set_error(int code) {
+  this->error.code = code;
+  switch (code)
+  {
+  case 2000:
+	this->error.title = "WRONG OPERATION";
+	this->error.msg = "only operation of ( 'create', 'drop', 'select', 'delete', 'insert', 'execfile', 'quit' ) vaild.";
+	break;
+  case 2001:
+	this->error.title = "SYNTAX ERROR";
+	this->error.msg = "create table syntax error.";
+	break;
+  case 2002:
+	this->error.title = "SYNTAX ERROR";
+	this->error.msg = "create index syntax error.";
+	break;
+  case 2003:
+	this->error.title = "SYNTAX ERROR";
+	this->error.msg = "only ( 'index', 'table' ) can be created.";
+	break;
+  case 2004:
+	this->error.title = "EXECFILE ERROR";
+	this->error.msg = "can not open file or file content invaild.";
+	break;
+  case 2005:
+	this->error.title = "INSERT ERROR";
+	this->error.msg = "insert syntax error or data can not insert into table.";
+	break;
+  case 2006:
+	this->error.title = "SYNTAX ERROR";
+	this->error.msg = "delete syntax error.";
+	break;
+  case 2007:
+	this->error.title = "SYNTAX ERROR";
+	this->error.msg = "selete syntax error.";
+	break;
+  case 2008:
+	this->error.title = "SYNTAX ERROR";
+	this->error.msg = "only ( 'index', 'table' ) can be dropped.";
+	break;
+  case 2009:
+	this->error.title = "DROP INDEX ERROR";
+	this->error.msg = "index name illegal or an error occured when drop it.";
+	break;
+  case 2010:
+	this->error.title = "DROP TABLE ERROR";
+	this->error.msg = "table name illegal or an error occured when drop it.";
+	break;
+  default:
+	this->error.title = "UNKNOWN ERROR";
+	this->error.msg = "unknown error";
+	break;
+  }
+}
