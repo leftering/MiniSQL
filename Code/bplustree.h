@@ -4,17 +4,18 @@
 #include "buffer_manager.h"
 #include <vector>
 #include "record_manager.h"
+#include <map>
 #define rootstate 2
 #define interstate 1
 #define leafstate 0
 #define nodecapacity 4//how many keys in a node of B+tree 
-
+//同一个地址必须只能建立一次索引
 //data in block is in char, so the value is char 
 typedef struct addr *address;
 struct addr
 {//介于之前发生过的问题，如果该结构里面的buf不能正确产生值，可以考虑使用static
     int block_id;//page is block.
-    int block_offset;//record_id;
+    int record_id;//record_id;
 	address last_addr;
 	address next_addr;
 };
@@ -24,7 +25,7 @@ address create_addr()
 	address x;
 	x = (address)malloc(sizeof(struct addr));
 	x->block_id = -1;
-	x->block_offset = -1;
+	x->record_id = -1;
 	x->last_addr = NULL;
 	x->next_addr = NULL;
 	return x;
@@ -67,6 +68,7 @@ public:
 	string index_attributename;
 	indexnode<K>* rootnode;
 	indexnode<K>* aim;
+	map <address,K> ak;
 	int aim_id;
 public:
 	bptree(string index_filename, string index_attributename, char datatype);
@@ -111,7 +113,7 @@ bptree<K>::bptree(string index_filename,string index_attributename, char datatyp
 template <class K>
 address bptree<K>::find_index_of_key(K k)
 {
-	// cout<<"find_index_of_key"<<endl;
+	cout<<"find_index_of_key"<<endl;
 	indexnode<K> *temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -191,7 +193,7 @@ address bptree<K>::lowerbound_of_key(K k)
 		{
 			aim = temp->sibling;
 			aim_id = 0;
-			return temp->page[temp->key.size()-1].next_addr;
+			return temp->page[temp->key.size()-1]->next_addr;
 		}
 	}
 	aim_id = -1;
@@ -239,7 +241,7 @@ address bptree<K>::upperbound_of_key(K k)
 		{
 			aim = temp->sibling;
 			aim_id = 0;
-			return temp->page[temp->key.size()-1].next_addr;//前闭后开
+			return temp->page[temp->key.size()-1]->next_addr;//前闭后开
 		}
 	}
 	aim_id = -1;
@@ -315,7 +317,8 @@ void bptree<K>::refresh()
 template <class K>
 void bptree<K>::insertindex(K k, address a)
 {
-	// cout<<"insertindex"<<endl;
+	ak[a] = k;
+	cout<<"insertindex"<<endl;
 	indexnode<K> *temp;
 	temp = (this->rootnode);
 	// cout<<"root state:"<<this->rootnode->NodeState<<endl;
@@ -387,8 +390,10 @@ void bptree<K>::insertindex(K k, address a)
 			temp->page[i] = a;
 			temp->key.push_back(0);
 			temp->key[i] = k;
-			temp->page[i]->last_addr = temp->page[i-1];//no multiple
-			temp->page[i]->next_addr = temp->page[i-1]->next_addr;
+			address tempaddr = temp->page[i-1];
+			while(tempaddr->next_addr != NULL && ak[tempaddr->next_addr] == ak[tempaddr])tempaddr = tempaddr->next_addr;
+			temp->page[i]->last_addr = tempaddr;//no multiple
+			temp->page[i]->next_addr = tempaddr->next_addr;
 			
 			if(temp->page[i]->last_addr != NULL)temp->page[i]->last_addr->next_addr = temp->page[i];
 			if(temp->page[i]->next_addr != NULL)temp->page[i]->next_addr->last_addr = temp->page[i];
@@ -414,7 +419,7 @@ void bptree<K>::insertindex(K k, address a)
 template <class K>
 void bptree<K>::split(indexnode<K> *temp)
 {
-	// cout<<"split"<<endl;
+	cout<<"split"<<endl;
 	int i,j;
 	int breakpoint;
 	int sizechange;
@@ -598,7 +603,7 @@ void bptree<K>::split(indexnode<K> *temp)
 template <class K>
 void bptree<K>::deleteindex(K k)
 {
-	// cout<<"delete"<<endl;
+	cout<<"delete"<<endl;
 	indexnode<K> *temp;
 	temp = (this->rootnode);
 	int i = 0;
@@ -676,7 +681,20 @@ void bptree<K>::deletescope(K lowk, K upk)
 template <class K>
 void bptree<K>::deletes(indexnode<K>* index, int num)
 {
-	// cout<<"deletes"<<endl;
+	cout<<"deletes"<<endl;
+	address erase_aim = index->page[num];
+	address lastaddr = erase_aim->last_addr;
+	address next_eraseaim = erase_aim->next_addr;
+	while(ak[next_eraseaim] == ak[erase_aim]&&next_eraseaim != NULL)
+	{
+		ak.erase(erase_aim);
+		erase_aim = next_eraseaim;
+		next_eraseaim = erase_aim->next_addr;
+	}
+	ak.erase(erase_aim);
+	address nextaddr = next_eraseaim;
+	if(lastaddr != NULL)lastaddr->next_addr = nextaddr;
+	if(nextaddr != NULL)nextaddr->last_addr = lastaddr;
 	int i;
 	for(i = num+1;i<index->key.size();i++)
 	{
@@ -685,6 +703,7 @@ void bptree<K>::deletes(indexnode<K>* index, int num)
 	}
 	index->key.pop_back();
 	index->page.pop_back();
+	
 	if(index->key.size()<nodecapacity/2&&index->NodeState != rootstate&&index->parent != NULL)
 	{
 		this->merge(index);//优先和自己的父节点的孩子合并。
@@ -694,7 +713,7 @@ void bptree<K>::deletes(indexnode<K>* index, int num)
 template <class K>
 void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 {
-	// cout<<"merge"<<endl;
+	cout<<"merge"<<endl;
 	int i,j,child_num,key_num;
 	indexnode<K> *mergenode;
 	indexnode<K> *secnode;
