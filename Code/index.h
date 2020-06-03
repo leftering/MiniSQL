@@ -7,7 +7,7 @@
 #define interstate 1
 #define leafstate 0
 class type_tablelist{
-private:
+public:
     vector<bptree<int>*> int_treelist;
     vector<bptree<string>*> string_treelist;
     vector<bptree<float>*> float_treelist;
@@ -78,7 +78,6 @@ bptree<int>* type_tablelist::create_tree_int(string table_name,string attributen
     // cout<<"-"<<int_treelist[int_treelist.size()-1]->index_attributename<<"-"<<int_treelist[int_treelist.size()-1]->rootnode->NodeState<<endl;
     return int_treelist[int_treelist.size()-1];
 }
-
 bptree<string>* type_tablelist::create_tree_string(string table_name,string attributename, char type)
 {
     this->string_treelist.push_back(0);
@@ -93,8 +92,6 @@ bptree<float>* type_tablelist::create_tree_float(string table_name,string attrib
     this->float_treelist[float_treelist.size()-1] = &x;
     return float_treelist[float_treelist.size()-1];
 }
-
-
 
 
 type_tablelist a_table_list;
@@ -197,11 +194,12 @@ address find_index_int(string table_name, string attributename, int key)
     aimtree = t->find_int_tree(table_name,attributename);
     if(aimtree != NULL)
     {
-        aimtree->find_index_of_key(key);
+        return aimtree->find_index_of_key(key);
     }
     else if(aimtree == NULL)
     {
         cout<<"not find"<<endl;
+        return NULL;
     }
 }
 
@@ -211,11 +209,12 @@ address find_index_string(string table_name, string attributename, string key)
     aimtree = t->find_string_tree(table_name,attributename);
     if(aimtree != NULL)
     {
-        aimtree->find_index_of_key(key);
+        return aimtree->find_index_of_key(key);
     }
     else if(aimtree == NULL)
     {
         cout<<"not find"<<endl;
+        return NULL;
     }
 }
 
@@ -225,17 +224,20 @@ address find_index_float(string table_name, string attributename, float key)
     aimtree = t->find_float_tree(table_name,attributename);
     if(aimtree != NULL)
     {
-        aimtree->find_index_of_key(key);
+        return aimtree->find_index_of_key(key);
     }
     else if(aimtree == NULL)
     {
         cout<<"not find"<<endl;
+        return NULL;
     }
 }
 
 //先实现基本的插入，删除，查找单个。删除多个和查找多个之后再添加。在bplustree的修改中有一个addr的连接不再支持多个同值的搜索。
-//目前可以实现的是：只能不同的值作为key来检索，同一个key只能对应一个addr
-//范围搜索、批量删除和查找，同一个key可以检测到多个addr功能，后续添加。
+
+//scope
+//范围查找函数：由于需要返回两个边界，上界和下界，因此直接考虑调用了两个函数。且注意，前闭后开，返回的low是包含在所需空间里的，返回的up是不包含的。
+//范围删除函数，无返回值，直接一次输入，但是参数同样需要表名、属性名、上界和下界。且同样是前闭后开。
 address find_scope_int_low(string table_name, string attributename, int key)
 {
     bptree<int>* aimtree;
@@ -339,13 +341,25 @@ address find_scope_float_up(string table_name, string attributename, float key)
         return aimtree->upperbound_of_key(key);
     }//如果是空的，查找应该得到null
 }
-//age_g = find_scope_int_low("student","age",16);
-//age_h = find_scope_int_up("student","age",18);
-//16就是key的下界，18就是key的上界，最后会返回该student表以age属性检索到的key = 18且key = 16的地址，
-//然后里面所有的地址都是从小到大以双向链表的方式连起来的，直接从下界遍历到上界就可以了
-//注意这里认为取得的两个边界是前闭后开，比如实际树里面只有16,19,21，23三个数，你搜索的下界是16，搜索的上界是21，
-//两个函数返回的分别是16对应的地址和23对应的地址。
-//即下界函数和上界函数返回的都是比参考的边界值大的数。
+
+void delete_scope_int(string table_name,string attributename, int lowkey, int upkey)
+{
+    bptree<int>* aimtree;
+    aimtree = t->find_int_tree(table_name,attributename);
+    aimtree->deletescope(lowkey,upkey);
+}
+
+void delete_scope_string(string table_name, string attributename, string lowkey, string upkey)
+{
+    bptree<string>* aimtree;
+    aimtree->deletescope(lowkey,upkey);
+}
+
+void delete_scope_float(string table_name,string attributename, float lowkey, float upkey)
+{
+    bptree<float>* aimtree;
+    aimtree->deletescope(lowkey,upkey);
+}
 
 
 #endif // index.h
