@@ -68,8 +68,8 @@ public:
 	string index_attributename;
 	indexnode<K>* rootnode;
 	indexnode<K>* aim;
-	map <address,K> ak;
-	int aim_id;
+	map <address,K> ak;//建立从address到K的映射，可以利用address来找到key
+	int aim_id;//aim 和aim_id可以用于所有find功能的函数，这些函数使用之后，可以通过aim和aim_id来定位当前找到的address
 public:
 	bptree(string index_filename, string index_attributename, char datatype);
 	void disposetree(void);
@@ -113,7 +113,6 @@ bptree<K>::bptree(string index_filename,string index_attributename, char datatyp
 template <class K>
 address bptree<K>::find_index_of_key(K k)
 {
-	cout<<"find_index_of_key"<<endl;
 	indexnode<K> *temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -151,7 +150,6 @@ address bptree<K>::find_index_of_key(K k)
 	aim = NULL;
 	return NULL;
 }
-
 
 template <class K>
 address bptree<K>::lowerbound_of_key(K k)
@@ -193,7 +191,7 @@ address bptree<K>::lowerbound_of_key(K k)
 		{
 			aim = temp->sibling;
 			aim_id = 0;
-			return temp->page[temp->key.size()-1]->next_addr;
+			return temp->sibling->page[0];//修改过，
 		}
 	}
 	aim_id = -1;
@@ -241,15 +239,13 @@ address bptree<K>::upperbound_of_key(K k)
 		{
 			aim = temp->sibling;
 			aim_id = 0;
-			return temp->page[temp->key.size()-1]->next_addr;//前闭后开
+			return temp->sibling->page[0];//前闭后开
 		}
 	}
 	aim_id = -1;
 	aim = NULL;
 	return NULL;
 }
-
-
 
 template <class K>
 indexnode<K>* bptree<K>::findsmallest(indexnode<K>* temp)
@@ -318,7 +314,6 @@ template <class K>
 void bptree<K>::insertindex(K k, address a)
 {
 	ak[a] = k;
-	cout<<"insertindex"<<endl;
 	indexnode<K> *temp;
 	temp = (this->rootnode);
 	// cout<<"root state:"<<this->rootnode->NodeState<<endl;
@@ -419,7 +414,6 @@ void bptree<K>::insertindex(K k, address a)
 template <class K>
 void bptree<K>::split(indexnode<K> *temp)
 {
-	cout<<"split"<<endl;
 	int i,j;
 	int breakpoint;
 	int sizechange;
@@ -603,7 +597,6 @@ void bptree<K>::split(indexnode<K> *temp)
 template <class K>
 void bptree<K>::deleteindex(K k)
 {
-	cout<<"delete"<<endl;
 	indexnode<K> *temp;
 	temp = (this->rootnode);
 	int i = 0;
@@ -653,35 +646,33 @@ void bptree<K>::deleteindex(K k)
 template <class K>
 void bptree<K>::deletescope(K lowk, K upk)
 {
-	// cout<<"delete"<<endl;
-	indexnode<K> *templow;
-	indexnode<K> *tempup;
-	int lowi,upi,i;
-	this->lowerbound_of_key(lowk);
-	templow = aim;
-	lowi = aim_id;
-	this->upperbound_of_key(upk);
-	tempup = aim;
-	upi = aim_id;
-	while(templow != tempup)
+	address templow;
+	address tempup;
+	address curraddr;
+	K smallestkey,largestkey;
+	K currkey;
+	templow = lowerbound_of_key(lowk);
+	tempup = upperbound_of_key(upk);
+	if(templow == NULL)return;//下界为空就说明没有符合条件的记录需要删除。
+	smallestkey = ak[templow];
+	largestkey = ak[tempup];
+	currkey = smallestkey;
+	curraddr = templow;
+	while(currkey != largestkey)
 	{
-		for(i = lowi;i<templow->key.size();i++)
+		while(ak[curraddr] == ak[curraddr->next_addr])
 		{
-			deletes(templow,lowi);
+			curraddr = curraddr->next_addr;
 		}
-		lowi = 0;
-		templow = templow->sibling;
-	}
-	for(i = lowi;i<upi;i++)
-	{
-		deletes(templow,lowi);
+		curraddr = curraddr->next_addr;
+		deleteindex(currkey);
+		currkey = ak[curraddr];
 	}
 }
 
 template <class K>
 void bptree<K>::deletes(indexnode<K>* index, int num)
 {
-	cout<<"deletes"<<endl;
 	address erase_aim = index->page[num];
 	address lastaddr = erase_aim->last_addr;
 	address next_eraseaim = erase_aim->next_addr;
@@ -713,7 +704,6 @@ void bptree<K>::deletes(indexnode<K>* index, int num)
 template <class K>
 void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 {
-	cout<<"merge"<<endl;
 	int i,j,child_num,key_num;
 	indexnode<K> *mergenode;
 	indexnode<K> *secnode;
@@ -721,7 +711,8 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 	if(temp->NodeState == rootstate)
 	{
 		this->rootnode = temp->children[0];
-		this->rootnode->NodeState = rootstate;
+		this->rootnode->parent == NULL;
+		if(this->rootnode->NodeState != leafstate)this->rootnode->NodeState = rootstate;
 		return;
 	}
 	for(i = 0;i<temp->parent->children.size();i++)
@@ -799,15 +790,16 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 	else if(mergenode->parent->key.size()<nodecapacity/2&&mergenode->parent->NodeState != rootstate)this->merge(mergenode->parent);
 	else if(mergenode->parent->key.size() == 0&&mergenode->parent->NodeState == rootstate)
 	{
-		mergenode->NodeState = rootstate;
+		if(mergenode->NodeState != leafstate)mergenode->NodeState = rootstate;
 		mergenode->parent = NULL;
 		this->rootnode = mergenode;
 	}
 }
 
-
-
-
-
+//新增的范围删除和选择有点奇怪，请理解含义再使用。
+//选择是前闭后开的，比如，树中有15,16,17,18,19，范围选择函数给的两个参数key是16,18，意思就是选择所有>=16且<=18 的数。但是返回的是16和19,
+//16是第一个大于等于16的，19是第一个大于18的，这就是返回值的前闭后开的意思，这么写有利于循环的写法
+//范围选择必须要给定两个范围，所以必要的时候，需要设置该类型变量下的无穷大的数。
+//范围删除是在范围选择的基础上写的，但是注意，范围删除没有返回值，按照上面的举例，会删掉16,17,18，即所有【16,18】的值。
 
 #endif// bplustree.h
