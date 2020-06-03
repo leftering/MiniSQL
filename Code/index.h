@@ -339,7 +339,13 @@ address find_scope_float_up(string table_name, string attributename, float key)
         return aimtree->upperbound_of_key(key);
     }//如果是空的，查找应该得到null
 }
-
+//age_g = find_scope_int_low("student","age",16);
+//age_h = find_scope_int_up("student","age",18);
+//16就是key的下界，18就是key的上界，最后会返回该student表以age属性检索到的key = 18且key = 16的地址，
+//然后里面所有的地址都是从小到大以双向链表的方式连起来的，直接从下界遍历到上界就可以了
+//注意这里认为取得的两个边界是前闭后开，比如实际树里面只有16,19,21，23三个数，你搜索的下界是16，搜索的上界是21，
+//两个函数返回的分别是16对应的地址和23对应的地址。
+//即下界函数和上界函数返回的都是比参考的边界值大的数。
 
 
 #endif // index.h
