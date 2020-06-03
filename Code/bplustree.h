@@ -105,7 +105,7 @@ bptree<K>::bptree(string index_filename,string index_attributename, char datatyp
 	this->rootnode->NodeState = leafstate;
 	aim_id = -1;
 	aim = NULL;
-}
+} 
 
 template <class K>
 address bptree<K>::find_index_of_key(K k)
