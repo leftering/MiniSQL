@@ -236,5 +236,110 @@ address find_index_float(string table_name, string attributename, float key)
 //先实现基本的插入，删除，查找单个。删除多个和查找多个之后再添加。在bplustree的修改中有一个addr的连接不再支持多个同值的搜索。
 //目前可以实现的是：只能不同的值作为key来检索，同一个key只能对应一个addr
 //范围搜索、批量删除和查找，同一个key可以检测到多个addr功能，后续添加。
+address find_scope_int_low(string table_name, string attributename, int key)
+{
+    bptree<int>* aimtree;
+    aimtree = t->find_int_tree(table_name,attributename);
+    if(aimtree != NULL)
+    {
+        return aimtree->lowerbound_of_key(key);
+    }
+    else if(aimtree == NULL)
+    {
+        // cout<<"find_int_tree returns null"<<endl;
+        aimtree = t->create_tree_int(table_name,attributename,'i');
+        // cout<<"create_index_int"<<aimtree->index_filename<<aimtree->rootnode->NodeState<<endl;
+        return aimtree->lowerbound_of_key(key);
+    }
+    
+}
+
+address find_scope_int_up(string table_name, string attributename, int key)
+{
+    bptree<int>* aimtree;
+    aimtree = t->find_int_tree(table_name,attributename);
+    if(aimtree != NULL)
+    {
+        return aimtree->upperbound_of_key(key);
+    }
+    else if(aimtree == NULL)
+    {
+        // cout<<"find_int_tree returns null"<<endl;
+        aimtree = t->create_tree_int(table_name,attributename,'i');
+        // cout<<"create_index_int"<<aimtree->index_filename<<aimtree->rootnode->NodeState<<endl;
+        return aimtree->upperbound_of_key(key);
+    }
+    
+}
+
+address find_scope_string_low(string table_name, string attributename, string key)
+{
+    bptree<string>* aimtree;
+    aimtree = t->find_string_tree(table_name,attributename);
+    if(aimtree != NULL)
+    {
+        return aimtree->lowerbound_of_key(key);
+    }
+    else if(aimtree == NULL)
+    {
+        // cout<<"find_int_tree returns null"<<endl;
+        aimtree = t->create_tree_string(table_name,attributename,'i');
+        // cout<<"create_index_int"<<aimtree->index_filename<<aimtree->rootnode->NodeState<<endl;
+        return aimtree->lowerbound_of_key(key);
+    }
+}
+
+address find_scope_string_up(string table_name, string attributename, string key)
+{
+    bptree<string>* aimtree;
+    aimtree = t->find_string_tree(table_name,attributename);
+    if(aimtree != NULL)
+    {
+        return aimtree->upperbound_of_key(key);
+    }
+    else if(aimtree == NULL)
+    {
+        // cout<<"find_int_tree returns null"<<endl;
+        aimtree = t->create_tree_string(table_name,attributename,'i');
+        // cout<<"create_index_int"<<aimtree->index_filename<<aimtree->rootnode->NodeState<<endl;
+        return aimtree->upperbound_of_key(key);
+    }
+}
+
+address find_scope_float_low(string table_name, string attributename, float key)
+{
+    bptree<float>* aimtree;
+    aimtree = t->find_float_tree(table_name,attributename);
+    if(aimtree != NULL)
+    {
+        return aimtree->lowerbound_of_key(key);
+    }
+    else if(aimtree == NULL)
+    {
+        // cout<<"find_int_tree returns null"<<endl;
+        aimtree = t->create_tree_float(table_name,attributename,'i');
+        // cout<<"create_index_int"<<aimtree->index_filename<<aimtree->rootnode->NodeState<<endl;
+        return aimtree->lowerbound_of_key(key);
+    }
+}
+
+address find_scope_float_up(string table_name, string attributename, float key)
+{
+    bptree<float>* aimtree;
+    aimtree = t->find_float_tree(table_name,attributename);
+    if(aimtree != NULL)
+    {
+        return aimtree->upperbound_of_key(key);
+    }
+    else if(aimtree == NULL)
+    {
+        // cout<<"find_int_tree returns null"<<endl;
+        aimtree = t->create_tree_float(table_name,attributename,'i');
+        // cout<<"create_index_int"<<aimtree->index_filename<<aimtree->rootnode->NodeState<<endl;
+        return aimtree->upperbound_of_key(key);
+    }//如果是空的，查找应该得到null
+}
+
+
 
 #endif // index.h
