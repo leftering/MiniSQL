@@ -11,6 +11,9 @@ int RecordManager::getBlockNum(std::string table_name) {
 
 bool RecordManager::checkRecord(const char* record, std::string table_name, const int* type, const int colId, const int op, const char* opValue)
 {
+    if (colId == -1) {
+        return true;
+    }
 	int offset = 0;
 	std::string record_value;
 	for (int i = 0; i < colId; i++) {
@@ -80,3 +83,104 @@ int RecordManager::select(std::string table_name, const int* type, const int col
 	}
 	return cnt;
 }
+/*
+bool RecordManager::insert(const char* table_name, const int col_num, const int type[], const char* data)
+{  
+    std::string table = table_name;
+    std::string filename = RECORDPATH + table + ".data";
+    table_info TABLE;
+    //检测表是否存在
+    if (!TABLE.get_table_info(table_name)) {
+        return -1;
+    }
+    column_info* attri = TABLE.col;
+    //检测插入的元组的各个属性是否合法
+    for (int i = 0; i < col_num; i++) {
+        if ((type[i] == -2 && attri[i].col_name != "int") || (type[i] == -1 && attri[i].col_name != "float") || (type[i] >= 0 && attri[i].col_name != "char"))
+            return false;
+    }
+    vector<char*> records;
+    select(table_name, type, -1, 0, NULL, &records);
+    if (attr.primary_key >= 0) {
+        if (isConflict(tuples, v, attr.primary_key) == true)
+            throw primary_key_conflict();
+    }
+    //检测是否存在unqiue冲突
+    for (int i = 0; i < attr.num; i++) {
+        if (attr.unique[i] == true) {
+            if (isConflict(tuples, v, i) == true)
+                throw unique_conflict();
+        }
+    }
+
+    //异常检测完成
+
+    //获取表所占的块的数量
+    // int block_num = getFileSize(table_name) / PAGESIZE;
+    // 改为
+    int block_num = getBlockNum(table_name);
+    //处理表文件大小为0的特殊情况
+    if (block_num <= 0)
+        block_num = 1;
+    //获取表的最后一块的句柄
+    char* p = buffer_manager.getPage(table_name, block_num - 1);
+    int i;
+    //寻找第一个空位
+    for (i = 0; p[i] != '\0' && i < PAGESIZE; i++);
+    int j;
+    int len = 0;
+    //计算插入的tuple的长度
+    for (j = 0; j < v.size(); j++) {
+        Data d = v[j];
+        switch (d.type) {
+        case -1: {
+            int t = getDataLength(d.datai);
+            len += t;
+        }; break;
+        case 0: {
+            float t = getDataLength(d.dataf);
+            len += t;
+        }; break;
+        default: {
+            len += d.datas.length();
+        };
+        }
+    }
+    len += v.size() + 7;
+    int block_offset;//最终记录所插入的块的编号
+    //如果剩余的空间足够插入该tuple
+    if (PAGESIZE - i >= len) {
+        block_offset = block_num - 1;
+        //插入该元组
+        insertRecord1(p, i, len, v);
+        //写回表文件
+        int page_id = buffer_manager.getPageId(table_name, block_num - 1);
+        // buffer_manager.flushPage(page_id , table_name , block_num - 1);
+        // 改为
+        buffer_manager.modifyPage(page_id);
+    }
+    //如果剩余的空间不够
+    else {
+        block_offset = block_num;
+        //新增一个块
+        char* p = buffer_manager.getPage(table_name, block_num);
+        //在新增的块中插入该元组
+        insertRecord1(p, 0, len, v);
+        //写回表文件
+        int page_id = buffer_manager.getPageId(table_name, block_num);
+        // buffer_manager.flushPage(page_id , table_name , block_num);
+        // 改为
+        buffer_manager.modifyPage(page_id);
+    }
+
+    //更新索引
+    IndexManager index_manager(tmp_name);
+    for (int i = 0; i < attr.num; i++) {
+        if (attr.has_index[i] == true) {
+            std::string attr_name = attr.name[i];
+            std::string file_path = "INDEX_FILE_" + attr_name + "_" + tmp_name;
+            std::vector<Data> d = tuple.getData();
+            index_manager.insertIndex(file_path, d[i], block_offset);
+        }
+    }
+}*/

@@ -3,7 +3,7 @@
 
 Block::~Block()
 {
-    delete[]data;
+    
 }
 void Block::setTableName(std::string table)
 {

@@ -16,8 +16,8 @@ public:
 	int select(std::string table_name, const int* type, const int colId, const int op, const char* opValue, vector<char*>* records);
 
 	// Insert record into table. Return new index id
-	/*int insert(const char* table_name, const int* type, const char* data);
-
+	bool insert(const char* table_name, const int col_num, const int type[], const char* data);
+	/*
 	// Delete id-th record from table. Return true if success
 	bool remove(const char* tableName, const vector<int>* ids);
 
