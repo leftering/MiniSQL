@@ -57,9 +57,9 @@ BYTE* Block::getRecord(int ith)
     short start, end;
     end = BLOCKSIZE - 3;
     memcpy(&start, data + ith * 2 + 1, sizeof(short));
-    end -= 1;
     if (ith != 1) {
         memcpy(&end, data + ith * 2 - 1, sizeof(short));
+        end -= 1;
     }
     BYTE* record = new BYTE[end - start + 1];
     memcpy(record, data + start, end - start + 1);
@@ -74,7 +74,7 @@ void BufferManager::initialize()
 BufferManager::~BufferManager()
 {
 	for (int i = 0; i < page_num; i ++) {
-        if (Pages[i].isPinned() == false) {
+        if (Pages[i].isPinned() == false && Pages[i].getTableName() != "") {
             flushPage(i);
         }
 	}
@@ -85,7 +85,7 @@ void BufferManager::flushPage(int page_id)
 	Block page = Pages[page_id];
 	std::string filename = RECORDPATH + page.getTableName() + ".data";
 	int block_id = page.getBlockId();
-    FILE* f = fopen(filename.c_str(), "r+");
+    FILE* f = fopen(filename.c_str(), "wb");
 
     if (f == NULL)
         return;
@@ -116,7 +116,7 @@ Block* BufferManager::getPage(std::string table_name, int block_id)
 bool BufferManager::loadDiskBlock(int page_id, std::string table_name, int block_id) {
     Pages[page_id] = Block(table_name, block_id, false, true, false);
     std::string filename = RECORDPATH + table_name + ".data";
-    FILE* f = fopen(filename.c_str(), "r");
+    FILE* f = fopen(filename.c_str(), "rb");
     if (f == NULL)
         return false;
 
@@ -165,7 +165,7 @@ int BufferManager::getEmptyPageId()
 int BufferManager::getBlockNum(std::string table_name)
 {
     std::string filepath = RECORDPATH + table_name + ".data";
-    FILE* fp = fopen(filepath.c_str(), "r+");
+    FILE* fp = fopen(filepath.c_str(), "rb");
     fseek(fp, 0, SEEK_END);
     int num;
     num = ftell(fp) / BLOCKSIZE;

@@ -60,6 +60,7 @@ Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 		}
 		else if (T.col[i].col_type == COL_FLOAT) {
 			data.type = -1;
+			memset(&(data.dataf), 0, sizeof(float));
 			memcpy(&(data.dataf), record + offset, size);
 		}
 		else {
