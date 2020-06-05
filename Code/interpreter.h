@@ -41,7 +41,7 @@ public:
   user_status status;
   operation_type operation;
   table_info table;
-  Where_clouse w_clouse;
+  vector<Where_clouse> w_clouse;
   clock_t start, finish;
   DB_exception error;
 

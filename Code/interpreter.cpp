@@ -8,6 +8,7 @@ string get_brackets(string command,int& position);	// get string in (), without 
 bool parse_cols(string cols_str, string table_name, Interpreter* in); // parse create table columns
 string get_comma(string str, int& position , bool& end);  // get next string form positon, from ',' to next ','
 bool set_primary(string col_name, Interpreter* in);	// set 'col_name' as primary key
+bool get_where(string where_clause,vector<Where_clouse>* w_clouse,vector<int>* logic); 
 
 const string str_ERROR = "ERROR";
 
@@ -106,14 +107,18 @@ void Interpreter::read_operation() {
 	string str_star = get_word(command, position);
 	string str_from = get_word(command, position);	// get table name
 	string table_name = get_word(command, position);
-	if (strcmp(str_star.c_str(), "*") == 0 && strcmp(str_from.c_str(), "from") == 0 && table_name != str_ERROR) {
+	if (str_star != str_ERROR && strcmp(str_from.c_str(), "from") == 0 && table_name != str_ERROR) {
 	  string str_where = get_word(command, position);
+	  vector<int> col_ids;
+	  col_ids.clear();
+	  get_col_ids(&col_ids, str_star, table_name, this);
 	  if (strcmp(str_where.c_str(), "where") == 0) {  // select with where
 		string where_clause = command.substr(position);
-		int position = 0;
-		this->w_clouse.attr = get_word(where_clause, position);
-		this->w_clouse.operation = get_word(where_clause, position);
-		this->w_clouse.value = get_word(where_clause, position);
+		vector<int> logic;
+		logic.clear();
+		this->w_clouse.clear();
+		get_where(where_clause, &this->w_clouse, &logic);
+		select(table_name, col_ids, this->w_clouse, logic);
 		// call select
 		this->operation = SELECT;
 	  }
@@ -136,9 +141,7 @@ void Interpreter::read_operation() {
 	  if (strcmp(str_where.c_str(), "where") == 0) {  // delete with where
 		string where_clause = command.substr(position);
 		int position = 0;
-		this->w_clouse.attr = get_word(where_clause, position);
-		this->w_clouse.operation = get_word(where_clause, position);
-		this->w_clouse.value = get_word(where_clause, position);
+
 		// call delete
 		this->operation = DELETE;
 	  }
@@ -224,7 +227,7 @@ string get_word(string command,int& position) {
 }
 
 bool is_break_char(char ch) {
-  if (ch == ' ' || ch == '\n' || ch == ',' || ch == '\0' || ch == '(' || ch == ')' || ch == '\'' || ch == '\t')
+  if (ch == ' ' || ch == '\n' || ch == '`' || ch == '\0' || ch == '(' || ch == ')' || ch == '\'' || ch == '\t' || ch == '=' || ch == '>' || ch == '<')
 	return true;
   return false;
 }
@@ -469,4 +472,29 @@ void Interpreter::set_error(int code) {
 	this->error.msg = "unknown error";
 	break;
   }
+}
+
+bool get_where(string where_clause, vector<Where_clouse>* w_clouse, vector<int>* logic) {
+  bool end = false;
+  int posi = 0;
+  bool and_or = false;
+  while (!end) {
+	Where_clouse w;
+	w.attr = get_word(where_clause, posi);
+	w.operation = get_word(where_clause, posi);
+	w.value = get_word(where_clause, posi);
+	w_clouse->push_back(w);
+	if (get_word(where_clause, posi) == "and") {
+	  and_or = true;
+	  logic->push_back(1);
+	}
+	else if (get_word(where_clause, posi) == "or") {
+	  and_or = true;
+	  logic->push_back(0);
+	}
+	else {
+	  end = true;
+	}
+  }
+  return true;
 }
