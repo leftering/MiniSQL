@@ -11,7 +11,7 @@
 #include <vector>
 #include <fstream>
 #include <ctime>
-
+typedef unsigned char BYTE;
 using namespace std;
 
 #endif // !PCH_H

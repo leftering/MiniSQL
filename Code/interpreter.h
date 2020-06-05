@@ -23,7 +23,7 @@ typedef enum {
   ERROR
 }user_status; // user input status
 
-struct Where_clouse {
+struct Where_clause {
   string attr;
   string value;
   string operation;
@@ -41,7 +41,7 @@ public:
   user_status status;
   operation_type operation;
   table_info table;
-  Where_clouse w_clouse;
+  Where_clause w_clouse;
   clock_t start, finish;
   DB_exception error;
 

@@ -4,6 +4,7 @@
 #include "buffer_manager.h"
 
 BufferManager buffer_manager;
+RecordManager record_manager;
 
 int main() {
   Interpreter In;
