@@ -1,64 +1,57 @@
-#ifndef INTERPRETER_H
-#define INTERPRETER_H
+#pragma once
 
 #include "pch.h"
 #include "catalog.h"
 
 typedef enum {
-  CREATE_TABLE = 0,
-  DROP_TABLE,
-  CREATE_INDEX,
-  DROP_INDEX,
-  SELECT,
-  INSERT,
-  DELETE,
-  QUIT,
-  EXECFILE,
-  EMPTY
+	CREATE_TABLE = 0,
+	DROP_TABLE,
+	CREATE_INDEX,
+	DROP_INDEX,
+	SELECT,
+	INSERT,
+	DELETE,
+	QUIT,
+	EXECFILE,
+	EMPTY
 }operation_type; // sql operation type
 
 typedef enum {
-  READING = 0,
-  FINISH,
-  ERROR
+	READING = 0,
+	FINISH,
+	ERROR
 }user_status; // user input status
 
 struct Where_clause {
-  string attr;
-  string value;
-  string operation;
+	string attr;
+	string value;
+	string operation;
 };
 
-struct DB_exception{
-  int code;
-  string title;
-  string msg;
+struct DB_exception {
+	int code;
+	string title;
+	string msg;
 };
 
 class Interpreter {
 public:
 
-  user_status status;
-  operation_type operation;
-  table_info table;
-<<<<<<< HEAD
-  Where_clause w_clouse;
-=======
-  Where_clouse w_clouse;
->>>>>>> parent of 560e472... interpreter add select
-  clock_t start, finish;
-  DB_exception error;
+	user_status status;
+	operation_type operation;
+	table_info table;
+	vector<Where_clause> w_clouse;
+	clock_t start, finish;
+	DB_exception error;
 
-  void read_operation(); // read sql sentense
+	void read_operation(); // read sql sentense
 
-  void log_status();
+	void log_status();
 
-  void set_error(int code);
+	void set_error(int code);
 
-  Interpreter();
+	Interpreter();
 
-  ~Interpreter();
+	~Interpreter();
 
 };
-
-#endif // !INTERPRETER_H
