@@ -121,6 +121,9 @@ void Interpreter::read_operation() {
 		this->w_clouse.clear();
 		get_where(where_clause, &this->w_clouse, &logic);
 		select(table_name, col_ids, this->w_clouse, logic);
+<<<<<<< HEAD
+>>>>>>> parent of 9f280bb... add api select
+=======
 >>>>>>> parent of 9f280bb... add api select
 		// call select
 		this->operation = SELECT;
