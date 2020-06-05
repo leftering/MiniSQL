@@ -164,12 +164,9 @@ void Interpreter::read_operation() {
 	string values[32];
 	bool end = false;
 	int i = 0, v_posi = 0;
-	//cout << value << endl;
 	while (!end) {
 	  int zero = 0;
-	  //cout << v_posi << endl;
 	  values[i++] = get_word(get_comma(value, v_posi, end), zero);
-	  //cout << values[i-1] << endl;
 	  zero = 0;
 	}
 	if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR && insert_record(table_name, values)) {
@@ -264,17 +261,16 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
   in->table.col_num = 0;
   int position = 0;
   bool end = false; // whether all columns are parsed;
-  //cout << cols_str << endl;
+  cout << cols_str << endl;
   while (!end) {
 	string col = get_comma(cols_str, position, end);  // get a column info
-	//cout << col << endl;
+	cout << col << endl;
 	if (col.c_str() == str_ERROR) {
 	  return false;
 	}
 	else {
 	  int col_position = 0;
 	  string name = get_word(col, col_position);  // get column name
-	  //cout << name << endl;
 	  if (name == str_ERROR) {
 		return false;
 	  }
@@ -282,13 +278,11 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 		name = get_word(col, col_position);
 		if (strcmp(name.c_str(), "key") == 0) {
 		  name = get_word(col, col_position); // get primary key name
-		  //cout << name << endl;
 		  if (name == str_ERROR) {
 			return false;
 		  }
 		  else {
 			if (!set_primary(name, in)) { // set primary key
-			  //cout << "12" << endl;
 			  return false;
 			}
 		  }
@@ -300,8 +294,6 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 	  else {
 		string typestr = get_word(col, col_position); // get colunm type
 		colunm_type type;
-		//cout << typestr << endl;
-
 		int char_length = 0;
 		bool unique = false;
 		if (typestr == str_ERROR) {
@@ -322,12 +314,10 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 		else if (strcmp(typestr.c_str(), "char") == 0) {  // char
 		  type = COL_CHAR;
 		  string char_length_str = get_word(col, col_position);
-		  //cout << char_length_str << endl;
 		  if (char_length_str == str_ERROR) {
 			return false;
 		  }
 		  char_length = atoi(char_length_str.c_str());	// get char length
-		  //cout << char_length << endl;
 		  if (char_length == 0) {
 			return false;
 		  }
@@ -349,14 +339,13 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 	}
   }
   if (create_table(in)) {
-	//cout << "!!!" << endl;
 	return true;
   }
   return false;
 }
 
 string get_comma(string str, int& position, bool& end) {
-  int L = position, R;
+  int L = position + 1, R;
   if (L >= str.length()) {
 	return str_ERROR;
   }
@@ -364,8 +353,8 @@ string get_comma(string str, int& position, bool& end) {
   while (str[R] != ',' && R < str.length()) {
 	R++;
   }
-  position = R + 1;
-  if (position >= str.length()) {
+  position = R;
+  if (position == str.length()) {
 	end = true;
   }
   return str.substr(L, R - L);
