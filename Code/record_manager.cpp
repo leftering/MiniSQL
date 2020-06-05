@@ -124,7 +124,7 @@ void RecordManager::insert2block(BYTE* data, std::vector<Data> records, short re
 	memcpy(data + 2 * data[0] + 1, &ptr, sizeof(short));
 	short free_ptr = ptr - 1;
 	memcpy(data + 1, &free_ptr, sizeof(short));
-	free_space -= record_size;
+	free_space -= record_size + 2;
 	memcpy(data + BLOCKSIZE - 2, &free_space, sizeof(short));
 	int attri_num = records.size();
 	short offset = ptr + attri_num;
