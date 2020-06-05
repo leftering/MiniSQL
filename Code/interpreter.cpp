@@ -110,10 +110,18 @@ void Interpreter::read_operation() {
 	  string str_where = get_word(command, position);
 	  if (strcmp(str_where.c_str(), "where") == 0) {  // select with where
 		string where_clause = command.substr(position);
+<<<<<<< HEAD
 		int position = 0;
 		this->w_clouse.attr = get_word(where_clause, position);
 		this->w_clouse.operation = get_word(where_clause, position);
 		this->w_clouse.value = get_word(where_clause, position);
+=======
+		vector<int> logic;
+		logic.clear();
+		this->w_clouse.clear();
+		get_where(where_clause, &this->w_clouse, &logic);
+		select(table_name, col_ids, this->w_clouse, logic);
+>>>>>>> parent of 9f280bb... add api select
 		// call select
 		this->operation = SELECT;
 	  }

@@ -60,3 +60,31 @@ bool execfile(Interpreter* in,string file_name) {
   fin.close();
   return true;
 }
+<<<<<<< HEAD
+=======
+
+bool get_col_ids(vector<int>* col_ids, string str, string table_name, Interpreter* in) {
+  if (!in->table.get_table_info(table_name)) {
+	return false;
+  }
+  if (str == "*") {
+	for (int i = 0;i < in->table.col_num;i++) {
+	  col_ids->push_back(i);
+	}
+	return true;
+  }
+  else {
+	for (int i = 0;i < in->table.col_num;i++) {
+	  if (str.find(in->table.col[i].col_name) != -1) {
+		col_ids->push_back(i);
+	  }
+	}
+	return true;
+  }
+}
+
+bool select(string table_name, vector<int> col_ids, vector<Where_clouse> w_clause, vector<int> logic) {
+  //call select in record manager here;
+  return true;
+}
+>>>>>>> parent of 9f280bb... add api select
