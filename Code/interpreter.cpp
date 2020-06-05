@@ -118,7 +118,7 @@ void Interpreter::read_operation() {
 		logic.clear();
 		this->w_clouse.clear();
 		get_where(where_clause, &this->w_clouse, &logic);
-		api_select(table_name, col_ids, this->w_clouse, logic);
+		select(table_name, col_ids, this->w_clouse, logic);
 		// call select
 		this->operation = SELECT;
 	  }
