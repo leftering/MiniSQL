@@ -41,7 +41,11 @@ public:
   user_status status;
   operation_type operation;
   table_info table;
+<<<<<<< HEAD
   Where_clause w_clouse;
+=======
+  Where_clouse w_clouse;
+>>>>>>> parent of 560e472... interpreter add select
   clock_t start, finish;
   DB_exception error;
 
