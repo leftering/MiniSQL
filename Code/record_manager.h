@@ -5,6 +5,8 @@
 #include "define.h"
 #include "catalog.h"
 #include "buffer_manager.h"
+#include "tuple.h"
+#include "interpreter.h"
 
 extern BufferManager buffer_manager;
 
@@ -13,34 +15,41 @@ class RecordManager
 public:
 
 	// Select record from table. Return number of records selected
-	int select(std::string table_name, const int* type, const int colId, const int op, const char* opValue, vector<char*>* records);
+	int select(std::string table_name, std::vector<int> col_ids, std::vector<Where_clause>wheres, std::vector<int> logic, std::vector<Tuple>* tuples);
 
 	// Insert record into table. Return new index id
-	bool insert(const char* table_name, const int col_num, const int type[], const char* data);
-	/*
+	int insert(std::string table_name, Tuple record);
+	
 	// Delete id-th record from table. Return true if success
-	bool remove(const char* tableName, const vector<int>* ids);
-
-	// Create table. Return true if success
-	bool createTable(const char* tableName);
+	int remove(std::string table_name, std::vector<Where_clause>wheres, std::vector<int>logic);
+	
 
 	// Drop table. Return true if success
-	bool dropTable(const char* tableName);*/
+	// bool dropTable(const char* table_name);
 
 	// Check if record satisfy all conditions
-	bool checkRecord(const char* record, std::string table_name, const int* type, const int colId, const int op, const char* opValue);
-
+	bool check(Tuple record, std::string table_name, std::vector<Where_clause> wheres, std::vector<int> logic);
+	bool check_unique(std::string table_name, Tuple record);
 private:
-	/*
-	// Compare string
-	bool charCmp(const char* a, const char* b, int op);
 
-	// Compare int
-	bool intCmp(const char* a, const char* b, int op);
-
-	// Compare float
-	bool floatCmp(const char* a, const char* b, int op);*/
-
-	int getBlockNum(std::string table_name);
+	template<typename T> bool cmp(T a, T b, std::string op) {
+		if (op == "=")
+			return (a == b);
+		else if (op == "!=")
+			return (a != b);
+		else if (op == ">=")
+			return (a >= b);
+		else if (op == "<=")
+			return (a <= b);
+		else if (op == ">")
+			return (a > b);
+		else if (op == "<")
+			return (a < b);
+		else
+			return false;
+	};
+	Tuple read2tuple(BYTE* record, int col_num);
+	void insert2block(BYTE* data, std::vector<Data> records, short record_size, short free_space);
+	void remove4block(BYTE* data, int record_id, int col_num);
 };
 #endif

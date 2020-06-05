@@ -45,34 +45,34 @@ bool Block::isPinned()
 {
     return is_pinned;
 }
-char* Block::getData()
+BYTE* Block::getData()
 {
     return data;
 }
-char* Block::getNextRecord()
+BYTE* Block::getRecord(int ith)
 {
-    if (ptr == 0 || ptr > data[0]) {
+    if (ith > data[0]) {
         return NULL;
     }
-    int start = data[ptr * 2 + 1], end = data[ptr * 2 + 3] - 1;
-    char* record = new char[end - start + 1];;
-    for (int i = start; i <= end; i++) {
-        record[i - start] = data[i];
-    }
-    ptr = ptr + 1;
+    int start = data[ith * 2 + 1], end = data[ith * 2 + 3] - 1;
+    BYTE* record = new BYTE[end - start + 1];
+    memcpy(record, data + start, end - start + 1);
     return record;
+}
+
+void BufferManager::initialize()
+{
+    Pages = new Block[page_num];
 }
 
 BufferManager::~BufferManager()
 {
 	for (int i = 0; i < page_num; i ++) {
-		flushPage(i);
+        if (Pages[i].isPinned() == false) {
+            flushPage(i);
+        }
 	}
 	delete[]Pages;
-}
-void BufferManager::initialize()
-{
-    Pages = new Block[page_num];//在堆上分配内存
 }
 void BufferManager::flushPage(int page_id)
 {
@@ -85,25 +85,27 @@ void BufferManager::flushPage(int page_id)
         return;
 
     fseek(f, BLOCKSIZE * block_id, SEEK_SET);
-    char* data = page.getData();
+    BYTE* data = page.getData();
     fwrite(data, BLOCKSIZE, 1, f);
 
     fclose(f);
     return;
 }
-char* BufferManager::getPage(std::string table_name, int block_id)
+Block* BufferManager::getPage(std::string table_name, int block_id)
 {
     for (int i = 0; i < page_num; i++) {
         if (Pages[i].getBlockId() == block_id && table_name == Pages[i].getTableName()) {
             Pages[i].setUsed(true);
-            return Pages[i].getData();
+            return Pages+ i;
         }
     }
     int empty = getEmptyPageId();
-    if (loadDiskBlock(empty, table_name, block_id)) {
-        return Pages[empty].getData();
+    if (block_id < getBlockNum(table_name) && loadDiskBlock(empty, table_name, block_id)) {
+        return Pages + empty;
     }
-    return NULL;
+    Block EMPTY(table_name, block_id, false, true, false);
+    Pages[empty] = EMPTY;
+    return Pages + empty;
 }
 bool BufferManager::loadDiskBlock(int page_id, std::string table_name, int block_id) {
     Pages[page_id] = Block(table_name, block_id, false, true, false);
@@ -113,7 +115,7 @@ bool BufferManager::loadDiskBlock(int page_id, std::string table_name, int block
         return false;
 
     fseek(f, BLOCKSIZE * block_id, SEEK_SET);
-    char* data = Pages[page_id].getData();
+    BYTE* data = Pages[page_id].getData();
     if (fread(data, BLOCKSIZE, 1, f) == 0) {
         fclose(f);
         return false;
@@ -153,4 +155,23 @@ int BufferManager::getEmptyPageId()
             }
         }
     }
+}
+int BufferManager::getBlockNum(std::string table_name)
+{
+    std::string filepath = RECORDPATH + table_name + ".data";
+    FILE* fp = fopen(filepath.c_str(), "r+");
+    fseek(fp, 0, SEEK_END);
+    int num;
+    num = ftell(fp) / BLOCKSIZE;
+    return num;
+}
+
+int BufferManager::getPageId(std::string table_name, int block_id) {
+    for (int i = 0; i < page_num; i++) {
+        std::string tmp_table_name = Pages[i].getTableName();
+        int tmp_block_id = Pages[i].getBlockId();
+        if (tmp_table_name == table_name && tmp_block_id == block_id)
+            return i;
+    }
+    return -1;
 }

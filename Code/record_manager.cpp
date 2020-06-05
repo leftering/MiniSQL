@@ -1,186 +1,272 @@
 #include "record_manager.h"
 
-int RecordManager::getBlockNum(std::string table_name) {
-	char* p;
-	int block_num = -1;
-	do {
-		p = buffer_manager.getPage(table_name, ++block_num);
-	} while (p != NULL);
-	return block_num;
-}
-
-bool RecordManager::checkRecord(const char* record, std::string table_name, const int* type, const int colId, const int op, const char* opValue)
+bool RecordManager::check(Tuple record, std::string table_name, std::vector<Where_clause> wheres, std::vector<int> logic)
 {
-    if (colId == -1) {
-        return true;
-    }
-	int offset = 0;
-	std::string record_value;
-	for (int i = 0; i < colId; i++) {
-		if (type[i] == -2) {
-			offset += sizeof(int) / sizeof(char);
+	bool flag = true;
+	int where_num = wheres.size();
+	bool* flags = new bool[where_num];
+	memset(flags, true, where_num);
+	table_info T;
+	T.get_table_info(table_name);
+	for (int i = 0; i < where_num; i++) {
+		Where_clause wherei = wheres[i];
+		int index = -1;
+		for (int j = 0; j < T.col_num; j++) {
+			if (T.col[j].col_name == wherei.attr) {
+				index = j;
+				break;
+			}
 		}
-		else if (type[i] == -1) {
-			offset += sizeof(float) / sizeof(char);
+		if (index == -1) {
+			return false;
+		}
+		if (record.getData()[index].type == -2 && !cmp(record.getData()[index].datai, std::stoi(wherei.value), wherei.operation)) {
+			flags[i] = false;
+		}
+		else if (record.getData()[index].type == -1 && !cmp(record.getData()[index].dataf, std::stof(wherei.value), wherei.operation)) {
+			flags[i] = false;
 		}
 		else {
-			offset += type[i];
+			if (cmp(record.getData()[index].datas, wherei.value, wherei.operation)) {
+				flags[i] = false;
+			}
 		}
 	}
-	if (type[colId] == -2) {
-		int rv;
-		memcpy(&rv, record + offset, sizeof(rv));
-		record_value = to_string(rv);
-	}
-	else if (type[colId] == -1) {
-		float rv;
-		memcpy(&rv, record + offset, sizeof(float));
-		record_value = to_string(rv);
-	}
-	else {
-		for (int i = 0; i < type[colId]; i++) {
-			record_value = record_value + record[offset + i];
+	flag = flag && flags[0];
+	if (logic.size()) {
+		for (int i = 0; i < where_num - 1; i++) {
+			if (logic[i] == 0) {
+				flag = flag || flags[i + 1];
+			}
+			else {
+				flag = flag && flags[i + 1];
+			}
 		}
 	}
-	// <, <=, <>, =, >=, >
-	switch (op)
-	{
-	case 0:if (strcmp(record_value.c_str(), opValue) < 0) return true; break;
-	case 1:if (strcmp(record_value.c_str(), opValue) <= 0) return true; break;
-	case 2:if (strcmp(record_value.c_str(), opValue) != 0) return true; break;
-	case 3:if (strcmp(record_value.c_str(), opValue) == 0) return true; break;
-	case 4:if (strcmp(record_value.c_str(), opValue) >= 0) return true; break;
-	case 5:if (strcmp(record_value.c_str(), opValue) > 0) return true; break;
-	default:
-		break;
-	}
-	return false;
+	return flag;
 }
 
-int RecordManager::select(std::string table_name, const int* type, const int colId, const int op, const char* opValue, vector<char*>* records)
+Tuple RecordManager::read2tuple(BYTE* record, int col_num)
+{
+	Tuple tuple;
+	int offset = col_num;
+	for (int i = 0; i < col_num; i++) {
+		int size = record[i];
+		Data data;
+		// 读取一个属性
+		if (size == sizeof(short)) {
+			data.type = -2;
+			memcpy(&(data.datai), record + offset, size);
+		}
+		else if (size == sizeof(float)) {
+			data.type = -1;
+			memcpy(&(data.dataf), record + offset, size);
+		}
+		else {
+			data.type = size;
+			char* r = new char[size];
+			memcpy(r, record + offset, size);
+			std::string s(r + offset, size);
+			data.datas = s;
+		}
+		tuple.addData(data);
+	}
+	return tuple;
+}
+
+int RecordManager::select(std::string table_name, std::vector<int>col_ids, std::vector<Where_clause>wheres, std::vector<int> logic, std::vector<Tuple>* tuples)
 {
 	int cnt = 0;
-	table_info TABLE;
-	if (TABLE.get_table_info(table_name) == false) {
-		return -1;
+	table_info T;
+	if (T.get_table_info(table_name) == false) {
+		return -2010;		// 表不存在
 	}
-	int block_num = getBlockNum(table_name);
-	if (block_num == 0) {
-		return -1;
-	}
+	int block_num = buffer_manager.getBlockNum(table_name);
 	for (int i = 0; i < block_num; i++) {
-		char* page = buffer_manager.getPage(table_name, i);
-		int record_num = page[0];
-		for (int i = 1; i <= record_num; i++) {
-			int start = page[2 * i + 1], end = page[2 * i + 3] - 1;
-			char* record = new char[end - start + 1];
-			memcpy(record, page + start, sizeof(record));
-			if (checkRecord(record, table_name, type, colId, op, opValue)) {
+		Block* blocki = buffer_manager.getPage(table_name, i);
+		BYTE* blocki_data = (*blocki).getData();
+		int record_num = blocki_data[0];
+		for (int j = 1; j <= record_num; j++) {
+			BYTE* recordj = (*blocki).getRecord(j);
+			Tuple tuple = read2tuple(recordj, T.col_num);
+			if (!check(tuple, table_name, wheres, logic)) {
+				tuple.setDeleted();
+			}
+			else{
+				int index = col_ids.size() - 1;
+				if (index >= 0) {
+					for (int k = T.col_num - 1; j >= 0; j--) {
+						if (index >= 0 && k == col_ids[index]) {
+							index--;
+							continue;
+						}
+						else {
+							tuple.eraseData(k);
+						}
+					}
+				}
 				cnt++;
-				records->push_back(record);
+			}
+			tuples->push_back(tuple);
+		}
+	}
+	return cnt;
+}
+
+void RecordManager::insert2block(BYTE* data, std::vector<Data> records, short record_size, short free_space)
+{
+	short ptr;
+	memcpy(&ptr, data + 1, sizeof(short));
+	ptr = ptr - (record_size - 1);
+	memcpy(data + 2 * data[0] + 1, &ptr, sizeof(short));
+	data[0] += 1;
+	short free_ptr = ptr - 1;
+	memcpy(data + 1, &free_ptr, sizeof(short));
+	free_space -= record_size;
+	memcpy(data + BLOCKSIZE - 2, &free_space, sizeof(short));
+	int attri_num = records.size();
+	short offset = ptr + attri_num;
+	for (int i = 0; i < attri_num; i++) {
+		if (records[i].type == -2) {
+			memset(data + ptr + i, sizeof(int), 1);
+			memcpy(data + offset, &records[i].datai, sizeof(int));
+			offset += sizeof(int);
+		}
+		else if (records[i].type == -1) {
+			memset(data + ptr + i, sizeof(float), 1);
+			memcpy(data + offset, &records[i].dataf, sizeof(float));
+			offset += sizeof(float);
+		}
+		else {
+			memset(data + ptr + i, records[i].type, 1);
+			memcpy(data + offset, records[i].datas.c_str(), records[i].type);
+			offset += records[i].type;
+		}
+	}
+}
+
+bool RecordManager::check_unique(std::string table_name, Tuple record)
+{
+	table_info T;
+	T.get_table_info(table_name);
+	int col_num = T.col_num;
+	for (int i = 0; i < col_num; i++) {
+		if (T.col[i].primary_key == true || T.col[i].unique == true) {
+			std::vector<int> col_ids;
+			std::vector<Where_clause>wheres;
+			Where_clause whr;
+			whr.attr = T.col[i].col_name;
+			int type = record.getData()[i].type;
+			if (type == -2) {
+				whr.value = to_string(record.getData()[i].datai);
+			}
+			else if (type == -1) {
+				whr.value = to_string(record.getData()[i].dataf);
+			}
+			else {
+				whr.value = record.getData()[i].datas;
+			}
+			whr.operation = "=";
+			wheres.push_back(whr);
+			std::vector<Tuple> tuples;
+			std::vector<int>logic;
+			if (select(table_name, col_ids, wheres, logic, &tuples) != 0) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+int RecordManager::insert(std::string table_name, Tuple record)
+{
+	table_info T;
+	if (T.get_table_info(table_name) == false) {
+		return -2010;
+	}
+	int col_num = T.col_num, act_col_num = record.getData().size();
+	if (col_num != act_col_num) {
+		return -2011;	// 输入属性不够
+	}
+	short record_size = 0;
+	for (int i = 0; i < col_num; i++) {
+		int type = record.getData()[i].type;
+		if (type == -2) {
+			record_size += sizeof(int);
+		}
+		else if (type == -1) {
+			record_size += sizeof(float);
+		}
+		else {
+			record_size += type;
+		}
+	}
+	record_size += col_num;
+	int block_num = buffer_manager.getBlockNum(table_name);
+	for (int i = 0; i <= block_num; i++) {
+		Block* blocki = buffer_manager.getPage(table_name, i);
+		BYTE* data = (*blocki).getData();
+		short free_space;
+		memcpy(&free_space, data + BLOCKSIZE - 2, sizeof(short));
+		if (free_space >= record_size) {
+			if (check_unique(table_name, record)) {
+				insert2block(data, record.getData(), record_size, free_space);
+				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
+				return 1;
+				break;
+			}
+			else {
+				return -2012;	// unique键重复
+			}
+		}
+	}
+	return 0;
+}
+
+void RecordManager::remove4block(BYTE* data, int record_id, int col_num)
+{
+	short record_size = col_num;
+	short ptr;
+	memcpy(&ptr, data + 2 * record_id + 1, sizeof(short));
+	for (int i = 0; i < col_num; i++) {
+		BYTE attri_size = 0;
+		memcpy(&attri_size, data + ptr + i, 1);
+		record_size += (short)attri_size;
+	}
+	short free_space;
+	memcpy(&free_space, data + BLOCKSIZE - 2, sizeof(short));
+	free_space -= record_size;
+	memcpy(data + BLOCKSIZE - 2, &free_space, sizeof(short));
+	data[0] -= 1;
+	short free_ptr, start_ptr = ptr + record_size - 1;
+	memcpy(&free_ptr, data + 1, sizeof(short));
+	for (short i = start_ptr; i > free_ptr; i--) {
+		data[i] = data[i - record_size];
+	}
+}
+
+int RecordManager::remove(std::string table_name, std::vector<Where_clause>wheres, std::vector<int>logic)
+{
+	int cnt = 0;
+	table_info T;
+	if (T.get_table_info(table_name) == false) {
+		return -2010;
+	}
+	int block_num = buffer_manager.getBlockNum(table_name);
+	for (int i = 0; i < block_num; i++) {
+		Block* blocki = buffer_manager.getPage(table_name, i);
+		BYTE* blocki_data = (*blocki).getData();
+		int record_num = blocki_data[0];
+		for (int j = 1; j <= record_num; j++) {
+			BYTE* recordj = (*blocki).getRecord(j);
+			Tuple tuple = read2tuple(recordj, T.col_num);
+			if (check(tuple, table_name, wheres, logic)) {
+				remove4block(blocki_data, j, T.col_num);
+				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
+				record_num = blocki_data[0];
+				cnt++;
 			}
 		}
 	}
 	return cnt;
 }
-/*
-bool RecordManager::insert(const char* table_name, const int col_num, const int type[], const char* data)
-{  
-    std::string table = table_name;
-    std::string filename = RECORDPATH + table + ".data";
-    table_info TABLE;
-    //检测表是否存在
-    if (!TABLE.get_table_info(table_name)) {
-        return -1;
-    }
-    column_info* attri = TABLE.col;
-    //检测插入的元组的各个属性是否合法
-    for (int i = 0; i < col_num; i++) {
-        if ((type[i] == -2 && attri[i].col_name != "int") || (type[i] == -1 && attri[i].col_name != "float") || (type[i] >= 0 && attri[i].col_name != "char"))
-            return false;
-    }
-    vector<char*> records;
-    select(table_name, type, -1, 0, NULL, &records);
-    if (attr.primary_key >= 0) {
-        if (isConflict(tuples, v, attr.primary_key) == true)
-            throw primary_key_conflict();
-    }
-    //检测是否存在unqiue冲突
-    for (int i = 0; i < attr.num; i++) {
-        if (attr.unique[i] == true) {
-            if (isConflict(tuples, v, i) == true)
-                throw unique_conflict();
-        }
-    }
-
-    //异常检测完成
-
-    //获取表所占的块的数量
-    // int block_num = getFileSize(table_name) / PAGESIZE;
-    // 改为
-    int block_num = getBlockNum(table_name);
-    //处理表文件大小为0的特殊情况
-    if (block_num <= 0)
-        block_num = 1;
-    //获取表的最后一块的句柄
-    char* p = buffer_manager.getPage(table_name, block_num - 1);
-    int i;
-    //寻找第一个空位
-    for (i = 0; p[i] != '\0' && i < PAGESIZE; i++);
-    int j;
-    int len = 0;
-    //计算插入的tuple的长度
-    for (j = 0; j < v.size(); j++) {
-        Data d = v[j];
-        switch (d.type) {
-        case -1: {
-            int t = getDataLength(d.datai);
-            len += t;
-        }; break;
-        case 0: {
-            float t = getDataLength(d.dataf);
-            len += t;
-        }; break;
-        default: {
-            len += d.datas.length();
-        };
-        }
-    }
-    len += v.size() + 7;
-    int block_offset;//最终记录所插入的块的编号
-    //如果剩余的空间足够插入该tuple
-    if (PAGESIZE - i >= len) {
-        block_offset = block_num - 1;
-        //插入该元组
-        insertRecord1(p, i, len, v);
-        //写回表文件
-        int page_id = buffer_manager.getPageId(table_name, block_num - 1);
-        // buffer_manager.flushPage(page_id , table_name , block_num - 1);
-        // 改为
-        buffer_manager.modifyPage(page_id);
-    }
-    //如果剩余的空间不够
-    else {
-        block_offset = block_num;
-        //新增一个块
-        char* p = buffer_manager.getPage(table_name, block_num);
-        //在新增的块中插入该元组
-        insertRecord1(p, 0, len, v);
-        //写回表文件
-        int page_id = buffer_manager.getPageId(table_name, block_num);
-        // buffer_manager.flushPage(page_id , table_name , block_num);
-        // 改为
-        buffer_manager.modifyPage(page_id);
-    }
-
-    //更新索引
-    IndexManager index_manager(tmp_name);
-    for (int i = 0; i < attr.num; i++) {
-        if (attr.has_index[i] == true) {
-            std::string attr_name = attr.name[i];
-            std::string file_path = "INDEX_FILE_" + attr_name + "_" + tmp_name;
-            std::vector<Data> d = tuple.getData();
-            index_manager.insertIndex(file_path, d[i], block_offset);
-        }
-    }
-}*/

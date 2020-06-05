@@ -13,14 +13,12 @@
 class Block
 {
 private:
-	char data[BLOCKSIZE];
+	BYTE data[BLOCKSIZE];
 	std::string table_name;
 	int block_id;
 	bool dirty_bit;
 	bool use_bit;
 	bool is_pinned;
-	int ptr;
-	int free_space;
 public:
 	Block(std::string table = "", int _block_id = -1, bool _dirty_bit = false, bool _use_bit = false, bool _is_pinned = false) {
 		table_name = table;
@@ -31,9 +29,11 @@ public:
 		for (int i = 0; i < BLOCKSIZE; i++) {
 			data[i] = -1;
 		}
-		ptr = 0;
-		free_space = BLOCKSIZE - 3;
-		sprintf(data + 1, "%08x", BLOCKSIZE - 1);
+		data[0] = 0;
+		short free_space_ptr = BLOCKSIZE - 3;
+		memcpy(data + 1, &free_space_ptr, sizeof(short));
+		short free_space = BLOCKSIZE - 5;
+		memcpy(data + BLOCKSIZE - 2, &free_space, sizeof(short));
 	}
 	~Block();
 	void setTableName(std::string table);
@@ -46,9 +46,9 @@ public:
 	bool isUsed();
 	void setPinned(bool _pinned);
 	bool isPinned();
-	char* getData();
+	BYTE* getData();
 
-	char* getNextRecord();
+	BYTE* getRecord(int ith);
 };
 
 // BufferManager类。对外提供操作缓冲区的接口。
@@ -63,14 +63,13 @@ private:
     void initialize();
 public:
     // 构造函数
-    BufferManager(int buffer_size = MAXBUFFERSIZE) :current_position(0), page_num(min(buffer_size, MAXBUFFERSIZE))
-    {
-        initialize();
-    };
+    BufferManager(int page_num_ = MAXBUFFERSIZE) : current_position(0), page_num(min(page_num_, MAXBUFFERSIZE)){    
+		initialize();
+	};
     // 析构函数
     ~BufferManager();
     // 通过页号得到页的句柄(一个页的头地址)
-    char* getPage(std::string table_name, int block_id);
+    Block* getPage(std::string table_name, int block_id);
     // 标记page_id所对应的页已经被修改
     void modifyPage(int page_id);
     // 钉住一个页
@@ -80,6 +79,8 @@ public:
     void unpinPage(int page_id);
     // 将对应内存页写入对应文件的对应块。
     void flushPage(int page_id);
+	int getBlockNum(std::string table_name);
+	int getPageId(std::string table_name, int block_id);
 };
 
 #endif

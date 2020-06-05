@@ -122,6 +122,9 @@ void Interpreter::read_operation() {
 		get_where(where_clause, &this->w_clouse, &logic);
 		select(table_name, col_ids, this->w_clouse, logic);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 9f280bb... add api select
+=======
 >>>>>>> parent of 9f280bb... add api select
 =======
 >>>>>>> parent of 9f280bb... add api select
