@@ -123,7 +123,10 @@ void Interpreter::read_operation() {
 				this->operation = SELECT;
 			}
 			else {  // select without where
-			  // call select
+				vector<Where_clause> wheres;
+				vector<int>logic;
+				api_select(table_name, col_ids, wheres, logic);
+				// call select
 				this->operation = SELECT;
 			}
 		}
@@ -173,7 +176,7 @@ void Interpreter::read_operation() {
 			zero = 0;
 		}
 		if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR && insert_record(table_name, values)) {
-			// call insert
+
 			this->operation = INSERT;
 		}
 		else {

@@ -48,7 +48,7 @@ private:
 		else
 			return false;
 	};
-	Tuple read2tuple(BYTE* record, int col_num);
+	Tuple read2tuple(BYTE* record, table_info T);
 	void insert2block(BYTE* data, std::vector<Data> records, short record_size, short free_space);
 	void remove4block(BYTE* data, int record_id, int col_num);
 };

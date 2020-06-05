@@ -27,7 +27,7 @@ bool RecordManager::check(Tuple record, std::string table_name, std::vector<Wher
 			flags[i] = false;
 		}
 		else {
-			if (cmp(record.getData()[index].datas, wherei.value, wherei.operation)) {
+			if (!cmp(record.getData()[index].datas, wherei.value, wherei.operation)) {
 				flags[i] = false;
 			}
 		}
@@ -46,19 +46,19 @@ bool RecordManager::check(Tuple record, std::string table_name, std::vector<Wher
 	return flag;
 }
 
-Tuple RecordManager::read2tuple(BYTE* record, int col_num)
+Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 {
 	Tuple tuple;
-	int offset = col_num;
-	for (int i = 0; i < col_num; i++) {
+	int offset = T.col_num;
+	for (int i = 0; i < T.col_num; i++) {
 		int size = record[i];
 		Data data;
 		// 读取一个属性
-		if (size == sizeof(short)) {
+		if (T.col[i].col_type == COL_INT) {
 			data.type = -2;
 			memcpy(&(data.datai), record + offset, size);
 		}
-		else if (size == sizeof(float)) {
+		else if (T.col[i].col_type == COL_FLOAT) {
 			data.type = -1;
 			memcpy(&(data.dataf), record + offset, size);
 		}
@@ -66,9 +66,10 @@ Tuple RecordManager::read2tuple(BYTE* record, int col_num)
 			data.type = size;
 			char* r = new char[size];
 			memcpy(r, record + offset, size);
-			std::string s(r + offset, size);
+			std::string s(r, size);
 			data.datas = s;
 		}
+		offset += size;
 		tuple.addData(data);
 	}
 	return tuple;
@@ -88,14 +89,14 @@ int RecordManager::select(std::string table_name, std::vector<int>col_ids, std::
 		int record_num = blocki_data[0];
 		for (int j = 1; j <= record_num; j++) {
 			BYTE* recordj = (*blocki).getRecord(j);
-			Tuple tuple = read2tuple(recordj, T.col_num);
+			Tuple tuple = read2tuple(recordj, T);
 			if (!check(tuple, table_name, wheres, logic)) {
 				tuple.setDeleted();
 			}
 			else{
 				int index = col_ids.size() - 1;
 				if (index >= 0) {
-					for (int k = T.col_num - 1; j >= 0; j--) {
+					for (int k = T.col_num - 1; k >= 0; k--) {
 						if (index >= 0 && k == col_ids[index]) {
 							index--;
 							continue;
@@ -118,8 +119,8 @@ void RecordManager::insert2block(BYTE* data, std::vector<Data> records, short re
 	short ptr;
 	memcpy(&ptr, data + 1, sizeof(short));
 	ptr = ptr - (record_size - 1);
-	memcpy(data + 2 * data[0] + 1, &ptr, sizeof(short));
 	data[0] += 1;
+	memcpy(data + 2 * data[0] + 1, &ptr, sizeof(short));
 	short free_ptr = ptr - 1;
 	memcpy(data + 1, &free_ptr, sizeof(short));
 	free_space -= record_size;
@@ -259,7 +260,7 @@ int RecordManager::remove(std::string table_name, std::vector<Where_clause>where
 		int record_num = blocki_data[0];
 		for (int j = 1; j <= record_num; j++) {
 			BYTE* recordj = (*blocki).getRecord(j);
-			Tuple tuple = read2tuple(recordj, T.col_num);
+			Tuple tuple = read2tuple(recordj, T);
 			if (check(tuple, table_name, wheres, logic)) {
 				remove4block(blocki_data, j, T.col_num);
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));

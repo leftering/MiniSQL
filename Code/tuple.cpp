@@ -27,11 +27,10 @@ void Tuple::showTuple()
 {
     for (int i = 0; i < getSize(); i ++) {
         if (contents[i].type == -2)
-            std::cout << contents[i].datai << '\t';
-        else if (contents[i].type == 0)
-            std::cout << contents[i].dataf << '\t';
+            std::cout << setw(16) << setfill(' ') << left << contents[i].datai << '|';
+        else if (contents[i].type == -1)
+            std::cout << setw(16) << setfill(' ') << left << contents[i].dataf << '|';
         else
-            std::cout << contents[i].datas << '\t';
+            std::cout << setw(16) << setfill(' ') << left << contents[i].datas << '|';
     }
-    std::cout << std::endl;
 }

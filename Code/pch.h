@@ -10,6 +10,7 @@
 #include <cctype>
 #include <vector>
 #include <fstream>
+#include <iomanip>
 #include <ctime>
 typedef unsigned char BYTE;
 using namespace std;

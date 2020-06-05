@@ -1,42 +1,45 @@
 #include "api.h"
 
 bool create_table(Interpreter* in) {
-	if (in->table.write_table_info())
+	if (in->table.write_table_info()) {
+		std::string filename = RECORDPATH + in->table.table_name + ".data";
+		FILE* fp = fopen(filename.c_str(), "w");
+		fclose(fp);
 		return true;
+	}
 	else
 		return false;
 }
 
 bool insert_record(string table_name, string values[]) {
 	table_info table;
-	int type[32];
-	char data[32 * 8];
-	int now = 0;
+	Tuple record;
 	if (table.get_table_info(table_name)) {
 		for (int i = 0; i < table.col_num; i++) {
+			Data data;
 			if (table.col[i].col_type == COL_INT) {
 				int v = stoi(values[i]);
-				memcpy(data + now, &v, sizeof(v));
-				type[i] = -2;
-				now += sizeof(v);
+				data.type = -2;
+				data.datai = v;
+				record.addData(data);
 			}
 			else if (table.col[i].col_type == COL_FLOAT) {
 				float v = stof(values[i]);
-				memcpy(data + now, &v, sizeof(v));
-				type[i] = -1;
-				now += sizeof(v);
+				data.type = -1;
+				data.dataf = v;
+				record.addData(data);
 			}
 			else if (table.col[i].col_type == COL_CHAR) {
-				const char* v = values[i].c_str();
-				memcpy(data + now, v, sizeof(v));
-				type[i] = sizeof(v);
-				now += sizeof(v);
+				std::string v = values[i];
+				data.type = v.length();
+				data.datas = v;
+				record.addData(data);
 			}
 			else {
 				return false;
 			}
 		}
-		// call insert;
+		record_manager.insert(table_name, record);
 		return true;
 	}
 	else {
@@ -81,5 +84,32 @@ bool get_col_ids(vector<int>* col_ids, string str, string table_name, Interprete
 
 bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_clause, vector<int> logic) {
 	//call select in record manager here;
+	std::vector<Tuple> tuples;
+	int cnt = record_manager.select(table_name, col_ids, w_clause, logic, &tuples);
+	if (cnt < 0) {
+		return false;
+	}
+	table_info T;
+	T.get_table_info(table_name);
+	for (int i = 0; i < col_ids.size(); i++) {
+		cout << "-----------------";
+	}
+	cout << endl;
+	for (int i = 0; i < col_ids.size(); i++) {
+		std::cout << setw(16) << setfill(' ') << left << T.col[col_ids[i]].col_name << '|';
+	}
+	cout << endl;
+	for (int i = 0; i < col_ids.size(); i++) {
+		cout << "----------------|";
+	}
+	cout << endl;
+	for (int i = 0; i < tuples.size(); i++) {
+		tuples[i].showTuple();
+		cout << endl;
+	}
+	for (int i = 0; i < col_ids.size(); i++) {
+		cout << "-----------------";
+	}
+	cout << endl;
 	return true;
 }

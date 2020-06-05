@@ -54,7 +54,13 @@ BYTE* Block::getRecord(int ith)
     if (ith > data[0]) {
         return NULL;
     }
-    int start = data[ith * 2 + 1], end = data[ith * 2 + 3] - 1;
+    short start, end;
+    end = BLOCKSIZE - 3;
+    memcpy(&start, data + ith * 2 + 1, sizeof(short));
+    end -= 1;
+    if (ith != 1) {
+        memcpy(&end, data + ith * 2 - 1, sizeof(short));
+    }
     BYTE* record = new BYTE[end - start + 1];
     memcpy(record, data + start, end - start + 1);
     return record;
