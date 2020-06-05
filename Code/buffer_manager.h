@@ -27,7 +27,7 @@ public:
 		use_bit = _use_bit;
 		is_pinned = _is_pinned;
 		for (int i = 0; i < BLOCKSIZE; i++) {
-			data[i] = -1;
+			data[i] = 255;
 		}
 		data[0] = 0;
 		short free_space_ptr = BLOCKSIZE - 3;

@@ -85,7 +85,7 @@ void BufferManager::flushPage(int page_id)
 	Block page = Pages[page_id];
 	std::string filename = RECORDPATH + page.getTableName() + ".data";
 	int block_id = page.getBlockId();
-    FILE* f = fopen(filename.c_str(), "wb");
+    FILE* f = fopen(filename.c_str(), "rb+");
 
     if (f == NULL)
         return;

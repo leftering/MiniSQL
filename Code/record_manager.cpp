@@ -60,7 +60,6 @@ Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 		}
 		else if (T.col[i].col_type == COL_FLOAT) {
 			data.type = -1;
-			memset(&(data.dataf), 0, sizeof(float));
 			memcpy(&(data.dataf), record + offset, size);
 		}
 		else {
@@ -124,7 +123,7 @@ void RecordManager::insert2block(BYTE* data, std::vector<Data> records, short re
 	memcpy(data + 2 * data[0] + 1, &ptr, sizeof(short));
 	short free_ptr = ptr - 1;
 	memcpy(data + 1, &free_ptr, sizeof(short));
-	free_space -= record_size + 2;
+	free_space -= (record_size + 2);
 	memcpy(data + BLOCKSIZE - 2, &free_space, sizeof(short));
 	int attri_num = records.size();
 	short offset = ptr + attri_num;
@@ -210,7 +209,7 @@ int RecordManager::insert(std::string table_name, Tuple record)
 		BYTE* data = (*blocki).getData();
 		short free_space;
 		memcpy(&free_space, data + BLOCKSIZE - 2, sizeof(short));
-		if (free_space >= record_size) {
+		if (free_space >= (record_size + 2)) {
 			if (check_unique(table_name, record)) {
 				insert2block(data, record.getData(), record_size, free_space);
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
