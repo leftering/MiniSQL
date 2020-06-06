@@ -24,10 +24,8 @@ bool table_info::write_table_info() {
 }
 
 bool table_info::get_table_info(string table_name) {
-  if (table_name == this->table_name) {
-	return true;
-  }
-  ifstream fin(table_name, ios::in);
+  ifstream fin(table_name);
+  cout << table_name << endl;
   if (!fin) {
 	return false;
   }
@@ -46,6 +44,5 @@ bool table_info::get_table_info(string table_name) {
 	}
   }
   fin.close();
-  fin.clear();
   return true;
 }

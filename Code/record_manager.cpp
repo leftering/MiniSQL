@@ -20,11 +20,17 @@ bool RecordManager::check(Tuple record, std::string table_name, std::vector<Wher
 		if (index == -1) {
 			return false;
 		}
-		if (record.getData()[index].type == -2 && !cmp(record.getData()[index].datai, std::stoi(wherei.value), wherei.operation)) {
-			flags[i] = false;
+		if (record.getData()[index].type == -2) {
+			if (!cmp(record.getData()[index].datai, std::stoi(wherei.value), wherei.operation)) {
+				flags[i] = false;
+			}
+			
 		}
-		else if (record.getData()[index].type == -1 && !cmp(record.getData()[index].dataf, std::stof(wherei.value), wherei.operation)) {
-			flags[i] = false;
+		else if (record.getData()[index].type == -1) {
+			if (!cmp(record.getData()[index].dataf, std::stof(wherei.value), wherei.operation)) {
+				flags[i] = false;
+			}
+			
 		}
 		else {
 			if (!cmp(record.getData()[index].datas, wherei.value, wherei.operation)) {
