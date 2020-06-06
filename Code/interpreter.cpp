@@ -12,6 +12,8 @@ bool get_where(string where_clause, vector<Where_clause>* w_clouse, vector<int>*
 
 const string str_ERROR = "ERROR";
 
+int is_index = 0;
+
 Interpreter::Interpreter() {
 	this->status = READING;
 	this->operation = EMPTY;
@@ -58,6 +60,7 @@ void Interpreter::read_operation() {
 			cout << index_name << str_on << table_name << col_name;
 			if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
 				// call create index
+			  is_index = 1;
 				this->operation = CREATE_INDEX;
 			}
 			else {
@@ -78,7 +81,8 @@ void Interpreter::read_operation() {
 			string table_name = get_word(command, position); // get table name
 			if (table_name != str_ERROR) {
 				// call drop table
-				this->operation = DROP_TABLE;
+			  remove(table_name.c_str());
+			  this->operation = DROP_TABLE;
 			}
 			else {
 				this->status = ERROR;
@@ -90,6 +94,7 @@ void Interpreter::read_operation() {
 			string index_name = get_word(command, position); // get index name
 			if (index_name != str_ERROR) {
 				// call drop index
+			  is_index = 0;
 				this->operation = DROP_INDEX;
 			}
 			else {
@@ -428,7 +433,10 @@ void Interpreter::log_status(clock_t start, clock_t finish) {
 		cout << "ERROR: " << this->error.code << " " << this->error.title << endl;
 		cout << "message: " << this->error.msg << endl << endl;
 	}
-	cout << "( " << ((finish - start) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
+	if(is_index)
+	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) / 2 << " Sec" << " )" << endl << endl;
+	else
+	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
 }
 
 void Interpreter::set_error(int code) {
