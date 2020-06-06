@@ -504,9 +504,9 @@ void Interpreter::set_error(int code) {
 	  this->error.msg = "Column count doesn't match value count;";
 	  break;
 	case 2014:
-		this->error.title = "INSERT ERROR";
-		this->error.msg = "Duplicate entry for unique key;";
-		break;
+	  this->error.title = "INSERT ERROR";
+	  this->error.msg = "Duplicate entry for unique key;";
+	  break;
 	default:
 		this->error.title = "UNKNOWN ERROR";
 		this->error.msg = "unknown error;";
@@ -534,6 +534,9 @@ bool get_where(string where_clause, vector<Where_clause>* w_clouse, vector<int>*
 		  w.operation = ">";
 		}
 		w.value = get_word(where_clause, posi);
+		cout << w.attr << endl;
+		cout << w.operation << endl;
+		cout << w.value << endl;
 		w_clouse->push_back(w);
 		if (get_word(where_clause, posi) == "and") {
 			and_or = true;
