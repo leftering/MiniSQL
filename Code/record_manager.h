@@ -35,7 +35,7 @@ private:
 	template<typename T> bool cmp(T a, T b, std::string op) {
 		if (op == "=")
 			return (a == b);
-		else if (op == "!=")
+		else if (op == "<>")
 			return (a != b);
 		else if (op == ">=")
 			return (a >= b);
