@@ -12,9 +12,9 @@ bool create_table(Interpreter* in) {
 }
 
 bool insert_record(string table_name, string values[]) {
-	table_info table;
+	static table_info table;
 	Tuple record;
-	if (table.get_table_info(table_name)) {
+	if (table.table_name == table_name || table.get_table_info(table_name)) {
 		for (int i = 0; i < table.col_num; i++) {
 			Data data;
 			if (table.col[i].col_type == COL_INT) {
