@@ -46,7 +46,7 @@ public:
 
 	void read_operation(); // read sql sentense
 
-	void log_status();
+	void log_status(clock_t start, clock_t finish);
 
 	void set_error(int code);
 

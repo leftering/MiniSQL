@@ -20,14 +20,15 @@ Interpreter::Interpreter() {
 Interpreter::~Interpreter() {}
 
 void Interpreter::read_operation() {
+	clock_t start, finish;
 	this->set_error(0);
 	string command;
 	int position = 0;
 	getline(cin, command, ';'); // command = SQL sentence
 	if (command.length() < 3)
 		return;
-	 cout << "Command: " << command << ";" << endl;
-	this->start = clock();
+	 //cout << "Command: " << command << ";" << endl;
+	start = clock();
 	transform(command.begin(), command.end(), command.begin(), tolower);	// all words in lowercase
 	string operation = get_word(command, position); // get first word ( 'create', 'drop', 'select', 'delete', 'insert', 'execfile', 'quit' )
 	if (operation == str_ERROR) {
@@ -145,12 +146,20 @@ void Interpreter::read_operation() {
 			if (strcmp(str_where.c_str(), "where") == 0) {  // delete with where
 				string where_clause = command.substr(position);
 				int position = 0;
-
+				string where_clause = command.substr(position);
+				vector<int> logic;
+				logic.clear();
+				this->w_clouse.clear();
+				get_where(where_clause, &this->w_clouse, &logic);
+				api_delete(table_name, this->w_clouse, logic);
 				// call delete
 				this->operation = DELETE;
 			}
 			else {  // delete without where
 			  // call delete
+				vector<Where_clause> wheres;
+				vector<int>logic;
+				api_delete(table_name, wheres, logic);
 				this->operation = DELETE;
 			}
 		}
@@ -206,8 +215,8 @@ void Interpreter::read_operation() {
 		this->operation = EMPTY;
 		this->set_error(2000);
 	}
-	this->finish = clock();
-	this->log_status();
+	finish = clock();
+	this->log_status(start, finish);
 }
 
 string get_word(string command, int& position) {
@@ -385,7 +394,7 @@ bool set_primary(string col_name, Interpreter* in) {
 	return false;
 }
 
-void Interpreter::log_status() {
+void Interpreter::log_status(clock_t start, clock_t finish) {
 	if (this->status != ERROR) {
 		cout << "Success: ";
 		if (this->operation == CREATE_TABLE) {
@@ -420,7 +429,7 @@ void Interpreter::log_status() {
 		cout << "ERROR: " << this->error.code << " " << this->error.title << endl;
 		cout << "message: " << this->error.msg << endl << endl;
 	}
-	cout << "( " << ((this->start - this->finish) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
+	cout << "( " << ((finish - start) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
 }
 
 void Interpreter::set_error(int code) {
