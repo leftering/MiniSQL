@@ -114,3 +114,7 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 	cout << endl;
 	return true;
 }
+
+bool api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic) {
+
+}
