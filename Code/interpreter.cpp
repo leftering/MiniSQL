@@ -155,9 +155,14 @@ void Interpreter::read_operation() {
 				logic.clear();
 				this->w_clouse.clear();
 				get_where(where_clause, &this->w_clouse, &logic);
-				api_delete(table_name, this->w_clouse, logic);
-				
-				this->operation = DELETE;
+				if (api_delete(table_name, this->w_clouse, logic) != 1) {
+				  this->status = ERROR;
+				  this->operation = EMPTY;
+				  this->set_error(2015);
+				}
+				else {
+				  this->operation = DELETE;
+				}
 			}
 			else {  // delete without where
 				vector<Where_clause> wheres;
@@ -507,6 +512,10 @@ void Interpreter::set_error(int code) {
 	case 2014:
 	  this->error.title = "INSERT ERROR";
 	  this->error.msg = "Duplicate entry for unique key;";
+	  break;
+	case 2015:
+	  this->error.title = "DELETE ERROR";
+	  this->error.msg = "Table tablename doesn't exist;";
 	  break;
 	default:
 		this->error.title = "UNKNOWN ERROR";

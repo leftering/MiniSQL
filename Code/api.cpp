@@ -132,7 +132,10 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 	return true;
 }
 
-bool api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic) {
+int api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic) {
+	if (!In.table.get_table_info(table_name)) {
+	  return -1;
+	}
 	int cnt;
 	cnt = record_manager.remove(w_clouse, logic);
 	if (cnt < 0) {
