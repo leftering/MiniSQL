@@ -16,3 +16,5 @@ bool get_col_ids(vector<int>* col_ids, string str, string table_name, Interprete
 bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_clause, vector<int> logic);
 
 bool api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic);
+
+bool is_unique(string table_name, string col_name);

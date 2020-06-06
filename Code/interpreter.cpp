@@ -19,6 +19,7 @@ Interpreter::Interpreter() {
 
 Interpreter::~Interpreter() {}
 
+
 void Interpreter::read_operation() {
 	clock_t start, finish;
 	this->set_error(0);
@@ -430,7 +431,7 @@ void Interpreter::log_status(clock_t start, clock_t finish) {
 		cout << "ERROR: " << this->error.code << " " << this->error.title << endl;
 		cout << "message: " << this->error.msg << endl << endl;
 	}
-	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
+	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) / 20 << " Sec" << " )" << endl << endl;
 }
 
 void Interpreter::set_error(int code) {

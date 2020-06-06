@@ -134,3 +134,18 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 bool api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic) {
 	return true;
 }
+
+
+bool is_unique(string table_name, string col_name) {
+  table_info table;
+  if (!table.get_table_info(table_name)) {
+	return false;
+  }
+  for (int i = 0;i < table.col_num;i++) {
+	if (col_name == table.col[i].col_name&&table.col[i].unique == 1) {
+	  return true;
+	}
+  }
+  return false;
+}
+
