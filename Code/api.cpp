@@ -89,8 +89,9 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 	if (cnt <= 0) {
 		return false;
 	}
-	table_info T;
-	T.get_table_info(table_name);
+	static table_info T;
+	if(T.table_name != table_name)
+		T.get_table_info(table_name);
 	for (int i = 0; i < col_ids.size(); i++) {
 		cout << "-----------------";
 	}
