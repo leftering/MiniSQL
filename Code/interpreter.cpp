@@ -232,14 +232,17 @@ string get_word(string command, int& position) {
 	if (position == command.length())
 		return str_ERROR;
 	int L = position, R;
-	while (is_break_char(command[L])) {
+	while (is_break_char(command[L]) && L < command.length()) {
 		L++;
 	}
+	if (L == command.length()) {
+	  return str_ERROR;
+	}
 	R = L;
-	while (!is_break_char(command[R])) {
+	while (!is_break_char(command[R]) && R < command.length()) {
 		R++;
 	}
-	if (R == L) {
+	if (R <= L) {
 		return str_ERROR;
 	}
 	else {
@@ -249,7 +252,7 @@ string get_word(string command, int& position) {
 }
 
 bool is_break_char(char ch) {
-	if (ch == ' ' || ch == '\n' || ch == '`' || ch == '\0' || ch == '(' || ch == ')' || ch == '\'' || ch == '\t')
+	if (ch == ' ' || ch == '\n' || ch == '`' || ch == '\0' || ch == '(' || ch == ')' || ch == '\'' || ch == '\t' || ch == '\'' || ch == '<' || ch == '>' || ch == '=')
 		return true;
 	return false;
 }
@@ -508,7 +511,18 @@ bool get_where(string where_clause, vector<Where_clause>* w_clouse, vector<int>*
 	while (!end) {
 		Where_clause w;
 		w.attr = get_word(where_clause, posi);
-		w.operation = get_word(where_clause, posi);
+		if (where_clause[posi] == '=') {
+		  w.operation = "=";
+		}
+		else if (where_clause[posi] == '<' && where_clause[posi + 1] == '>') {
+		  w.operation = "<>";
+		}
+		else if (where_clause[posi] == '<') {
+		  w.operation = "<";
+		}
+		else if (where_clause[posi] == '>') {
+		  w.operation = ">";
+		}
 		w.value = get_word(where_clause, posi);
 		w_clouse->push_back(w);
 		if (get_word(where_clause, posi) == "and") {

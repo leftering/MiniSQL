@@ -142,7 +142,7 @@ bool is_unique(string table_name, string col_name) {
 	return false;
   }
   for (int i = 0;i < table.col_num;i++) {
-	if (col_name == table.col[i].col_name&&table.col[i].unique == 1) {
+	if (col_name == table.col[i].col_name && table.col[i].unique == 1) {
 	  return true;
 	}
   }
