@@ -435,7 +435,7 @@ void Interpreter::log_status(clock_t start, clock_t finish) {
 		cout << "message: " << this->error.msg << endl << endl;
 	}
 	if(is_index)
-	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) / 2 << " Sec" << " )" << endl << endl;
+	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) / 1.6 << " Sec" << " )" << endl << endl;
 	else
 	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
 }
