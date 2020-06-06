@@ -3,7 +3,7 @@
 bool create_table(Interpreter* in) {
 	if (in->table.write_table_info()) {
 		std::string filename = RECORDPATH + in->table.table_name + ".data";
-		FILE* fp = fopen(filename.c_str(), "w");
+		FILE* fp = fopen(filename.c_str(), "wb");
 		fclose(fp);
 		return true;
 	}
