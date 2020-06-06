@@ -19,8 +19,6 @@ Interpreter::Interpreter() {
 
 Interpreter::~Interpreter() {}
 
-int is_index = 0;
-
 void Interpreter::read_operation() {
 	clock_t start, finish;
 	this->set_error(0);
@@ -61,7 +59,7 @@ void Interpreter::read_operation() {
 			if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
 				// call create index
 			  if (is_unique(table_name, col_name))
-				is_index = 1;
+				;
 			  else
 				cout << "not unique key" << endl;
 
@@ -98,7 +96,7 @@ void Interpreter::read_operation() {
 		else if (strcmp(drop_type.c_str(), "index") == 0) {	// drop index
 			string index_name = get_word(command, position); // get index name
 			if (index_name != str_ERROR) {
-			  is_index = 0;
+			  //drop index
 				this->operation = DROP_INDEX;
 			}
 			else {
@@ -128,16 +126,13 @@ void Interpreter::read_operation() {
 				logic.clear();
 				this->w_clouse.clear();
 				get_where(where_clause, &this->w_clouse, &logic);
-				//cout << w_clouse[0].attr << w_clouse[0].operation << w_clouse[0].value;
 				api_select(table_name, col_ids, this->w_clouse, logic);
-				// call select
 				this->operation = SELECT;
 			}
 			else {  // select without where
 				vector<Where_clause> wheres;
 				vector<int>logic;
 				api_select(table_name, col_ids, wheres, logic);
-				// call select
 				this->operation = SELECT;
 			}
 		}
@@ -159,13 +154,11 @@ void Interpreter::read_operation() {
 				logic.clear();
 				this->w_clouse.clear();
 				get_where(where_clause, &this->w_clouse, &logic);
-				// call delete
 				api_delete(table_name, this->w_clouse, logic);
 				
 				this->operation = DELETE;
 			}
 			else {  // delete without where
-			  // call delete
 				vector<Where_clause> wheres;
 				vector<int>logic;
 				api_delete(table_name, wheres, logic);
@@ -186,12 +179,9 @@ void Interpreter::read_operation() {
 		string values[32];
 		bool end = false;
 		int i = 0, v_posi = 0;
-		//cout << value << endl;
 		while (!end) {
 			int zero = 0;
-			//cout << v_posi << endl;
 			values[i++] = get_word(get_comma(value, v_posi, end), zero);
-			//cout << values[i-1] << endl;
 			zero = 0;
 		}
 		if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR && insert_record(table_name, values)) {
@@ -289,17 +279,14 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 	in->table.col_num = 0;
 	int position = 0;
 	bool end = false; // whether all columns are parsed;
-	//cout << cols_str << endl;
 	while (!end) {
 		string col = get_comma(cols_str, position, end);  // get a column info
-		//cout << col << endl;
 		if (col.c_str() == str_ERROR) {
 			return false;
 		}
 		else {
 			int col_position = 0;
 			string name = get_word(col, col_position);  // get column name
-			//cout << name << endl;
 			if (name == str_ERROR) {
 				return false;
 			}
@@ -307,13 +294,11 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 				name = get_word(col, col_position);
 				if (strcmp(name.c_str(), "key") == 0) {
 					name = get_word(col, col_position); // get primary key name
-					//cout << name << endl;
 					if (name == str_ERROR) {
 						return false;
 					}
 					else {
 						if (!set_primary(name, in)) { // set primary key
-						  //cout << "12" << endl;
 							return false;
 						}
 					}
@@ -325,8 +310,6 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 			else {
 				string typestr = get_word(col, col_position); // get colunm type
 				colunm_type type;
-				//cout << typestr << endl;
-
 				int char_length = 0;
 				bool unique = false;
 				if (typestr == str_ERROR) {
@@ -347,12 +330,10 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 				else if (strcmp(typestr.c_str(), "char") == 0) {  // char
 					type = COL_CHAR;
 					string char_length_str = get_word(col, col_position);
-					//cout << char_length_str << endl;
 					if (char_length_str == str_ERROR) {
 						return false;
 					}
 					char_length = atoi(char_length_str.c_str());	// get char length
-					//cout << char_length << endl;
 					if (char_length == 0) {
 						return false;
 					}
@@ -374,7 +355,6 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in) {
 		}
 	}
 	if (create_table(in)) {
-		//cout << "!!!" << endl;
 		return true;
 	}
 	return false;
@@ -441,12 +421,7 @@ void Interpreter::log_status(clock_t start, clock_t finish) {
 		cout << "ERROR: " << this->error.code << " " << this->error.title << endl;
 		cout << "message: " << this->error.msg << endl << endl;
 	}
-	if (is_index)
-	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) / 35 << " Sec" << " )" << endl << endl;
-
-	else
-
-	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) / 20 << " Sec" << " )" << endl << endl;
+	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
 }
 
 void Interpreter::set_error(int code) {
