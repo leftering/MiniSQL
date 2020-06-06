@@ -189,10 +189,7 @@ int RecordManager::insert(Tuple record)
 {
 	static table_info T = In.table;
 	std::string table_name = T.table_name;
-	int col_num = T.col_num, act_col_num = record.getData().size();
-	if (col_num != act_col_num) {
-		return -2011;	//  ‰»Î Ù–‘≤ªπª
-	}
+	int col_num = T.col_num;
 	short record_size = 0;
 	for (int i = 0; i < col_num; i++) {
 		int type = record.getData()[i].type;

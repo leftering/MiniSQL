@@ -73,6 +73,12 @@ void BufferManager::initialize()
 
 BufferManager::~BufferManager()
 {
+    /*
+    for (int i = 0; i < page_num; i++) {
+        if (Pages[i].isPinned() == false && Pages[i].getTableName() != "") {
+            flushPage(i);
+        }
+    }*/
 	delete[]Pages;
 }
 void BufferManager::flushPage(int page_id)
