@@ -11,12 +11,11 @@ bool create_table(Interpreter* in) {
 		return false;
 }
 
-bool insert_record(string table_name, string values[]) {
+int insert_record(string table_name, string values[]) {
 	static table_info table;
 	Tuple record;
 	if (table.get_table_info(table_name) == false) {
-		cout << "table not exist" << endl;
-		return false;
+		return -1;
 	} 
 	if (table.table_name == table_name || table.get_table_info(table_name)) {
 		for (int i = 0; i < table.col_num; i++) {
@@ -45,7 +44,7 @@ bool insert_record(string table_name, string values[]) {
 		}
 		int cnt = record_manager.insert(table_name, record);
 		if (cnt <= 0) {
-			return false;
+			return cnt;
 		}
 		else {
 			cout << cnt << " record(s) inserted" << endl;
@@ -53,7 +52,7 @@ bool insert_record(string table_name, string values[]) {
 		return true;
 	}
 	else {
-		return false;
+		return -1;
 	}
 }
 

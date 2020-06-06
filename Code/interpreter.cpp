@@ -184,9 +184,24 @@ void Interpreter::read_operation() {
 			values[i++] = get_word(get_comma(value, v_posi, end), zero);
 			zero = 0;
 		}
-		if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR && insert_record(table_name, values)) {
-
+		if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR) {
+		  int code = insert_record(table_name, values);
+		  if (code == 1) {
 			this->operation = INSERT;
+		  }
+		  else {
+			this->status = ERROR;
+			this->operation = EMPTY;
+			if (code == 0) {
+			  this->set_error(2011);
+			}
+			else if (code == -1) {
+			  this->set_error(2012);
+			}
+			else if (code == -2011) {
+			  this->set_error(2013);
+			}
+		  }
 		}
 		else {
 			this->status = ERROR;
@@ -450,7 +465,7 @@ void Interpreter::set_error(int code) {
 		break;
 	case 2005:
 		this->error.title = "INSERT ERROR";
-		this->error.msg = "insert syntax error or data can not insert into table.";
+		this->error.msg = "insert syntax error;";
 		break;
 	case 2006:
 		this->error.title = "SYNTAX ERROR";
@@ -466,15 +481,27 @@ void Interpreter::set_error(int code) {
 		break;
 	case 2009:
 		this->error.title = "DROP INDEX ERROR";
-		this->error.msg = "index name illegal or an error occured when drop it.";
+		this->error.msg = "index name illegal;";
 		break;
 	case 2010:
 		this->error.title = "DROP TABLE ERROR";
-		this->error.msg = "table name illegal or an error occured when drop it.";
+		this->error.msg = "table name illegal;";
 		break;
+	case 2011:
+	  this->error.title = "INSERT ERROR";
+	  this->error.msg = "unsupport data type;";
+	  break;
+	case 2012:
+	  this->error.title = "INSERT ERROR";
+	  this->error.msg = "table name invaild;";
+	  break;
+	case 2013:
+	  this->error.title = "INSERT ERROR";
+	  this->error.msg = "attributes number deletion;";
+	  break;
 	default:
 		this->error.title = "UNKNOWN ERROR";
-		this->error.msg = "unknown error";
+		this->error.msg = "unknown error;";
 		break;
 	}
 }
