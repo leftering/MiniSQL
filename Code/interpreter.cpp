@@ -9,6 +9,7 @@ bool parse_cols(string cols_str, string table_name, Interpreter* in); // parse c
 string get_comma(string str, int& position, bool& end);  // get next string form positon, from ',' to next ','
 bool set_primary(string col_name, Interpreter* in);	// set 'col_name' as primary key
 bool get_where(string where_clause, vector<Where_clause>* w_clouse, vector<int>* logic);
+string get_where_op(string where_clouse, int posi);
 
 const string str_ERROR = "ERROR";
 
@@ -521,18 +522,7 @@ bool get_where(string where_clause, vector<Where_clause>* w_clouse, vector<int>*
 	while (!end) {
 		Where_clause w;
 		w.attr = get_word(where_clause, posi);
-		if (where_clause[posi] == '=') {
-		  w.operation = "=";
-		}
-		else if (where_clause[posi] == '<' && where_clause[posi + 1] == '>') {
-		  w.operation = "<>";
-		}
-		else if (where_clause[posi] == '<') {
-		  w.operation = "<";
-		}
-		else if (where_clause[posi] == '>') {
-		  w.operation = ">";
-		}
+		w.operation = get_where_op(where_clause, posi);
 		w.value = get_word(where_clause, posi);
 		w_clouse->push_back(w);
 		if (get_word(where_clause, posi) == "and") {
@@ -548,4 +538,23 @@ bool get_where(string where_clause, vector<Where_clause>* w_clouse, vector<int>*
 		}
 	}
 	return true;
+}
+
+string get_where_op(string where_clouse, int posi) {
+  while (where_clouse[posi] == ' ' && posi < where_clouse.length() - 1) {
+	posi++;
+  }
+  if (where_clouse[posi] == '=') {
+	return "=";
+  }
+  else if (where_clouse[posi] == '<') {
+	if (where_clouse[posi + 1] == '>') {
+	  return "<>";
+	}
+	return "<";
+  }
+  else if (where_clouse[posi] == '>') {
+	return ">";
+  }
+  return str_ERROR;
 }
