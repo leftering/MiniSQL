@@ -20,6 +20,7 @@ Interpreter::Interpreter() {
 Interpreter::~Interpreter() {}
 
 void Interpreter::read_operation() {
+	clock_t start, finish;
 	this->set_error(0);
 	string command;
 	int position = 0;
@@ -27,7 +28,7 @@ void Interpreter::read_operation() {
 	if (command.length() < 3)
 		return;
 	 //cout << "Command: " << command << ";" << endl;
-	this->start = clock();
+	start = clock();
 	transform(command.begin(), command.end(), command.begin(), tolower);	// all words in lowercase
 	string operation = get_word(command, position); // get first word ( 'create', 'drop', 'select', 'delete', 'insert', 'execfile', 'quit' )
 	if (operation == str_ERROR) {
@@ -206,8 +207,8 @@ void Interpreter::read_operation() {
 		this->operation = EMPTY;
 		this->set_error(2000);
 	}
-	this->finish = clock();
-	this->log_status();
+	finish = clock();
+	this->log_status(start, finish);
 }
 
 string get_word(string command, int& position) {
@@ -385,7 +386,7 @@ bool set_primary(string col_name, Interpreter* in) {
 	return false;
 }
 
-void Interpreter::log_status() {
+void Interpreter::log_status(clock_t start, clock_t finish) {
 	if (this->status != ERROR) {
 		cout << "Success: ";
 		if (this->operation == CREATE_TABLE) {
@@ -420,7 +421,7 @@ void Interpreter::log_status() {
 		cout << "ERROR: " << this->error.code << " " << this->error.title << endl;
 		cout << "message: " << this->error.msg << endl << endl;
 	}
-	cout << "( " << ((this->start - this->finish) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
+	cout << "( " << ((start - finish) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
 }
 
 void Interpreter::set_error(int code) {
