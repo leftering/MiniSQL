@@ -14,6 +14,14 @@ bool create_table(Interpreter* in) {
 bool insert_record(string table_name, string values[]) {
 	static table_info table;
 	Tuple record;
+	if (table.get_table_info(table_name) == false) {
+		cout << "table not exist" << endl;
+		return false;
+	}
+	if (values->size() != table.col_num) {
+		cout << "attributes number not enough" << endl;
+		return false;
+	}
 	if (table.table_name == table_name || table.get_table_info(table_name)) {
 		for (int i = 0; i < table.col_num; i++) {
 			Data data;
@@ -39,7 +47,13 @@ bool insert_record(string table_name, string values[]) {
 				return false;
 			}
 		}
-		record_manager.insert(table_name, record);
+		int cnt = record_manager.insert(table_name, record);
+		if (cnt <= 0) {
+			return false;
+		}
+		else {
+			cout << cnt << " record(s) inserted" << endl;
+		}
 		return true;
 	}
 	else {
@@ -90,7 +104,7 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 		return false;
 	}
 	static table_info T;
-	if(T.table_name != table_name)
+	if (T.table_name != table_name)
 		T.get_table_info(table_name);
 	for (int i = 0; i < col_ids.size(); i++) {
 		cout << "-----------------";
@@ -105,23 +119,19 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 	}
 	cout << endl;
 	for (int i = 0; i < tuples.size(); i++) {
-		if (tuples[i].isDeleted() == true) {
-			continue;
+		if (tuples[i].isDeleted() == false) {
+			tuples[i].showTuple();
+			cout << endl;
 		}
-		tuples[i].showTuple();
-		cout << endl;
 	}
 	for (int i = 0; i < col_ids.size(); i++) {
 		cout << "-----------------";
 	}
 	cout << endl;
+	cout << cnt << " records selected" << endl;
 	return true;
 }
 
 bool api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic) {
-	int cnt = record_manager.remove(table_name, w_clouse, logic);
-	
-	cout << cnt << " recotd(s) deleted. " << endl;
-
 	return true;
 }

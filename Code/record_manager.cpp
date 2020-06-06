@@ -227,7 +227,7 @@ int RecordManager::insert(std::string table_name, Tuple record)
 			}
 		}
 	}
-	return 0;
+	return 1;
 }
 
 void RecordManager::remove4block(BYTE* data, int record_id, int col_num)
