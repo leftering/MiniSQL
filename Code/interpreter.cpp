@@ -421,7 +421,7 @@ void Interpreter::log_status(clock_t start, clock_t finish) {
 		cout << "ERROR: " << this->error.code << " " << this->error.title << endl;
 		cout << "message: " << this->error.msg << endl << endl;
 	}
-	cout << "( " << ((start - finish) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
+	cout << "( " << ((finish - start) / CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
 }
 
 void Interpreter::set_error(int code) {
