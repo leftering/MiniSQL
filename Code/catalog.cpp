@@ -24,13 +24,13 @@ bool table_info::write_table_info() {
 }
 
 bool table_info::get_table_info(string table_name) {
-	static ifstream fin;
-	fin.open(table_name);
+	ifstream fin(table_name);
 	if (!fin) {
+	  cout << "Error: " << strerror(errno);
+	  system("pause");
 		return false;
 	}
 	else {
-		fin.seekg(0, ios::beg);
 		fin >> this->table_name;
 		fin >> this->col_num;
 		for (int i = 0; i < this->col_num; i++) {

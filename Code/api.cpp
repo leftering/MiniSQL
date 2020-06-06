@@ -60,6 +60,8 @@ bool insert_record(string table_name, string values[]) {
 bool execfile(Interpreter* in, string file_name) {
 	ifstream fin(file_name);
 	if (!fin) {
+	  cout << "Error: " << strerror(errno);
+	  system("pause");
 		cout << file_name;
 		return false;
 	}
@@ -69,6 +71,7 @@ bool execfile(Interpreter* in, string file_name) {
 	}
 	cin.rdbuf(oldcin);
 	fin.close();
+	fin.clear();
 	return true;
 }
 
