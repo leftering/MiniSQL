@@ -1,13 +1,12 @@
 #include "record_manager.h"
 
-bool RecordManager::check(Tuple record, std::string table_name, std::vector<Where_clause> wheres, std::vector<int> logic)
+bool RecordManager::check(Tuple record, std::vector<Where_clause> wheres, std::vector<int> logic)
 {
 	bool flag = true;
 	int where_num = wheres.size();
 	bool* flags = new bool[where_num];
 	memset(flags, true, where_num);
-	table_info T;
-	T.get_table_info(table_name);
+	table_info T = In.table;
 	for (int i = 0; i < where_num; i++) {
 		Where_clause wherei = wheres[i];
 		int index = -1;
@@ -81,13 +80,11 @@ Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 	return tuple;
 }
 
-int RecordManager::select(std::string table_name, std::vector<int>col_ids, std::vector<Where_clause>wheres, std::vector<int> logic, std::vector<Tuple>* tuples)
+int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wheres, std::vector<int> logic, std::vector<Tuple>* tuples)
 {
 	int cnt = 0;
-	table_info T;
-	if (T.get_table_info(table_name) == false) {
-		return -2010;		// 表不存在
-	}
+	table_info T = In.table;
+	std::string table_name = T.table_name;
 	int block_num = buffer_manager.getBlockNum(table_name);
 	for (int i = 0; i < block_num; i++) {
 		Block* blocki = buffer_manager.getPage(table_name, i);
@@ -96,12 +93,12 @@ int RecordManager::select(std::string table_name, std::vector<int>col_ids, std::
 		for (int j = 1; j <= record_num; j++) {
 			BYTE* recordj = (*blocki).getRecord(j);
 			Tuple tuple = read2tuple(recordj, T);
-			if (!check(tuple, table_name, wheres, logic)) {
+			if (!check(tuple, wheres, logic)) {
 				tuple.setDeleted();
 			}
 			else{
 				int index = col_ids.size() - 1;
-				if (index >= 0) {
+				if (index + 1 != T.col_num && index >= 0) {
 					for (int k = T.col_num - 1; k >= 0; k--) {
 						if (index >= 0 && k == col_ids[index]) {
 							index--;
@@ -152,10 +149,9 @@ void RecordManager::insert2block(BYTE* data, std::vector<Data> records, short re
 	}
 }
 
-bool RecordManager::check_unique(std::string table_name, Tuple record)
+bool RecordManager::check_unique(Tuple record)
 {
-	table_info T;
-	T.get_table_info(table_name);
+	table_info T = In.table;
 	int col_num = T.col_num;
 	for (int i = 0; i < col_num; i++) {
 		if (T.col[i].primary_key == true || T.col[i].unique == true) {
@@ -177,7 +173,7 @@ bool RecordManager::check_unique(std::string table_name, Tuple record)
 			wheres.push_back(whr);
 			std::vector<Tuple> tuples;
 			std::vector<int>logic;
-			if (select(table_name, col_ids, wheres, logic, &tuples) != 0) {
+			if (select(col_ids, wheres, logic, &tuples) != 0) {
 				return false;
 			}
 		}
@@ -185,12 +181,10 @@ bool RecordManager::check_unique(std::string table_name, Tuple record)
 	return true;
 }
 
-int RecordManager::insert(std::string table_name, Tuple record)
+int RecordManager::insert(Tuple record)
 {
-	static table_info T;
-	if (T.get_table_info(table_name) == false) {
-		return -1;
-	}
+	static table_info T = In.table;
+	std::string table_name = T.table_name;
 	int col_num = T.col_num, act_col_num = record.getData().size();
 	if (col_num != act_col_num) {
 		return -2011;	// 输入属性不够
@@ -216,7 +210,7 @@ int RecordManager::insert(std::string table_name, Tuple record)
 		short free_space;
 		memcpy(&free_space, data + BLOCKSIZE - 2, sizeof(short));
 		if (free_space >= (record_size + 2)) {
-			if (check_unique(table_name, record)) {
+			if (check_unique(record)) {
 				insert2block(data, record.getData(), record_size, free_space);
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
 				return 1;
@@ -261,13 +255,11 @@ void RecordManager::remove4block(BYTE* data, int record_id, int col_num)
 	}
 }
 
-int RecordManager::remove(std::string table_name, std::vector<Where_clause>wheres, std::vector<int>logic)
+int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic)
 {
 	int cnt = 0;
-	table_info T;
-	if (T.get_table_info(table_name) == false) {
-		return -2010;
-	}
+	table_info T = In.table;
+	std::string table_name = T.table_name;
 	int block_num = buffer_manager.getBlockNum(table_name);
 	for (int i = 0; i < block_num; i++) {
 		Block* blocki = buffer_manager.getPage(table_name, i);
@@ -276,7 +268,7 @@ int RecordManager::remove(std::string table_name, std::vector<Where_clause>where
 		for (int j = 1; j <= record_num; j++) {
 			BYTE* recordj = (*blocki).getRecord(j);
 			Tuple tuple = read2tuple(recordj, T);
-			if (check(tuple, table_name, wheres, logic)) {
+			if (check(tuple, wheres, logic)) {
 				remove4block(blocki_data, j, T.col_num);
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
 				record_num = blocki_data[0];

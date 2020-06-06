@@ -5,9 +5,9 @@
 
 BufferManager buffer_manager;
 RecordManager record_manager;
+Interpreter In;
 
 int main() {
-  Interpreter In;
   cout << "Welcome to MiniSQL !" << endl << endl;
   while (true) { // event loop
 	cout << "MiniSQL >> ";
