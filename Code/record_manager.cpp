@@ -153,10 +153,13 @@ bool RecordManager::check_unique(Tuple record)
 {
 	table_info T = In.table;
 	int col_num = T.col_num;
+	std::vector<Where_clause>wheres;
+	std::vector<int>logic;
+	std::vector<int> col_ids;
 	for (int i = 0; i < col_num; i++) {
 		if (T.col[i].primary_key == true || T.col[i].unique == true) {
-			std::vector<int> col_ids;
-			std::vector<Where_clause>wheres;
+			
+			
 			Where_clause whr;
 			whr.attr = T.col[i].col_name;
 			int type = record.getData()[i].type;
@@ -171,12 +174,13 @@ bool RecordManager::check_unique(Tuple record)
 			}
 			whr.operation = "=";
 			wheres.push_back(whr);
-			std::vector<Tuple> tuples;
-			std::vector<int>logic;
-			if (select(col_ids, wheres, logic, &tuples) != 0) {
-				return false;
-			}
+			logic.push_back(0);
 		}
+	}
+	logic.pop_back();
+	std::vector<Tuple> tuples;
+	if (select(col_ids, wheres, logic, &tuples) != 0) {
+		return false;
 	}
 	return true;
 }
@@ -217,7 +221,7 @@ int RecordManager::insert(Tuple record)
 				break;
 			}
 			else {
-				return -2012;	// unique¼üÖØ¸´
+				return -2014;	// unique¼üÖØ¸´
 			}
 		}
 		block_num++;

@@ -11,12 +11,13 @@ bool create_table(Interpreter* in) {
 		return false;
 }
 
-int insert_record(string table_name, string values[]) {
-	static table_info table;
+int insert_record(string values[], int num) {
+	static table_info table = In.table;
+	std::string table_name = table.table_name;
 	Tuple record;
-	if (table.get_table_info(table_name) == false) {
-		return -1;
-	} 
+	if (num < table.col_num) {
+		return 2013;
+	}
 	if (table.table_name == table_name || table.get_table_info(table_name)) {
 		for (int i = 0; i < table.col_num; i++) {
 			Data data;
@@ -42,6 +43,7 @@ int insert_record(string table_name, string values[]) {
 				return false;
 			}
 		}
+		table_info T = In.table;
 		int cnt = record_manager.insert(record);
 		if (cnt <= 0) {
 			return cnt;

@@ -185,7 +185,11 @@ void Interpreter::read_operation() {
 			zero = 0;
 		}
 		if (strcmp(str_into.c_str(), "into") == 0 && table_name != str_ERROR && strcmp(str_values.c_str(), "values") == 0 && value != str_ERROR) {
-		  int code = insert_record(table_name, values);
+			if (this->table.get_table_info(table_name) == false) {
+				this->set_error(2012);
+				return;
+		  }
+		  int code = insert_record(values, i);
 		  if (code == 1) {
 			this->operation = INSERT;
 		  }
@@ -195,11 +199,11 @@ void Interpreter::read_operation() {
 			if (code == 0) {
 			  this->set_error(2011);
 			}
-			else if (code == -1) {
-			  this->set_error(2012);
+			else if (code == 2013) {
+				this->set_error(2013);
 			}
-			else if (code == -2011) {
-			  this->set_error(2013);
+			else if (code == -2014) {
+			  this->set_error(2014);
 			}
 		  }
 		}
@@ -497,8 +501,12 @@ void Interpreter::set_error(int code) {
 	  break;
 	case 2013:
 	  this->error.title = "INSERT ERROR";
-	  this->error.msg = "attributes number deletion;";
+	  this->error.msg = "Column count doesn't match value count;";
 	  break;
+	case 2014:
+		this->error.title = "INSERT ERROR";
+		this->error.msg = "Duplicate entry for unique key;";
+		break;
 	default:
 		this->error.title = "UNKNOWN ERROR";
 		this->error.msg = "unknown error;";

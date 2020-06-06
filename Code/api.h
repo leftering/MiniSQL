@@ -4,10 +4,11 @@
 #include "pch.h"
 #include "record_manager.h"
 extern RecordManager record_manager;
+extern Interpreter In;
 
 bool create_table(Interpreter* in);
 
-int insert_record(string table_name, string values[]);
+int insert_record(string values[], int num);
 
 bool execfile(Interpreter* in, string file_name);
 
