@@ -146,13 +146,13 @@ void Interpreter::read_operation() {
 			if (strcmp(str_where.c_str(), "where") == 0) {  // delete with where
 				string where_clause = command.substr(position);
 				int position = 0;
-				string where_clause = command.substr(position);
 				vector<int> logic;
 				logic.clear();
 				this->w_clouse.clear();
 				get_where(where_clause, &this->w_clouse, &logic);
-				api_delete(table_name, this->w_clouse, logic);
 				// call delete
+				api_delete(table_name, this->w_clouse, logic);
+				
 				this->operation = DELETE;
 			}
 			else {  // delete without where

@@ -105,6 +105,9 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 	}
 	cout << endl;
 	for (int i = 0; i < tuples.size(); i++) {
+		if (tuples[i].isDeleted() == true) {
+			continue;
+		}
 		tuples[i].showTuple();
 		cout << endl;
 	}
@@ -116,5 +119,9 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 }
 
 bool api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic) {
+	int cnt = record_manager.remove(table_name, w_clouse, logic);
+	
+	cout << cnt << " recotd(s) deleted. " << endl;
 
+	return true;
 }

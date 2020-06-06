@@ -242,13 +242,21 @@ void RecordManager::remove4block(BYTE* data, int record_id, int col_num)
 	}
 	short free_space;
 	memcpy(&free_space, data + BLOCKSIZE - 2, sizeof(short));
-	free_space -= record_size;
+	free_space += (record_size + 2);
 	memcpy(data + BLOCKSIZE - 2, &free_space, sizeof(short));
 	data[0] -= 1;
 	short free_ptr, start_ptr = ptr + record_size - 1;
 	memcpy(&free_ptr, data + 1, sizeof(short));
+	free_ptr += record_size;
+	memcpy(data + 1, &free_ptr, sizeof(short));
 	for (short i = start_ptr; i > free_ptr; i--) {
 		data[i] = data[i - record_size];
+	}
+	for (short i = 3; i <= 2 * data[0] + 1; i+=2) {
+		short sizei;
+		memcpy(&sizei, data + i + 2, sizeof(short));
+		sizei += record_size;
+		memcpy(data + i, &sizei, sizeof(short));
 	}
 }
 
@@ -272,6 +280,7 @@ int RecordManager::remove(std::string table_name, std::vector<Where_clause>where
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
 				record_num = blocki_data[0];
 				cnt++;
+				j--;
 			}
 		}
 	}
