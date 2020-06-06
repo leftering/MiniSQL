@@ -154,6 +154,7 @@ int BufferManager::getEmptyPageId()
             for (int i = 0; i < page_num; i++) {
                 if (Pages[current].isUsed() == false && Pages[current].isDirty() == true) {
                     current_position = current + 1;
+                    flushPage(current);
                     return current;
                 }
                 Pages[current].setUsed(false);

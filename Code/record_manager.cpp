@@ -226,6 +226,7 @@ int RecordManager::insert(std::string table_name, Tuple record)
 				return -2012;	// unique¼üÖØ¸´
 			}
 		}
+		block_num++;
 	}
 	return 1;
 }
