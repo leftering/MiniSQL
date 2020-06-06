@@ -42,7 +42,7 @@ int insert_record(string table_name, string values[]) {
 				return false;
 			}
 		}
-		int cnt = record_manager.insert(table_name, record);
+		int cnt = record_manager.insert(record);
 		if (cnt <= 0) {
 			return cnt;
 		}
@@ -97,7 +97,7 @@ bool get_col_ids(vector<int>* col_ids, string str, string table_name, Interprete
 bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_clause, vector<int> logic) {
 	//call select in record manager here;
 	std::vector<Tuple> tuples;
-	int cnt = record_manager.select(table_name, col_ids, w_clause, logic, &tuples);
+	int cnt = record_manager.select(col_ids, w_clause, logic, &tuples);
 	if (cnt <= 0) {
 		return false;
 	}
@@ -132,7 +132,7 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 
 bool api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic) {
 	int cnt;
-	cnt = record_manager.remove(table_name, w_clouse, logic);
+	cnt = record_manager.remove(w_clouse, logic);
 	if (cnt < 0) {
 		return false;
 	}
