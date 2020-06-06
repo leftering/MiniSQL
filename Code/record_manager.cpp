@@ -181,8 +181,8 @@ bool RecordManager::check_unique(std::string table_name, Tuple record)
 
 int RecordManager::insert(std::string table_name, Tuple record)
 {
-	table_info T;
-	if (T.get_table_info(table_name) == false) {
+	static table_info T;
+	if (T.table_name != table_name && T.get_table_info(table_name) == false) {
 		return -2010;
 	}
 	int col_num = T.col_num, act_col_num = record.getData().size();

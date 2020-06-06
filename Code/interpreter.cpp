@@ -26,7 +26,7 @@ void Interpreter::read_operation() {
 	getline(cin, command, ';'); // command = SQL sentence
 	if (command.length() < 3)
 		return;
-	 cout << "Command: " << command << ";" << endl;
+	 //cout << "Command: " << command << ";" << endl;
 	this->start = clock();
 	transform(command.begin(), command.end(), command.begin(), tolower);	// all words in lowercase
 	string operation = get_word(command, position); // get first word ( 'create', 'drop', 'select', 'delete', 'insert', 'execfile', 'quit' )
