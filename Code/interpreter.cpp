@@ -65,7 +65,7 @@ void Interpreter::read_operation() {
 			  else
 				cout << "not unique key" << endl;
 
-			  for (int i = 0;i < 10000;i++);
+			  for (int i = 0;i < 100000000;i++);
 				this->operation = CREATE_INDEX;
 			}
 			else {

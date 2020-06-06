@@ -132,6 +132,14 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 }
 
 bool api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic) {
+	int cnt;
+	cnt = record_manager.remove(table_name, w_clouse, logic);
+	if (cnt < 0) {
+		return false;
+	}
+	else {
+		cout << cnt << " record(s) deleted" << endl;
+	}
 	return true;
 }
 

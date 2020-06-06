@@ -73,11 +73,6 @@ void BufferManager::initialize()
 
 BufferManager::~BufferManager()
 {
-	for (int i = 0; i < page_num; i ++) {
-        if (Pages[i].isPinned() == false && Pages[i].getTableName() != "") {
-            flushPage(i);
-        }
-	}
 	delete[]Pages;
 }
 void BufferManager::flushPage(int page_id)
@@ -131,6 +126,9 @@ bool BufferManager::loadDiskBlock(int page_id, std::string table_name, int block
 }
 void BufferManager::modifyPage(int page_id)
 {
+    if (Pages[page_id].isPinned() == false && Pages[page_id].getTableName() != "") {
+        flushPage(page_id);
+    }
     Pages[page_id].setDirty(true);
 }
 void BufferManager::pinPage(int page_id)
