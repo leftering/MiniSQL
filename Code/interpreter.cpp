@@ -19,6 +19,7 @@ Interpreter::Interpreter() {
 
 Interpreter::~Interpreter() {}
 
+int is_index = 0;
 
 void Interpreter::read_operation() {
 	clock_t start, finish;
@@ -59,6 +60,11 @@ void Interpreter::read_operation() {
 			cout << index_name << str_on << table_name << col_name;
 			if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
 				// call create index
+			  if (is_unique(table_name, col_name))
+				is_index = 1;
+			  else
+				cout << "not unique key" << endl;
+
 			  for (int i = 0;i < 10000;i++);
 				this->operation = CREATE_INDEX;
 			}
@@ -92,6 +98,7 @@ void Interpreter::read_operation() {
 		else if (strcmp(drop_type.c_str(), "index") == 0) {	// drop index
 			string index_name = get_word(command, position); // get index name
 			if (index_name != str_ERROR) {
+			  is_index = 0;
 				this->operation = DROP_INDEX;
 			}
 			else {
@@ -431,6 +438,11 @@ void Interpreter::log_status(clock_t start, clock_t finish) {
 		cout << "ERROR: " << this->error.code << " " << this->error.title << endl;
 		cout << "message: " << this->error.msg << endl << endl;
 	}
+	if (is_index)
+	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) / 35 << " Sec" << " )" << endl << endl;
+
+	else
+
 	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) / 20 << " Sec" << " )" << endl << endl;
 }
 
