@@ -27,6 +27,8 @@ bool table_info::get_table_info(string table_name) {
   static ifstream fin;
   fin.open(table_name);
   if (!fin) {
+	cout << strerror(errno);
+	system("pause");
 	return false;
   }
   else {
