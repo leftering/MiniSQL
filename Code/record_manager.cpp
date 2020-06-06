@@ -189,7 +189,7 @@ int RecordManager::insert(std::string table_name, Tuple record)
 {
 	static table_info T;
 	if (T.get_table_info(table_name) == false) {
-		return -2010;
+		return -1;
 	}
 	int col_num = T.col_num, act_col_num = record.getData().size();
 	if (col_num != act_col_num) {
