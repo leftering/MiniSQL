@@ -169,6 +169,7 @@ int BufferManager::getBlockNum(std::string table_name)
     fseek(fp, 0, SEEK_END);
     int num;
     num = ftell(fp) / BLOCKSIZE;
+    fclose(fp);
     return num;
 }
 

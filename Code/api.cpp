@@ -17,7 +17,7 @@ bool insert_record(string table_name, string values[]) {
 	if (table.get_table_info(table_name) == false) {
 		cout << "table not exist" << endl;
 		return false;
-	}
+	} 
 	if (table.table_name == table_name || table.get_table_info(table_name)) {
 		for (int i = 0; i < table.col_num; i++) {
 			Data data;
