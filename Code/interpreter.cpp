@@ -118,6 +118,7 @@ void Interpreter::read_operation() {
 				logic.clear();
 				this->w_clouse.clear();
 				get_where(where_clause, &this->w_clouse, &logic);
+				//cout << w_clouse[0].attr << w_clouse[0].operation << w_clouse[0].value;
 				api_select(table_name, col_ids, this->w_clouse, logic);
 				// call select
 				this->operation = SELECT;
@@ -230,7 +231,7 @@ string get_word(string command, int& position) {
 }
 
 bool is_break_char(char ch) {
-	if (ch == ' ' || ch == '\n' || ch == '`' || ch == '\0' || ch == '(' || ch == ')' || ch == '\'' || ch == '\t' || ch == '=' || ch == '>' || ch == '<')
+	if (ch == ' ' || ch == '\n' || ch == '`' || ch == '\0' || ch == '(' || ch == ')' || ch == '\'' || ch == '\t')
 		return true;
 	return false;
 }
