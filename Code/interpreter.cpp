@@ -533,9 +533,6 @@ bool get_where(string where_clause, vector<Where_clause>* w_clouse, vector<int>*
 		w.attr = get_word(where_clause, posi);
 		w.operation = get_where_op(where_clause, posi);
 		w.value = get_word(where_clause, posi);
-		cout << w.attr << endl;
-		cout << w.operation << endl;
-		cout << w.value << endl;
 		w_clouse->push_back(w);
 		if (get_word(where_clause, posi) == "and") {
 			and_or = true;
