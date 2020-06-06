@@ -146,7 +146,6 @@ void Interpreter::read_operation() {
 			if (strcmp(str_where.c_str(), "where") == 0) {  // delete with where
 				string where_clause = command.substr(position);
 				int position = 0;
-				string where_clause = command.substr(position);
 				vector<int> logic;
 				logic.clear();
 				this->w_clouse.clear();

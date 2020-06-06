@@ -116,5 +116,5 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 }
 
 bool api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic) {
-
+  return true;
 }

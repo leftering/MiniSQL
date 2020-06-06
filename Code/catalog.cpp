@@ -24,7 +24,8 @@ bool table_info::write_table_info() {
 }
 
 bool table_info::get_table_info(string table_name) {
-  ifstream fin(table_name);
+  ifstream fin;
+  fin.open(table_name);
   if (!fin) {
 	return false;
   }
