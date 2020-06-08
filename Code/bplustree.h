@@ -1,14 +1,15 @@
 #ifndef _BPLUSTREE_H_
 #define _BPLUSTREE_H_ 
 #include "pch.h"
-#include "buffer_manager.h"
+// #include "buffer_manager.h"
 #include <vector>
-#include "record_manager.h"
+// #include "record_manager.h"
 #include <map>
+#include <fstream>
 #define rootstate 2
 #define interstate 1
 #define leafstate 0
-#define nodecapacity 4//how many keys in a node of B+tree 
+#define nodecapacity 6//how many keys in a node of B+tree 
 //同一个地址必须只能建立一次索引
 //data in block is in char, so the value is char 
 typedef struct addr *address;
@@ -23,7 +24,7 @@ struct addr
 address create_addr()
 {
 	address x;
-	x = (address)malloc(sizeof(struct addr));
+	x = new struct addr;
 	x->block_id = -1;
 	x->record_id = -1;
 	x->last_addr = NULL;
@@ -36,14 +37,15 @@ address create_addr()
 template<class K>
 class indexnode {
 public:
-	int NodeState;	/* Internal/Leaf */
+	int NodeState;	/* Internal/Leaf/Root */
 	indexnode *sibling;
 	indexnode *parent;
 	vector<K> key;
 	vector<address> page;//pointer
 	vector<indexnode<K>*> children;//pointer
-	
+	int node_number;
 	indexnode();
+	~indexnode();
 };
 
 template <class K>
@@ -55,8 +57,22 @@ indexnode<K>::indexnode()
     this->NodeState = interstate;
 	this->sibling = NULL;
 	this->parent = NULL;
+	this->node_number = 0;
 }
-
+template <class K>
+indexnode<K>::~indexnode()
+{
+	sibling = NULL;
+	parent = NULL;
+	int i;
+	while(page.size() > 0)page.pop_back();
+	while(key.size() > 0)key.pop_back();
+	for(i = 0;i<this->children.size();i++)
+	{
+		if(children[i] != NULL)this->children[i]->~indexnode<K>();
+	}
+	
+}
 
 
 template <class K>
@@ -64,14 +80,18 @@ class bptree
 {
 public:
 	char data_type;//i means int , s means string, f means float,
+	int nodenumber;//只是在输出到文件的时候，需要使用这个来标号
+	string indexname;
 	string index_filename;
 	string index_attributename;
 	indexnode<K>* rootnode;
 	indexnode<K>* aim;
 	map <address,K> ak;//建立从address到K的映射，可以利用address来找到key
+	map <address,int>indexed;//用来标记这个地址是否建立了索引，建立了就不能再建。
 	int aim_id;//aim 和aim_id可以用于所有find功能的函数，这些函数使用之后，可以通过aim和aim_id来定位当前找到的address
 public:
-	bptree(string index_filename, string index_attributename, char datatype);
+	bptree(string indexname,string index_filename, string index_attributename, char datatype);
+	~bptree();
 	void disposetree(void);
 	//void updateblock(indexnode<K>* unode);//?
 	void insertindex(K key, address a);
@@ -97,17 +117,33 @@ int bptree<K>::check_nodestate(indexnode<K>* cnode)
 	else return -1;
 }
 template <class K>
-bptree<K>::bptree(string index_filename,string index_attributename, char datatype)
+bptree<K>::bptree(string indexname,string index_filename,string index_attributename, char datatype)
 {
+	this->indexname = indexname;
 	this->index_filename = index_filename;
+	ofstream out((this->indexname+".txt").c_str());
+	out<<this->data_type<<endl;
+	out<<index_filename<<endl;
+	out<<index_attributename<<endl;
+	out.close();
 	this->index_attributename = index_attributename;
 	this->data_type = datatype;
 	indexnode<K> *x;
 	x = new(indexnode<K>);
 	this->rootnode = x;
 	this->rootnode->NodeState = leafstate;
+	this->nodenumber = 1;
 	aim_id = -1;
 	aim = NULL;
+}
+
+template <class K>
+bptree<K>::~bptree()
+{
+	aim = NULL;
+	ak.erase(ak.begin(),ak.end());
+	indexed.erase(indexed.begin(),indexed.end());
+	rootnode->~indexnode<K> ();
 }
 
 template <class K>
@@ -313,7 +349,9 @@ void bptree<K>::refresh()
 template <class K>
 void bptree<K>::insertindex(K k, address a)
 {
-	ak[a] = k;
+	if(indexed[a] == 1)return;
+	indexed[a] = 1;
+	if(ak[a]!= k)ak[a] = k;
 	indexnode<K> *temp;
 	temp = (this->rootnode);
 	// cout<<"root state:"<<this->rootnode->NodeState<<endl;
@@ -415,6 +453,7 @@ template <class K>
 void bptree<K>::split(indexnode<K> *temp)
 {
 	int i,j;
+	this->nodenumber++;
 	int breakpoint;
 	int sizechange;
 	// static indexnode<K> newnodes[1000];
@@ -467,6 +506,7 @@ void bptree<K>::split(indexnode<K> *temp)
 	}
 	else if(temp->NodeState == leafstate&&temp->parent == NULL)//leaf and root
 	{
+		this->nodenumber++;
 		//  cout<<"leaf and root"<<endl;
 		breakpoint = temp->key.size()/2;
 		sizechange = temp->key.size();
@@ -505,6 +545,7 @@ void bptree<K>::split(indexnode<K> *temp)
 	}
 	else if(temp->NodeState == rootstate)//rootnode
 	{
+		this->nodenumber++;
 		// cout<<"root"<<endl;
 		breakpoint = (temp->key.size()+1)/2;
 		sizechange = temp->key.size();
@@ -673,15 +714,19 @@ void bptree<K>::deletescope(K lowk, K upk)
 template <class K>
 void bptree<K>::deletes(indexnode<K>* index, int num)
 {
-	address erase_aim = index->page[num];
+	address erase_aim = index->page[num];//这里尽可能的支持key下面的多值，从而删除多个 属性值都是key的地址
 	address lastaddr = erase_aim->last_addr;
 	address next_eraseaim = erase_aim->next_addr;
 	while(ak[next_eraseaim] == ak[erase_aim]&&next_eraseaim != NULL)
 	{
+		indexed[erase_aim] = 0;//将它变掉。
+		indexed.erase(erase_aim);
 		ak.erase(erase_aim);
 		erase_aim = next_eraseaim;
 		next_eraseaim = erase_aim->next_addr;
 	}
+	indexed[erase_aim] = 0;//将它变掉。
+	indexed.erase(erase_aim);
 	ak.erase(erase_aim);
 	address nextaddr = next_eraseaim;
 	if(lastaddr != NULL)lastaddr->next_addr = nextaddr;
@@ -707,10 +752,11 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 	int i,j,child_num,key_num;
 	indexnode<K> *mergenode;
 	indexnode<K> *secnode;
-
+	this->nodenumber--;
 	if(temp->NodeState == rootstate)
 	{
 		this->rootnode = temp->children[0];
+		this->nodenumber--;
 		this->rootnode->parent == NULL;
 		if(this->rootnode->NodeState != leafstate)this->rootnode->NodeState = rootstate;
 		return;
@@ -790,6 +836,7 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 	else if(mergenode->parent->key.size()<nodecapacity/2&&mergenode->parent->NodeState != rootstate)this->merge(mergenode->parent);
 	else if(mergenode->parent->key.size() == 0&&mergenode->parent->NodeState == rootstate)
 	{
+		this->nodenumber--;
 		if(mergenode->NodeState != leafstate)mergenode->NodeState = rootstate;
 		mergenode->parent = NULL;
 		this->rootnode = mergenode;
