@@ -1,6 +1,7 @@
 #include "interpreter.h"
 #include "api.h"
 #include "pch.h"
+#include "index.h"
 
 string get_word(string command, int& position);	// get next word from postion
 bool is_break_char(char ch);  // whether ch is a break char
@@ -20,25 +21,21 @@ Interpreter::Interpreter() {
 
 Interpreter::~Interpreter() {}
 
-void Interpreter::read_operation() {
-	clock_t start, finish;
+void Interpreter::read_operation() {	clock_t start, finish;
 	this->set_error(0);
 	string command;
 	int position = 0;
 	getline(cin, command, ';'); // command = SQL sentence
-	if (command.length() < 3)
-		return;
+	if (command.length() < 3)		return;
 	 //cout << "Command: " << command << ";" << endl;
 	start = clock();
 	transform(command.begin(), command.end(), command.begin(), tolower);	// all words in lowercase
 	string operation = get_word(command, position); // get first word ( 'create', 'drop', 'select', 'delete', 'insert', 'execfile', 'quit' )
-	if (operation == str_ERROR) {
-		this->status = ERROR;
+	if (operation == str_ERROR) {		this->status = ERROR;
 		this->operation = EMPTY;
 		this->set_error(0);
 	}
-	else if (strcmp(operation.c_str(), "create") == 0) {
-		string create_type = get_word(command, position);
+	else if (strcmp(operation.c_str(), "create") == 0) {		string create_type = get_word(command, position);
 		if (strcmp(create_type.c_str(), "table") == 0) {  // create table
 			string new_table_name = get_word(command, position);	// get table name
 			string cols_info = get_brackets(command, position); // get all columns info
@@ -59,11 +56,18 @@ void Interpreter::read_operation() {
 			cout << index_name << str_on << table_name << col_name;
 			if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
 				// call create index here
-			  if (is_unique(table_name, col_name))
-				int result;
-				result = create_index_from_record(index_name,table_name,col_name);
-				if(result == 0)cout<<"create index failed"<<endl;
-				else if(result == 1)cout<<"create index succeeded"<<endl;
+			  if (is_unique(table_name, col_name)){
+				table_info T;
+				T.get_table_info(table_name);
+				int k;for(k = 0;k<T.col_num;k++)
+				{
+					if(T.col[k].col_name == col_name)T.col[k].have_index = true;
+				}
+				int create_index_result;
+				create_index_result = create_index_from_record(index_name,table_name,col_name);
+				if(create_index_result == 0)cout<<"create index failed"<<endl;
+				else if(create_index_result == 1)cout<<"create index succeeded"<<endl;
+			  }
 			  else
 				cout << "not unique key" << endl;
 
@@ -101,10 +105,22 @@ void Interpreter::read_operation() {
 			string index_name = get_word(command, position); // get index name
 			if (index_name != str_ERROR) {
 			  //call drop index here
-				int result;
-				result = drop_index(index_name);
-				if(result == 1)cout<<"drop index succeeded"<<endl;
-				else if(result == 0)cout<<"drop index faied"<<endl;
+				// if we need to change the table.col[xx].have_index from true to false
+				ifstream fin((index_name+".txt").c_str());
+				string ftable_name,fattributename;
+				fin>>ftable_name>>fattributename;
+				table_info T;
+				T.get_table_info(ftable_name);
+				int k;for(k = 0;k<T.col_num;k++)
+				{
+					if(T.col[k].col_name == fattributename)T.col[k].have_index = false;
+				}
+				fin.close();
+				//drop index:
+				int drop_index_result;
+				drop_index_result = drop_index(index_name);
+				if(drop_index_result == 1)cout<<"drop index succeeded"<<endl;
+				else if(drop_index_result == 0)cout<<"drop index faied"<<endl;
 				this->operation = DROP_INDEX;
 			}
 			else {
