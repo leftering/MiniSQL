@@ -1268,15 +1268,15 @@ int create_index_from_record(string index_name,string tablename,string attribute
     {
         if(In.table.col[k].col_name == attributename)
         {
-            if(In.table.col[k].coltype == 0)
+            if(In.table.col[k].col_type == 0)
             {
                 t->create_tree_int(index_name,tablename,attributename,'i');
             }
-            else if(In.table.col[k].coltype == 1)
+            else if(In.table.col[k].col_type == 1)
             {
                 t->create_tree_float(index_name,tablename,attributename,'f');
             }
-            else if(In.table.col[k].coltype == 2)
+            else if(In.table.col[k].col_type == 2)
             {
                 t->create_tree_string(index_name,tablename,attributename,'s');
             }
