@@ -58,7 +58,7 @@ void Interpreter::read_operation() {
 			string col_name = get_word(command, position);  // get index column name
 			cout << index_name << str_on << table_name << col_name;
 			if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
-				// call create index
+				// call create index here
 			  if (is_unique(table_name, col_name))
 				;
 			  else
@@ -97,7 +97,7 @@ void Interpreter::read_operation() {
 		else if (strcmp(drop_type.c_str(), "index") == 0) {	// drop index
 			string index_name = get_word(command, position); // get index name
 			if (index_name != str_ERROR) {
-			  //drop index
+			  //call drop index here
 				this->operation = DROP_INDEX;
 			}
 			else {

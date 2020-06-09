@@ -44,7 +44,8 @@ int insert_record(string values[], int num) {
 			}
 		}
 		table_info T = In.table;
-		int cnt = record_manager.insert(record);
+		int cnt = record_manager.insert(record); //insert without index
+		// call insert with index here
 		if (cnt <= 0) {
 			return cnt;
 		}
@@ -97,6 +98,7 @@ bool get_col_ids(vector<int>* col_ids, string str, string table_name, Interprete
 }
 
 bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_clause, vector<int> logic) {
+	// below are select without index, add index selet  here
 	//call select in record manager here;
 	std::vector<Tuple> tuples;
 	int cnt = record_manager.select(col_ids, w_clause, logic, &tuples);
@@ -140,6 +142,7 @@ int api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> log
 	}
 	int cnt;
 	cnt = record_manager.remove(w_clouse, logic);
+	// call index delete here
 	if (cnt < 0) {
 		return false;
 	}
