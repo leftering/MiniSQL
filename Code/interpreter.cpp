@@ -70,8 +70,8 @@ void Interpreter::read_operation() {	clock_t start, finish;
 			  else
 				cout << "not unique key" << endl;
 
-			  for (int i = 0;i < 100000000;i++);
-				this->operation = CREATE_INDEX;
+			  // for (int i = 0;i < 100000000;i++);
+				// this->operation = CREATE_INDEX;
 			}
 			else {
 				this->status = ERROR;
