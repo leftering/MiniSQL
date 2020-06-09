@@ -6,6 +6,7 @@
 #include "buffer_manager.h"
 #include "tuple.h"
 #include "interpreter.h"
+#include "index.h"
 
 extern BufferManager buffer_manager;
 extern Interpreter In;
