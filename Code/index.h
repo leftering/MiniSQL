@@ -25,7 +25,7 @@ public:
 };
 
 extern type_tablelist atreelist;
-extern type_tablelist* treelists;
+type_tablelist* treelists = &atreelist;
 
 int insert_index_int(string table_name, string attributename, int key, address a);
 int insert_index_string(string table_name, string attributename, string key, address a);
@@ -1270,6 +1270,108 @@ void type_tablelist::write_all_tree_to_file()
     {
         write_to_file_string(this->string_treelist[i]);
     }
+}
+
+extern RecordManager record_manager;
+extern Interpreter In;
+
+int create_index_from_record(string index_name,string tablename,string attributename)//建立index
+{
+    if(treelists->find_int_tree(tablename,attributename) != NULL)return 0;//如果之前建立过索引，就不读了这个文件。
+    //没建立过索引的record，相当于初始状态，需要扫描读取。
+    int i,j,k;
+    int treebuild = 0;
+    int blocknum;
+    In.table.get_table_info(tablename);
+    Block* temppage;//存放这个block的地址的临时指针
+    BYTE* tempdata;//存放这个block的data的地址的临时指针
+    BYTE* temprecord;//存放当前record的地址的临时指针
+    blocknum = buffer_manager.getBlockNum(tablename);
+    for(k = 0;k< In.table.col_num;k++)
+    {
+        if(In.table.col[k].col_name == attributename)
+        {
+            if(In.table.col[k].col_type == 0)
+            {
+                treelists->create_tree_int(index_name,tablename,attributename,'i');
+            }
+            else if(In.table.col[k].col_type == 1)
+            {
+                treelists->create_tree_float(index_name,tablename,attributename,'f');
+            }
+            else if(In.table.col[k].col_type == 2)
+            {
+                treelists->create_tree_string(index_name,tablename,attributename,'s');
+            }
+        break;
+        }
+    }
+    if(blocknum == 0)return 1;
+    int key1;
+    string key2;
+    float key3;
+    for(i = 0;i<blocknum;i++)
+    {
+        temppage = buffer_manager.getPage(tablename,i);
+        tempdata = temppage->getData();
+        for(j = 0;j<tempdata[0];j++)
+        {
+            address tempaddr = create_addr();
+            tempaddr->block_id = i;
+            tempaddr->record_id = j;
+            temprecord = temppage->getRecord(j);//遍历生成新的地址，用于建立索引
+            Tuple temptuple = record_manager.read2tuple(temprecord,In.table);
+            for(k = 0;k<In.table.col_num;k++)
+            {
+                if(In.table.col[k].col_name == attributename)
+                {
+                    if(temptuple.getData()[k].type == -2)
+                    {
+                        key1 = temptuple.getData()[k].datai;
+                        insert_index_int(tablename,attributename,key1,tempaddr);
+                    }
+                    else if(temptuple.getData()[k].type == -1)
+                    {
+                        key3 = temptuple.getData()[k].dataf;
+                        insert_index_float(tablename,attributename,key3,tempaddr);
+                    }
+                    else if(temptuple.getData()[k].type >= 0)
+                    {
+                        key2 = temptuple.getData()[k].datas;
+                        insert_index_string(tablename,attributename,key2,tempaddr);
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+    //读文件，得到block，遍历地址，然后得到每个地址对应的record中的key，就足够建立一个索引了。
+}
+
+int drop_index(string index_name)
+{
+    char type;
+    string tablename;
+    string attributename;
+    int result = 0;
+    ifstream fin((index_name+".txt").c_str());
+    if(!fin.is_open()){cout<<"can't find the index"<<endl;return 0;}
+    fin>>type;
+    fin>>tablename;
+    fin>>attributename;
+    if(type == 'i')
+    {
+        result = treelists->drop_tree_int(index_name,tablename,attributename);
+    }
+    else if(type == 'f')
+    {
+        result = treelists->drop_tree_float(index_name,tablename,attributename);
+    }
+    else if(type == 's')
+    {
+        result = treelists->drop_tree_string(index_name,tablename,attributename);
+    }
+    return result;
 }
 
 
