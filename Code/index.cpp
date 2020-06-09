@@ -1252,7 +1252,7 @@ int create_index_from_record(string index_name, string tablename, string attribu
     {
         temppage = buffer_manager.getPage(tablename, i);
         tempdata = temppage->getData();
-        for (j = 0; j < tempdata[0]; j++)
+        for (j = 1; j <= tempdata[0]; j++)
         {
             address tempaddr = create_addr();
             tempaddr->block_id = i;

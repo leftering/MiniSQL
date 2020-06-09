@@ -8,7 +8,7 @@ BufferManager buffer_manager;
 RecordManager record_manager;
 Interpreter In;
 type_tablelist atreelist;
-type_tablelist* t;
+type_tablelist* t = &atreelist; 
 
 int main() {
   cout << "Welcome to MiniSQL !" << endl << endl;
