@@ -6,6 +6,8 @@
 #include "buffer_manager.h"
 #include "tuple.h"
 #include "interpreter.h"
+#include "bplustree.h"
+#include "index.h"
 
 extern BufferManager buffer_manager;
 extern Interpreter In;
@@ -30,7 +32,7 @@ public:
 	// Check if record satisfy all conditions
 	bool check(Tuple record, std::vector<Where_clause> wheres, std::vector<int> logic);
 	bool check_unique(Tuple record);
-public:
+private:
 
 	template<typename T> bool cmp(T a, T b, std::string op) {
 		if (op == "=")
