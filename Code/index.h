@@ -1,15 +1,8 @@
-#pragma once
+#ifndef _INDEX_H_
+#define _INDEX_H_
 
 #include "pch.h"
 #include "bplustree.h"
-#include "buffer_manager.h"
-#include "record_manager.h"
-#include "interpreter.h"
-#include "define.h"
-
-extern RecordManager record_manager;
-extern BufferManager buffer_manager;
-extern Interpreter In;
 
 class type_tablelist{
 public:
@@ -29,10 +22,42 @@ public:
     int drop_tree_int(string indexname,string table_name,string attribute_name);
     int drop_tree_float(string indexname,string table_name,string attribute_name);
     int drop_tree_string(string indexname,string table_name,string attribute_name);
-    void delete_tree_int(string table_name,string attributename);
-    void delete_tree_float(string table_name,string attributename);
-    void delete_tree_string(string table_name,string attributename);
 };
+
+extern type_tablelist atreelist;
+extern type_tablelist* treelists;
+
+int insert_index_int(string table_name, string attributename, int key, address a);
+int insert_index_string(string table_name, string attributename, string key, address a);
+int insert_index_float(string table_name, string attributename, float key, address a);
+int delete_index_int(string table_name, string attributename, int key);
+int delete_index_string(string table_name, string attributename, string key);
+int delete_index_float(string table_name, string attributename, float key);
+address find_index_int(string table_name, string attributename, int key);
+address find_index_string(string table_name, string attributename, string key);
+address find_index_float(string table_name, string attributename, float key);
+//scope
+address find_scope_int_low(string table_name, string attributename, int key);
+address find_scope_float_low(string table_name, string attributename, float key);
+address find_scope_string_low(string table_name, string attributename, string key);
+address find_scope_int_up(string table_name, string attributename, int key);
+address find_scope_string_up(string table_name, string attributename, string key);
+address find_scope_float_up(string table_name, string attributename, float key);
+void delete_scope_int(string table_name,string attributename, int lowkey, int upkey);
+void delete_scope_float(string table_name,string attributename, float lowkey, float upkey);
+void delete_scope_string(string table_name,string attributename, string lowkey, string upkey);
+//file store
+void write_to_file_int(bptree<int>* tree);
+void write_to_file_float(bptree<float>* tree);
+void write_to_file_string(bptree<string>* tree);
+bptree<int>* read_from_file_int(string filename);
+bptree<float>* read_from_file_float(string filename);
+bptree<string>* read_from_file_string(string filename);
+//create, drop
+
+//数据库程序结束的时候需要析构t指向的type_tablelist，从而保存所有的树。
+//同一个addr，不能插入两次.不然会死掉。已经尽可能避免了。请在外部格外添加一个判断程序，如果这个地址插入过了，一定不要再插入了。
+
 type_tablelist::type_tablelist()
 {
     this->int_treelist = vector<bptree<int>*>(0);
@@ -161,14 +186,12 @@ int type_tablelist::drop_tree_string(string indexname,string table_name,string a
     return 1;
 }
 
-extern type_tablelist a_table_list;//index
-extern type_tablelist* t;
 //please use t as a extern global variable
 //非范围查找，插入，删除
 int insert_index_int(string table_name, string attributename, int key, address a)
 {
     bptree<int>* aimtree;
-    aimtree = t->find_int_tree(table_name,attributename);
+    aimtree = treelists->find_int_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         aimtree->insertindex(key,a);
@@ -185,7 +208,7 @@ int insert_index_int(string table_name, string attributename, int key, address a
 int insert_index_string(string table_name, string attributename, string key, address a)
 {
     bptree<string>* aimtree;
-    aimtree = t->find_string_tree(table_name,attributename);
+    aimtree = treelists->find_string_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         aimtree->insertindex(key,a);
@@ -202,7 +225,7 @@ int insert_index_string(string table_name, string attributename, string key, add
 int insert_index_float(string table_name, string attributename, float key, address a)
 {
     bptree<float>* aimtree;
-    aimtree = t->find_float_tree(table_name,attributename);
+    aimtree = treelists->find_float_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         aimtree->insertindex(key,a);
@@ -219,7 +242,7 @@ int insert_index_float(string table_name, string attributename, float key, addre
 int delete_index_int(string table_name, string attributename, int key)
 {
     bptree<int>* aimtree;
-    aimtree = t->find_int_tree(table_name,attributename);
+    aimtree = treelists->find_int_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         
@@ -237,7 +260,7 @@ int delete_index_int(string table_name, string attributename, int key)
 int delete_index_string(string table_name, string attributename, string key)
 {
     bptree<string>* aimtree;
-    aimtree = t->find_string_tree(table_name,attributename);
+    aimtree = treelists->find_string_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         aimtree->deleteindex(key);
@@ -254,7 +277,7 @@ int delete_index_string(string table_name, string attributename, string key)
 int delete_index_float(string table_name, string attributename, float key)
 {
     bptree<float>* aimtree;
-    aimtree = t->find_float_tree(table_name,attributename);
+    aimtree = treelists->find_float_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         aimtree->deleteindex(key);
@@ -271,7 +294,7 @@ int delete_index_float(string table_name, string attributename, float key)
 address find_index_int(string table_name, string attributename, int key)
 {
     bptree<int>* aimtree;
-    aimtree = t->find_int_tree(table_name,attributename);
+    aimtree = treelists->find_int_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         cout<<"select succeeded"<<endl;
@@ -287,7 +310,7 @@ address find_index_int(string table_name, string attributename, int key)
 address find_index_string(string table_name, string attributename, string key)
 {
     bptree<string>* aimtree;
-    aimtree = t->find_string_tree(table_name,attributename);
+    aimtree = treelists->find_string_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         cout<<"select succeeded"<<endl;
@@ -303,7 +326,7 @@ address find_index_string(string table_name, string attributename, string key)
 address find_index_float(string table_name, string attributename, float key)
 {
     bptree<float>* aimtree;
-    aimtree = t->find_float_tree(table_name,attributename);
+    aimtree = treelists->find_float_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         cout<<"select succeeded"<<endl;
@@ -322,7 +345,7 @@ address find_index_float(string table_name, string attributename, float key)
 address find_scope_int_low(string table_name, string attributename, int key)
 {
     bptree<int>* aimtree;
-    aimtree = t->find_int_tree(table_name,attributename);
+    aimtree = treelists->find_int_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         return aimtree->lowerbound_of_key(key);
@@ -337,7 +360,7 @@ address find_scope_int_low(string table_name, string attributename, int key)
 address find_scope_int_up(string table_name, string attributename, int key)
 {
     bptree<int>* aimtree;
-    aimtree = t->find_int_tree(table_name,attributename);
+    aimtree = treelists->find_int_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         return aimtree->upperbound_of_key(key);
@@ -353,7 +376,7 @@ address find_scope_int_up(string table_name, string attributename, int key)
 address find_scope_string_low(string table_name, string attributename, string key)
 {
     bptree<string>* aimtree;
-    aimtree = t->find_string_tree(table_name,attributename);
+    aimtree = treelists->find_string_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         return aimtree->lowerbound_of_key(key);
@@ -368,7 +391,7 @@ address find_scope_string_low(string table_name, string attributename, string ke
 address find_scope_string_up(string table_name, string attributename, string key)
 {
     bptree<string>* aimtree;
-    aimtree = t->find_string_tree(table_name,attributename);
+    aimtree = treelists->find_string_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         return aimtree->upperbound_of_key(key);
@@ -383,7 +406,7 @@ address find_scope_string_up(string table_name, string attributename, string key
 address find_scope_float_low(string table_name, string attributename, float key)
 {
     bptree<float>* aimtree;
-    aimtree = t->find_float_tree(table_name,attributename);
+    aimtree = treelists->find_float_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         return aimtree->lowerbound_of_key(key);
@@ -398,7 +421,7 @@ address find_scope_float_low(string table_name, string attributename, float key)
 address find_scope_float_up(string table_name, string attributename, float key)
 {
     bptree<float>* aimtree;
-    aimtree = t->find_float_tree(table_name,attributename);
+    aimtree = treelists->find_float_tree(table_name,attributename);
     if(aimtree != NULL)
     {
         return aimtree->upperbound_of_key(key);
@@ -413,19 +436,21 @@ address find_scope_float_up(string table_name, string attributename, float key)
 void delete_scope_int(string table_name,string attributename, int lowkey, int upkey)
 {
     bptree<int>* aimtree;
-    aimtree = t->find_int_tree(table_name,attributename);
+    aimtree = treelists->find_int_tree(table_name,attributename);
     aimtree->deletescope(lowkey,upkey);
 }
 
 void delete_scope_string(string table_name, string attributename, string lowkey, string upkey)
 {
     bptree<string>* aimtree;
+    aimtree = treelists->find_string_tree(table_name, attributename);
     aimtree->deletescope(lowkey,upkey);
 }
 
 void delete_scope_float(string table_name,string attributename, float lowkey, float upkey)
 {
     bptree<float>* aimtree;
+    aimtree = treelists->find_float_tree(table_name, attributename);
     aimtree->deletescope(lowkey,upkey);
 }
 
@@ -506,7 +531,7 @@ bptree<int>* read_from_file_int(string filename)
     int input1;
     string input2;
     float input3;
-    int nodepos;
+    int nodepos = 0;
     int state_change = 0;
     address lastone = NULL;//用来处理addr链表的关系。
     int currkey;//用来处理map的关系
@@ -548,11 +573,11 @@ bptree<int>* read_from_file_int(string filename)
     tree->nodenumber = node_number;
     fin>>input2;
     tree->indexname = input2;
-    indexnode<int>** nodearr;
-    nodearr = new indexnode<int>* [node_number];
+    vector<indexnode<int>*> nodearr;
     for(i = 0;i<node_number;i++)
     {
-        nodearr[i] = new indexnode<int>;
+        nodearr.push_back(0);
+        nodearr[i] = new indexnode<int> ();
         nodearr[i]->node_number = i;
     }
     while(!fin.eof())
@@ -794,7 +819,7 @@ bptree<float>* read_from_file_float(string filename)
     nodearr = new indexnode<float>* [node_number];
     for(i = 0;i<node_number;i++)
     {
-        nodearr[i] = new indexnode<float>;
+        nodearr[i] = new indexnode<float> ();
         nodearr[i]->node_number = i;
     }
     while(!fin.eof())
@@ -1036,7 +1061,7 @@ bptree<string>* read_from_file_string(string filename)
     nodearr = new indexnode<string>* [node_number];
     for(i = 0;i<node_number;i++)
     {
-        nodearr[i] = new indexnode<string>;
+        nodearr[i] = new indexnode<string> ();
         nodearr[i]->node_number = i;
     }
     while(!fin.eof())
@@ -1180,7 +1205,7 @@ bptree<int>* type_tablelist::find_int_tree(string filename, string attributename
     {
         fin.close();
         bptree<int>* newtree = read_from_file_int(file_name);
-        t->int_treelist.push_back(newtree);
+        treelists->int_treelist.push_back(newtree);
         return newtree;
     }
     else return NULL;
@@ -1202,7 +1227,7 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
     {
         fin.close();
         bptree<string>* newtree = read_from_file_string(file_name);
-        t->string_treelist.push_back(newtree);
+        treelists->string_treelist.push_back(newtree);
         return newtree;
     }
     else return NULL;
@@ -1224,7 +1249,7 @@ bptree<float>* type_tablelist::find_float_tree(string filename, string attribute
     {
         fin.close();
         bptree<float>* newtree = read_from_file_float(file_name);
-        t->float_treelist.push_back(newtree);
+        treelists->float_treelist.push_back(newtree);
         return newtree;
     }
     else return NULL;
@@ -1247,103 +1272,5 @@ void type_tablelist::write_all_tree_to_file()
     }
 }
 
-int create_index_from_record(string index_name,string tablename,string attributename)//建立index
-{
-    if(t->find_int_tree(tablename,attributename) != NULL)return 0;//如果之前建立过索引，就不读了这个文件。
-    //没建立过索引的record，相当于初始状态，需要扫描读取。
-    int i,j,k;
-    int treebuild = 0;
-    int blocknum;
-    In.table.get_table_info(tablename);
-    Block* temppage;//存放这个block的地址的临时指针
-    BYTE* tempdata;//存放这个block的data的地址的临时指针
-    BYTE* temprecord;//存放当前record的地址的临时指针
-    blocknum = buffer_manager.getBlockNum(tablename);
-    for(k = 0;k< In.table.col_num;k++)
-    {
-        if(In.table.col[k].col_name == attributename)
-        {
-            if(In.table.col[k].col_type == 0)
-            {
-                t->create_tree_int(index_name,tablename,attributename,'i');
-            }
-            else if(In.table.col[k].col_type == 1)
-            {
-                t->create_tree_float(index_name,tablename,attributename,'f');
-            }
-            else if(In.table.col[k].col_type == 2)
-            {
-                t->create_tree_string(index_name,tablename,attributename,'s');
-            }
-        break;
-        }
-    }
-    if(blocknum == 0)return 1;
-    int key1;
-    string key2;
-    float key3;
-    for(i = 0;i<blocknum;i++)
-    {
-        temppage = buffer_manager.getPage(tablename,i);
-        tempdata = temppage->getData();
-        for(j = 0;j<tempdata[0];j++)
-        {
-            address tempaddr = create_addr();
-            tempaddr->block_id = i;
-            tempaddr->record_id = j;
-            temprecord = temppage->getRecord(j);//遍历生成新的地址，用于建立索引
-            Tuple temptuple = record_manager.read2tuple(temprecord,In.table);
-            for(k = 0;k<In.table.col_num;k++)
-            {
-                if(In.table.col[k].col_name == attributename)
-                {
-                    if(temptuple.getData()[k].type == -2)
-                    {
-                        key1 = temptuple.getData()[k].datai;
-                        insert_index_int(tablename,attributename,key1,tempaddr);
-                    }
-                    else if(temptuple.getData()[k].type == -1)
-                    {
-                        key3 = temptuple.getData()[k].dataf;
-                        insert_index_float(tablename,attributename,key3,tempaddr);
-                    }
-                    else if(temptuple.getData()[k].type >= 0)
-                    {
-                        key2 = temptuple.getData()[k].datas;
-                        insert_index_string(tablename,attributename,key2,tempaddr);
-                    }
-                }
-            }
-        }
-    }
-    return 1;
-    //读文件，得到block，遍历地址，然后得到每个地址对应的record中的key，就足够建立一个索引了。
-}
 
-int drop_index(string index_name)
-{
-    char type;
-    string tablename;
-    string attributename;
-    int result = 0;
-    ifstream fin((index_name+".txt").c_str());
-    if(!fin.is_open()){cout<<"can't find the index"<<endl;return 0;}
-    fin>>type;
-    fin>>tablename;
-    fin>>attributename;
-    if(type == 'i')
-    {
-        result = t->drop_tree_int(index_name,tablename,attributename);
-    }
-    else if(type == 'f')
-    {
-        result = t->drop_tree_float(index_name,tablename,attributename);
-    }
-    else if(type == 's')
-    {
-        result = t->drop_tree_string(index_name,tablename,attributename);
-    }
-    return result;
-}
-//数据库程序结束的时候需要析构t指向的type_tablelist，从而保存所有的树。
-//千万注意！！！！同一个addr，一定不能插入两次！！！不然会死掉。已经尽可能避免了。请在外部格外添加一个判断程序，如果这个地址插入过了，一定不要再插入了。
+#endif // index.h
