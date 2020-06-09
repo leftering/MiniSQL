@@ -1,4 +1,7 @@
 #include "api.h"
+#include "catalog.h"
+#include "tuple.h"
+#include "define.h"
 
 bool create_table(Interpreter* in) {
 	if (in->table.write_table_info()) {

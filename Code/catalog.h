@@ -1,8 +1,8 @@
-#ifndef CATALOG_H
-#define CATALOG_H
+#pragma once
+#ifndef _CATALOG_H_
+#define _CATALOG_H_
 
 #include "pch.h"
-
 typedef enum {
   COL_INT = 0,
   COL_FLOAT,

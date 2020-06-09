@@ -1,9 +1,11 @@
 #pragma once
-#include "interpreter.h"
-#include "catalog.h"
-#include "pch.h"
-#include "record_manager.h"
+#ifndef _API_H_
+#define _API_H_
 
+#include "interpreter.h"
+#include "pch.h"
+#include "buffer_manager.h"
+#include "record_manager.h"
 extern RecordManager record_manager;
 extern Interpreter In;
 
@@ -20,3 +22,6 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 int api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> logic);
 
 bool is_unique(string table_name, string col_name);
+
+
+#endif // !_API_H_

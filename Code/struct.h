@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _BASIC_H_
-#define _BASIC_H_ 1
+#ifndef _STRUCT_H_
+#define _STRUCT_H_
 
 #include "pch.h"
 
