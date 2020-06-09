@@ -107,8 +107,9 @@ void Interpreter::read_operation() {	clock_t start, finish;
 			  //call drop index here
 				// if we need to change the table.col[xx].have_index from true to false
 				ifstream fin((index_name+".txt").c_str());
+				int ftype;
 				string ftable_name,fattributename;
-				fin>>ftable_name>>fattributename;
+				fin>>ftype>>ftable_name>>fattributename;
 				table_info T;
 				T.get_table_info(ftable_name);
 				int k;for(k = 0;k<T.col_num;k++)
