@@ -25,8 +25,8 @@ bool table_info::write_table_info() {
 bool table_info::get_table_info(string table_name) {
 	ifstream fin(table_name);
 	if (!fin) {
-	  cout << "Error: " << strerror(errno);
-	  system("pause");
+	  //cout << "Error: " << strerror(errno);
+	  //system("pause");
 		return false;
 	}
 	else {

@@ -19,8 +19,8 @@ Interpreter::Interpreter() {
 }
 
 Interpreter::~Interpreter() {}
-
-void Interpreter::read_operation() {	clock_t start, finish;
+clock_t start, finish;
+void Interpreter::read_operation() {
 	this->set_error(0);
 	string command;
 	int position = 0;
@@ -52,7 +52,6 @@ void Interpreter::read_operation() {	clock_t start, finish;
 			string str_on = get_word(command, position);
 			string table_name = get_word(command, position);	// get table name
 			string col_name = get_word(command, position);  // get index column name
-			cout << index_name << str_on << table_name << col_name;
 			if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
 				// call create index here
 			  if (is_unique(table_name, col_name)){
@@ -67,11 +66,11 @@ void Interpreter::read_operation() {	clock_t start, finish;
 				if(create_index_result == 0)cout<<"create index failed"<<endl;
 				else if(create_index_result == 1)cout<<"create index succeeded"<<endl;
 			  }
-			  else
-				cout << "not unique key" << endl;
-
-			  for (int i = 0;i < 100000000;i++);
-				this->operation = CREATE_INDEX;
+			  else {
+				this->status = ERROR;
+				this->operation = EMPTY;
+				this->set_error(2016);
+			  }
 			}
 			else {
 				this->status = ERROR;
@@ -539,6 +538,10 @@ void Interpreter::set_error(int code) {
 	case 2015:
 	  this->error.title = "DELETE ERROR";
 	  this->error.msg = "Table tablename doesn't exist;";
+	  break;
+	case 2016:
+	  this->error.title = "CREATE INDEX ERROR";
+	  this->error.msg = "Not unique key;";
 	  break;
 	default:
 		this->error.title = "UNKNOWN ERROR";
