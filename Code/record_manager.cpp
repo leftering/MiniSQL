@@ -253,16 +253,16 @@ int RecordManager::insert(Tuple record)
 				nadd = create_addr();
 				nadd->block_id = i;
 				nadd->record_id = data[0];
-				for(k = 0;k<T.col_num;k++)
+				for(k = 0; k < T.col_num; k ++)
 				{
 					if(T.col[k].have_index == true)
 					{
 						if(T.col[k].col_type == 0)
-						insert_index_int(T.table_name,T.col[k].col_name,record.contents[k].datai,nadd);
+						insert_index_int(T.table_name,T.col[k].col_name,record.getData()[k].datai,nadd);
 						else if(T.col[k].col_type == 1)
-						insert_index_float(T.table_name,T.col[k].col_name,record.contents[k].dataf,nadd);
+						insert_index_float(T.table_name,T.col[k].col_name,record.getData()[k].dataf,nadd);
 						else if(T.col[k].col_type == 2)
-						insert_index_string(T.table_name,T.col[k].col_name,record.contents[k].datas,nadd);
+						insert_index_string(T.table_name,T.col[k].col_name,record.getData()[k].datas,nadd);
 					}
 				}
 				//index over

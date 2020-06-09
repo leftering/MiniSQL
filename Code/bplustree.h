@@ -1,5 +1,4 @@
-#ifndef _BPLUSTREE_H_
-#define _BPLUSTREE_H_ 
+#pragma once
 #include "pch.h"
 // #include "buffer_manager.h"
 #include <vector>
@@ -849,4 +848,3 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 //范围选择必须要给定两个范围，所以必要的时候，需要设置该类型变量下的无穷大的数。
 //范围删除是在范围选择的基础上写的，但是注意，范围删除没有返回值，按照上面的举例，会删掉16,17,18，即所有【16,18】的值。
 
-#endif// bplustree.h

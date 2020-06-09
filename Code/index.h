@@ -1,21 +1,16 @@
 #pragma once
-#ifndef INDEX_H
-#define INDEX_H
 
 #include "pch.h"
 #include "bplustree.h"
-// #include "buffer_manager.h"
+#include "buffer_manager.h"
 #include "record_manager.h"
-#include <vector>
 #include "interpreter.h"
-// #include "main.cpp"
-#define rootstate 2
-#define interstate 1
-#define leafstate 0
-
+#include "define.h"
 
 extern RecordManager record_manager;
+extern BufferManager buffer_manager;
 extern Interpreter In;
+
 class type_tablelist{
 public:
     vector<bptree<int>*> int_treelist;
@@ -1352,4 +1347,3 @@ int drop_index(string index_name)
 }
 //数据库程序结束的时候需要析构t指向的type_tablelist，从而保存所有的树。
 //千万注意！！！！同一个addr，一定不能插入两次！！！不然会死掉。已经尽可能避免了。请在外部格外添加一个判断程序，如果这个地址插入过了，一定不要再插入了。
-#endif // index.h
