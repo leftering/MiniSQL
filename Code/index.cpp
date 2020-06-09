@@ -155,7 +155,7 @@ int insert_index_string(string table_name, string attributename, string key, add
     if (aimtree != NULL)
     {
         aimtree->insertindex(key, a);
-        cout << "insert succeeded" << endl;
+        cout << "insert success" << endl;
         return 1;
     }
     else if (aimtree == NULL)

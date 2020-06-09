@@ -396,10 +396,8 @@ void bptree<K>::insertindex(K k, address a)
 			// cout<<"ori all < k"<<endl;
 			int j;
 			i = temp->key.size();
-			temp->page.push_back(0);
-			temp->page[i] = a;
-			temp->key.push_back(0);
-			temp->key[i] = k;
+			temp->page.push_back(a);
+			temp->key.push_back(k);
 			address tempaddr = temp->page[i - 1];
 			while (tempaddr->next_addr != NULL && ak[tempaddr->next_addr] == ak[tempaddr])tempaddr = tempaddr->next_addr;
 			temp->page[i]->last_addr = tempaddr;//no multiple
@@ -416,10 +414,8 @@ void bptree<K>::insertindex(K k, address a)
 	}
 	if (temp->key.size() == 0)
 	{
-		temp->key.push_back(0);
-		temp->key[0] = k;
-		temp->page.push_back(0);
-		temp->page[0] = a;
+		temp->key.push_back(k);
+		temp->page.push_back(a);
 	}
 	// cout<<"insert over"<<endl;
 
