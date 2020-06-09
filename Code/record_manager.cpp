@@ -58,7 +58,7 @@ Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 	for (int i = 0; i < T.col_num; i++) {
 		int size = record[i];
 		Data data;
-		// ¶ÁÈ¡Ò»¸öÊôÐÔ
+		// Â¶ÃÃˆÂ¡Ã’Â»Â¸Ã¶ÃŠÃ´ÃÃ”
 		if (T.col[i].col_type == COL_INT) {
 			data.type = -2;
 			memcpy(&(data.datai), record + offset, size);
@@ -115,6 +115,39 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 		}
 	}
 	return cnt;
+	/*
+	//check if have a index;
+	int i;
+	for(k = 0;k<T.colnum;k++)
+	{
+		if(T.col[k].have_index == true)
+		{
+			table_name = T.table_name;
+			attribute_name = T.col[k].col_name;
+			//select by index;
+		}
+	}
+	
+	//if scope select:
+	//please use your function to get the lower bound of key and the upper bound of key
+	address lowerbound,upperbound;
+	lowerbound = find_scope_int_low(table_name,attribute_name,key);
+	upperbound = find_scope_int_up(table_name,attribute_name,key);
+	// if the question don't have a lower bound , use the smallest one,for example: 
+	//select xxx from xxx where xx < 10, upper bound is 9(if <= 10,upper bound is 10),lower bound is -1 or 0.
+	// if the question don't have a upper bound , just like the lower bound, or you can use NULL.
+	while(lowerbound != upperbound)
+	{
+		//please use your func to select the record,using the address lowerbound
+		lowerbound = lowerbound->next_addr;
+	}
+	//if single select:
+	//please use your function to get the key.
+	address aimaddr;
+	aimaddr = find_index_int(table_name,attribute_name,key);
+	//then please select the record using the address aimaddr;
+	//float,string,use the similar func: find_scope_float_low(...),find_index_float(...);
+	*/
 }
 
 void RecordManager::insert2block(BYTE* data, std::vector<Data> records, short record_size, short free_space)
@@ -214,11 +247,30 @@ int RecordManager::insert(Tuple record)
 			if (check_unique(record)) {
 				insert2block(data, record.getData(), record_size, free_space);
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
+				//if there is a index, insert it
+				int k;
+				address nadd;
+				nadd = create_addr();
+				nadd->block_id = i;
+				nadd->record_id = data[0];
+				for(k = 0;k<T.col_num;k++)
+				{
+					if(T.col[k].have_index == true)
+					{
+						if(T.col[k].col_type == 0)
+						insert_index_int(T.table_name,T.col[k].col_name,record.contents[k].datai,nadd);
+						else if(T.col[k].col_type == 1)
+						insert_index_float(T.table_name,T.col[k].col_name,record.contents[k].dataf,nadd);
+						else if(T.col[k].col_type == 2)
+						insert_index_string(T.table_name,T.col[k].col_name,record.contents[k].datas,nadd);
+					}
+				}
+				//index over
 				return 1;
 				break;
 			}
 			else {
-				return -2014;	// unique¼üÖØ¸´
+				return -2014;	// uniqueÂ¼Ã¼Ã–Ã˜Â¸Â´
 			}
 		}
 		block_num++;
@@ -279,4 +331,16 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 		}
 	}
 	return cnt;
+	/*
+	//the way of checking index is similar to select
+	...
+	//to delete record, still need to use selete to find addr then use addr to delete.
+	
+	//these below are used for delete index
+	//if scope delete:
+	delete_scope_int(table_name,attribute_name,lower_key,upper_key);//delete the one before the upper key
+	//but the upper key don't delete
+	//if single delete:
+	delete_index_int(table_name,attribute_name,key);
+	*/
 }
