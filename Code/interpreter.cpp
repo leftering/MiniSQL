@@ -60,7 +60,10 @@ void Interpreter::read_operation() {
 			if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
 				// call create index here
 			  if (is_unique(table_name, col_name))
-				;
+				int result;
+				result = create_index_from_record(index_name,table_name,col_name);
+				if(result == 0)cout<<"create index failed"<<endl;
+				else if(result == 1)cout<<"create index succeeded"<<endl;
 			  else
 				cout << "not unique key" << endl;
 
@@ -98,6 +101,10 @@ void Interpreter::read_operation() {
 			string index_name = get_word(command, position); // get index name
 			if (index_name != str_ERROR) {
 			  //call drop index here
+				int result;
+				result = drop_index(index_name);
+				if(result == 1)cout<<"drop index succeeded"<<endl;
+				else if(result == 0)cout<<"drop index faied"<<endl;
 				this->operation = DROP_INDEX;
 			}
 			else {
