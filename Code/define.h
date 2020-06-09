@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#ifndef _DEFINE_H_
+#define _DEFINE_H_
 
 // BLOCK的大小为4KB
 #define BLOCKSIZE 4096

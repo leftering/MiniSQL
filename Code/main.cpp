@@ -2,10 +2,13 @@
 #include "interpreter.h"
 #include "record_manager.h"
 #include "buffer_manager.h"
+#include "index.h"
 
 BufferManager buffer_manager;
 RecordManager record_manager;
 Interpreter In;
+type_tablelist atreelist;
+type_tablelist* t;
 
 int main() {
   cout << "Welcome to MiniSQL !" << endl << endl;

@@ -1,5 +1,4 @@
 #include "catalog.h"
-#include "pch.h"
 
 bool table_info::write_table_info() {
 	ofstream fout(this->table_name);

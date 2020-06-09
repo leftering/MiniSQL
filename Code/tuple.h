@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _TUPLE_H_
+#define _TUPLE_H_
 #include "pch.h"
 struct Data {
     int type;
@@ -26,3 +28,4 @@ public:
     void setDeleted();
     void showTuple();  //显示元组中的所有数据
 };
+#endif

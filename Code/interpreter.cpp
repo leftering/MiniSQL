@@ -1,6 +1,5 @@
 #include "interpreter.h"
 #include "api.h"
-#include "pch.h"
 #include "index.h"
 
 string get_word(string command, int& position);	// get next word from postion

@@ -1,4 +1,6 @@
 #include "record_manager.h"
+#include "define.h"
+#include "index.h"
 
 bool RecordManager::check(Tuple record, std::vector<Where_clause> wheres, std::vector<int> logic)
 {
@@ -80,11 +82,120 @@ Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 	return tuple;
 }
 
+address RecordManager::find_addr_low(table_info T, std::string attributename, Where_clause where, int attr_index)
+{
+	address naddr = NULL;
+	if (T.col[attr_index].col_type = COL_INT) {
+		int low_bound = std::stoi(where.value);
+		naddr = find_scope_int_low(T.table_name, T.col[attr_index].col_name, low_bound);
+	}
+	else if (T.col[attr_index].col_type = COL_FLOAT) {
+		float low_bound = std::stof(where.value);
+		naddr = find_scope_float_low(T.table_name, T.col[attr_index].col_name, low_bound);
+	}
+	else {
+		std::string low_bound = where.value;
+		naddr = find_scope_string_low(T.table_name, T.col[attr_index].col_name, low_bound);
+	}
+	return naddr;
+}
+
+address RecordManager::find_addr_up(table_info T, std::string attributename, Where_clause where, int attr_index)
+{
+	address naddr;
+	if (T.col[attr_index].col_type = COL_INT) {
+		int low_bound = std::stoi(where.value);
+		naddr = find_scope_int_up(T.table_name, T.col[attr_index].col_name, low_bound);
+	}
+	else if (T.col[attr_index].col_type = COL_FLOAT) {
+		float low_bound = std::stof(where.value);
+		naddr = find_scope_float_up(T.table_name, T.col[attr_index].col_name, low_bound);
+	}
+	else {
+		std::string low_bound = where.value;
+		naddr = find_scope_string_up(T.table_name, T.col[attr_index].col_name, low_bound);
+	}
+	return naddr;
+}
+
 int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wheres, std::vector<int> logic, std::vector<Tuple>* tuples)
 {
 	int cnt = 0;
 	table_info T = In.table;
 	std::string table_name = T.table_name;
+
+	bool flag = false;
+	std::vector<int> col_id;
+	for (int i = 0; i < T.col_num; i++) {
+		if (T.col[i].have_index == true) {
+			col_id.push_back(i);
+			flag = true;
+		}
+	}
+	if (flag && (logic.size() == 0 || logic[0] == 1)) {
+		int where_index, attr_index;
+		for (int i = 0; i < col_id.size(); i++) {
+			int j;
+			for (j = 0; j < wheres.size(); j++) {
+				if (wheres[j].attr == T.col[col_id[i]].col_name) {
+					where_index = j;
+					attr_index = col_id[i];
+					break;
+				}
+			}
+			if (j < wheres.size()) {
+				break;
+			}
+		}
+		address naddr;
+		int direction = 0;
+		if (wheres[where_index].operation == ">" || wheres[where_index].operation == ">=") {
+			naddr = find_addr_low(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
+		}
+		else if (wheres[where_index].operation == "<" || wheres[where_index].operation == "<=") {
+			naddr = find_addr_up(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
+			direction = 1;
+		}
+		wheres.erase(wheres.begin() + where_index);
+		logic.pop_back();
+		if (naddr == NULL) {
+			return 0;
+		}
+		else {
+			while (naddr != NULL) {
+				Block* blocki = buffer_manager.getPage(table_name, naddr->block_id);
+				BYTE* recordi = (*blocki).getRecord(naddr->record_id);
+				Tuple tuple = read2tuple(recordi, T);
+				if (!check(tuple, wheres, logic)) {
+					tuple.setDeleted();
+				}
+				else {
+					int index = col_ids.size() - 1;
+					if (index + 1 != T.col_num && index >= 0) {
+						for (int k = T.col_num - 1; k >= 0; k--) {
+							if (index >= 0 && k == col_ids[index]) {
+								index--;
+								continue;
+							}
+							else {
+								tuple.eraseData(k);
+							}
+						}
+					}
+					cnt++;
+				}
+				tuples->push_back(tuple);
+				if (direction) {
+					naddr = naddr->last_addr;
+				}
+				else {
+					naddr = naddr->next_addr;
+				}
+			}
+		}
+		return cnt;
+	}
+
 	int block_num = buffer_manager.getBlockNum(table_name);
 	for (int i = 0; i < block_num; i++) {
 		Block* blocki = buffer_manager.getPage(table_name, i);
@@ -115,39 +226,6 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 		}
 	}
 	return cnt;
-	/*
-	//check if have a index;
-	int i;
-	for(k = 0;k<T.colnum;k++)
-	{
-		if(T.col[k].have_index == true)
-		{
-			table_name = T.table_name;
-			attribute_name = T.col[k].col_name;
-			//select by index;
-		}
-	}
-	
-	//if scope select:
-	//please use your function to get the lower bound of key and the upper bound of key
-	address lowerbound,upperbound;
-	lowerbound = find_scope_int_low(table_name,attribute_name,key);
-	upperbound = find_scope_int_up(table_name,attribute_name,key);
-	// if the question don't have a lower bound , use the smallest one,for example: 
-	//select xxx from xxx where xx < 10, upper bound is 9(if <= 10,upper bound is 10),lower bound is -1 or 0.
-	// if the question don't have a upper bound , just like the lower bound, or you can use NULL.
-	while(lowerbound != upperbound)
-	{
-		//please use your func to select the record,using the address lowerbound
-		lowerbound = lowerbound->next_addr;
-	}
-	//if single select:
-	//please use your function to get the key.
-	address aimaddr;
-	aimaddr = find_index_int(table_name,attribute_name,key);
-	//then please select the record using the address aimaddr;
-	//float,string,use the similar func: find_scope_float_low(...),find_index_float(...);
-	*/
 }
 
 void RecordManager::insert2block(BYTE* data, std::vector<Data> records, short record_size, short free_space)
@@ -182,27 +260,35 @@ void RecordManager::insert2block(BYTE* data, std::vector<Data> records, short re
 	}
 }
 
-bool RecordManager::check_unique(Tuple record)
+bool RecordManager::check_unique(table_info T, Tuple record)
 {
-	table_info T = In.table;
+	T = In.table;
 	int col_num = T.col_num;
 	std::vector<Where_clause>wheres;
 	std::vector<int>logic;
 	std::vector<int> col_ids;
 	for (int i = 0; i < col_num; i++) {
+		bool flag = true;
 		if (T.col[i].primary_key == true || T.col[i].unique == true) {
-			
-			
 			Where_clause whr;
 			whr.attr = T.col[i].col_name;
 			int type = record.getData()[i].type;
 			if (type == -2) {
+				if (T.col[i].have_index == true && find_index_int(T.table_name, T.col[i].col_name, record.getData()[i].datai) != NULL) {
+					return false;
+				}
 				whr.value = to_string(record.getData()[i].datai);
 			}
 			else if (type == -1) {
+				if (T.col[i].have_index == true && find_index_float(T.table_name, T.col[i].col_name, record.getData()[i].dataf) != NULL) {
+					return false;
+				}
 				whr.value = to_string(record.getData()[i].dataf);
 			}
 			else {
+				if (T.col[i].have_index == true && find_index_string(T.table_name, T.col[i].col_name, record.getData()[i].datas) != NULL) {
+					return false;
+				}
 				whr.value = record.getData()[i].datas;
 			}
 			whr.operation = "=";
@@ -244,13 +330,12 @@ int RecordManager::insert(Tuple record)
 		short free_space;
 		memcpy(&free_space, data + BLOCKSIZE - 2, sizeof(short));
 		if (free_space >= (record_size + 2)) {
-			if (check_unique(record)) {
+			if (check_unique(T, record)) {
 				insert2block(data, record.getData(), record_size, free_space);
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
 				//if there is a index, insert it
 				int k;
-				address nadd;
-				nadd = create_addr();
+				address nadd = NULL;
 				nadd->block_id = i;
 				nadd->record_id = data[0];
 				for(k = 0; k < T.col_num; k ++)
@@ -308,11 +393,112 @@ void RecordManager::remove4block(BYTE* data, int record_id, int col_num)
 	}
 }
 
+std::string get_ith_value(table_info T, BYTE record[], int i)
+{
+	std::string s;
+	int offset = T.col_num;
+	for (int j = 0; j < i; j ++) {
+		offset += record[j];
+	}
+	if (T.col[i].col_type == COL_INT) {
+		int value;
+		memcpy(&value, record + offset, sizeof(int));
+		s = to_string(value);
+	}
+	else if (T.col[i].col_type == COL_FLOAT) {
+		float value;
+		memcpy(&value, record + offset, sizeof(float));
+		s = to_string(value);
+	}
+	else {
+		char* value;
+		memcpy(value, record + offset, record[i]);
+		s = value;
+	}
+	return s;
+}
+
 int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic)
 {
 	int cnt = 0;
 	table_info T = In.table;
 	std::string table_name = T.table_name;
+
+	bool flag = false;
+	std::vector<int> col_id;
+	for (int i = 0; i < T.col_num; i++) {
+		if (T.col[i].have_index == true) {
+			col_id.push_back(i);
+			flag = true;
+		}
+	}
+	if (flag && (logic.size() == 0 || logic[0] == 1)) {
+		int where_index, attr_index;
+		for (int i = 0; i < col_id.size(); i++) {
+			int j;
+			for (j = 0; j < wheres.size(); j++) {
+				if (wheres[j].attr == T.col[col_id[i]].col_name) {
+					where_index = j;
+					attr_index = col_id[i];
+					break;
+				}
+			}
+			if (j < wheres.size()) {
+				break;
+			}
+		}
+		address naddr =	NULL;
+		int direction = 0;
+		if (wheres[where_index].operation == ">" || wheres[where_index].operation == ">=") {
+			naddr = find_addr_low(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
+		}
+		else if (wheres[where_index].operation == "<" || wheres[where_index].operation == "<=") {
+			naddr = find_addr_up(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
+			direction = 1;
+		}
+		wheres.erase(wheres.begin() + where_index);
+		logic.pop_back();
+		if (naddr == NULL) {
+			return 0;
+		}
+		else {
+			while (naddr != NULL) {
+				Block* blocki = buffer_manager.getPage(table_name, naddr->block_id);
+				BYTE* blocki_data = (*blocki).getData();
+				BYTE* recordi = (*blocki).getRecord(naddr->record_id);
+				Tuple tuple = read2tuple(recordi, T);
+				if (check(tuple, wheres, logic)) {
+					remove4block(blocki_data, naddr->record_id, T.col_num);
+					buffer_manager.modifyPage(buffer_manager.getPageId(table_name, naddr->block_id));
+					cnt++;
+					for (int i = 0; i < T.col_num; i++) {
+						if (T.col[i].have_index == true) {
+							if (T.col[i].col_type == COL_INT) {
+								int value = stoi(get_ith_value(T, recordi, i));
+								delete_scope_int(table_name, T.col[i].col_name, value, value);
+							}
+							else if (T.col[i].col_type == COL_FLOAT) {
+								float value = stof(get_ith_value(T, recordi, i));
+								delete_scope_float(table_name, T.col[i].col_name, value, value);
+							}
+							else {
+								std::string value = get_ith_value(T, recordi, i);
+								delete_scope_string(table_name, T.col[i].col_name, value, value);
+							}
+						}
+					}
+				}
+				if (direction) {
+					naddr = naddr->last_addr;
+				}
+				else {
+					naddr = naddr->next_addr;
+				}
+			}
+		}
+		return cnt;
+	}
+
 	int block_num = buffer_manager.getBlockNum(table_name);
 	for (int i = 0; i < block_num; i++) {
 		Block* blocki = buffer_manager.getPage(table_name, i);
