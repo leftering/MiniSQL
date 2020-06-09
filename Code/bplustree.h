@@ -508,9 +508,9 @@ void bptree<K>::split(indexnode<K>* temp)
 		newnode->parent = root;
 		newnode->sibling = NULL;
 		temp->sibling = newnode;
-		root->children.push_back(0);
-		root->children.push_back(0);
-		root->key.push_back(0);
+		root->children.push_back(temp->children[0]);
+		root->children.push_back(temp->children[0]);
+		root->key.push_back(temp->key[0]);
 		root->children[0] = temp;
 		root->children[1] = newnode;
 		root->key[0] = newnode->key[0];
