@@ -1294,9 +1294,14 @@ int drop_index(string index_name)
     int result = 0;
     ifstream fin((index_name + ".txt").c_str());
     if (!fin.is_open()) { cout << "can't find the index" << endl; return 0; }
-    fin >> type;
     fin >> tablename;
     fin >> attributename;
+    fin.close();
+    if (t->find_int_tree(tablename, attributename) != NULL)type = 'i';
+    else if (t->find_string_tree(tablename, attributename) != NULL)type = 's';
+    else if (t->find_float_tree(tablename, attributename) != NULL)type = 'f';
+    else type = 'x';
+    remove((index_name + ".txt").c_str());
     if (type == 'i')
     {
         result = t->drop_tree_int(index_name, tablename, attributename);
@@ -1308,6 +1313,11 @@ int drop_index(string index_name)
     else if (type == 's')
     {
         result = t->drop_tree_string(index_name, tablename, attributename);
+    }
+    else
+    {
+        result = 0;
+        cout << "can't find the index" << endl;
     }
     return result;
 }
