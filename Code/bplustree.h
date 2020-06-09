@@ -1,10 +1,10 @@
-#pragma once
+#ifndef _BPLUSTREE_H_
+#define _BPLUSTREE_H_ 
 #include "pch.h"
 // #include "buffer_manager.h"
 #include <vector>
 // #include "record_manager.h"
 #include <map>
-#include <fstream>
 #define rootstate 2
 #define interstate 1
 #define leafstate 0
@@ -20,16 +20,7 @@ struct addr
 	address next_addr;
 };
 
-address create_addr()
-{
-	address x;
-	x = new struct addr;
-	x->block_id = -1;
-	x->record_id = -1;
-	x->last_addr = NULL;
-	x->next_addr = NULL;
-	return x;
-}
+address create_addr();
 
 //leaf : key, addr(page), parents, sibling
 //inter: key, parents, children, number of children
@@ -46,33 +37,6 @@ public:
 	indexnode();
 	~indexnode();
 };
-
-template <class K>
-indexnode<K>::indexnode()
-{
-	key = vector<K>(0);
-    page = vector<address>(0);
-	children = vector<indexnode<K>*>(0);
-    this->NodeState = interstate;
-	this->sibling = NULL;
-	this->parent = NULL;
-	this->node_number = 0;
-}
-template <class K>
-indexnode<K>::~indexnode()
-{
-	sibling = NULL;
-	parent = NULL;
-	int i;
-	while(page.size() > 0)page.pop_back();
-	while(key.size() > 0)key.pop_back();
-	for(i = 0;i<this->children.size();i++)
-	{
-		if(children[i] != NULL)this->children[i]->~indexnode<K>();
-	}
-	
-}
-
 
 template <class K>
 class bptree
@@ -107,6 +71,49 @@ public:
 	void refresh();
 	indexnode<K>* findsmallest(indexnode<K>* temp);
 };
+
+//新增的范围删除和选择有点奇怪，请理解含义再使用。
+//选择是前闭后开的，比如，树中有15,16,17,18,19，范围选择函数给的两个参数key是16,18，意思就是选择所有>=16且<=18 的数。但是返回的是16和19,
+//16是第一个大于等于16的，19是第一个大于18的，这就是返回值的前闭后开的意思，这么写有利于循环的写法
+//范围选择必须要给定两个范围，所以必要的时候，需要设置该类型变量下的无穷大的数。
+//范围删除是在范围选择的基础上写的，但是注意，范围删除没有返回值，按照上面的举例，会删掉16,17,18，即所有【16,18】的值。
+
+address create_addr()
+{
+	address x;
+	x = new struct addr;
+	x->block_id = -1;
+	x->record_id = -1;
+	x->last_addr = NULL;
+	x->next_addr = NULL;
+	return x;
+}
+
+template <class K>
+indexnode<K>::indexnode()
+{
+	key = vector<K>(0);
+    page = vector<address>(0);
+	children = vector<indexnode<K>*>(0);
+    this->NodeState = interstate;
+	this->sibling = NULL;
+	this->parent = NULL;
+	this->node_number = 0;
+}
+template <class K>
+indexnode<K>::~indexnode()
+{
+	sibling = NULL;
+	parent = NULL;
+	int i;
+	while(page.size() > 0)page.pop_back();
+	while(key.size() > 0)key.pop_back();
+	for(i = 0;i<this->children.size();i++)
+	{
+		if(children[i] != NULL)this->children[i]->~indexnode<K>();
+	}
+}
+
 template <class K>
 int bptree<K>::check_nodestate(indexnode<K>* cnode)
 {
@@ -842,9 +849,6 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 	}
 }
 
-//新增的范围删除和选择有点奇怪，请理解含义再使用。
-//选择是前闭后开的，比如，树中有15,16,17,18,19，范围选择函数给的两个参数key是16,18，意思就是选择所有>=16且<=18 的数。但是返回的是16和19,
-//16是第一个大于等于16的，19是第一个大于18的，这就是返回值的前闭后开的意思，这么写有利于循环的写法
-//范围选择必须要给定两个范围，所以必要的时候，需要设置该类型变量下的无穷大的数。
-//范围删除是在范围选择的基础上写的，但是注意，范围删除没有返回值，按照上面的举例，会删掉16,17,18，即所有【16,18】的值。
 
+
+#endif// bplustree.h
