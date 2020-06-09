@@ -442,8 +442,8 @@ void bptree<K>::split(indexnode<K>* temp)
 		// cout<<breakpoint<<"$$"<<sizechange<<endl;
 		for (i = breakpoint; i < sizechange; i++)
 		{
-			newnode->key.push_back(0);
-			newnode->page.push_back(0);
+			newnode->key.push_back(temp->key[0]);
+			newnode->page.push_back(temp->page[0]);
 			newnode->key[i - breakpoint] = temp->key[i];
 			newnode->page[i - breakpoint] = temp->page[i];
 
@@ -508,8 +508,8 @@ void bptree<K>::split(indexnode<K>* temp)
 		newnode->parent = root;
 		newnode->sibling = NULL;
 		temp->sibling = newnode;
-		root->children.push_back(temp->children[0]);
-		root->children.push_back(temp->children[0]);
+		root->children.push_back(temp);
+		root->children.push_back(newnode);
 		root->key.push_back(temp->key[0]);
 		root->children[0] = temp;
 		root->children[1] = newnode;
