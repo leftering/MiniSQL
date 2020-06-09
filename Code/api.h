@@ -3,6 +3,7 @@
 #include "catalog.h"
 #include "pch.h"
 #include "record_manager.h"
+
 extern RecordManager record_manager;
 extern Interpreter In;
 
