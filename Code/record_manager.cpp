@@ -84,7 +84,7 @@ Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 
 address RecordManager::find_addr_low(table_info T, std::string attributename, Where_clause where, int attr_index)
 {
-	address naddr;
+	address naddr = create_addr();
 	if (T.col[attr_index].col_type = COL_INT) {
 		int low_bound = std::stoi(where.value);
 		naddr = find_scope_int_low(T.table_name, T.col[attr_index].col_name, low_bound);
@@ -102,7 +102,7 @@ address RecordManager::find_addr_low(table_info T, std::string attributename, Wh
 
 address RecordManager::find_addr_up(table_info T, std::string attributename, Where_clause where, int attr_index)
 {
-	address naddr;
+	address naddr = create_addr() ;
 	if (T.col[attr_index].col_type = COL_INT) {
 		int low_bound = std::stoi(where.value);
 		naddr = find_scope_int_up(T.table_name, T.col[attr_index].col_name, low_bound);
@@ -147,7 +147,7 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 				break;
 			}
 		}
-		address naddr;
+		address naddr = create_addr();
 		int direction = 0;
 		if (wheres[where_index].operation == ">" || wheres[where_index].operation == ">=") {
 			naddr = find_addr_low(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
@@ -335,7 +335,7 @@ int RecordManager::insert(Tuple record)
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
 				//if there is a index, insert it
 				int k;
-				address nadd;
+				address nadd = create_addr();
 				nadd->block_id = i;
 				nadd->record_id = data[0];
 				for(k = 0; k < T.col_num; k ++)
@@ -447,7 +447,7 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 				break;
 			}
 		}
-		address naddr;
+		address naddr = create_addr();
 		int direction = 0;
 		if (wheres[where_index].operation == ">" || wheres[where_index].operation == ">=") {
 			naddr = find_addr_low(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
