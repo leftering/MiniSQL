@@ -134,8 +134,14 @@ void Interpreter::read_operation() {
 				logic.clear();
 				this->w_clouse.clear();
 				get_where(where_clause, &this->w_clouse, &logic);
-				api_select(table_name, col_ids, this->w_clouse, logic);
-				this->operation = SELECT;
+				if (api_select(table_name, col_ids, this->w_clouse, logic)) {
+				  this->operation = SELECT;
+				}
+				else {
+				  this->status = ERROR;
+				  this->operation = EMPTY;
+				  this->set_error(2016);
+				}
 			}
 			else {  // select without where
 				vector<Where_clause> wheres;
@@ -522,6 +528,10 @@ void Interpreter::set_error(int code) {
 	  break;
 	case 2015:
 	  this->error.title = "DELETE ERROR";
+	  this->error.msg = "Table tablename doesn't exist;";
+	  break;
+	case 2016:
+	  this->error.title = "SELECT ERROR";
 	  this->error.msg = "Table tablename doesn't exist;";
 	  break;
 	default:
