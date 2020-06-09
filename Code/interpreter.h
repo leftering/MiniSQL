@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "catalog.h"
+#include "index.h"
 
 typedef enum {
 	CREATE_TABLE = 0,
