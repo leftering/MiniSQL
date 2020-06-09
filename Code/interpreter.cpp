@@ -58,12 +58,9 @@ void Interpreter::read_operation() {
 			string col_name = get_word(command, position);  // get index column name
 			cout << index_name << str_on << table_name << col_name;
 			if (index_name != str_ERROR && strcmp(str_on.c_str(), "on") == 0 && table_name != str_ERROR && col_name != str_ERROR) {
-				// call create index here
+				// call create index
 			  if (is_unique(table_name, col_name))
-				int result;
-				result = create_index_from_record(index_name,table_name,col_name);
-				if(result == 0)cout<<"create index failed"<<endl;
-				else if(result == 1)cout<<"create index succeeded"<<endl;
+				;
 			  else
 				cout << "not unique key" << endl;
 
@@ -100,11 +97,7 @@ void Interpreter::read_operation() {
 		else if (strcmp(drop_type.c_str(), "index") == 0) {	// drop index
 			string index_name = get_word(command, position); // get index name
 			if (index_name != str_ERROR) {
-			  //call drop index here
-				int result;
-				result = drop_index(index_name);
-				if(result == 1)cout<<"drop index succeeded"<<endl;
-				else if(result == 0)cout<<"drop index faied"<<endl;
+			  //drop index
 				this->operation = DROP_INDEX;
 			}
 			else {
@@ -134,8 +127,14 @@ void Interpreter::read_operation() {
 				logic.clear();
 				this->w_clouse.clear();
 				get_where(where_clause, &this->w_clouse, &logic);
-				api_select(table_name, col_ids, this->w_clouse, logic);
-				this->operation = SELECT;
+				if (api_select(table_name, col_ids, this->w_clouse, logic)) {
+				  this->operation = SELECT;
+				}
+				else {
+				  this->status = ERROR;
+				  this->operation = EMPTY;
+				  this->set_error(2016);
+				}
 			}
 			else {  // select without where
 				vector<Where_clause> wheres;
@@ -522,6 +521,10 @@ void Interpreter::set_error(int code) {
 	  break;
 	case 2015:
 	  this->error.title = "DELETE ERROR";
+	  this->error.msg = "Table tablename doesn't exist;";
+	  break;
+	case 2016:
+	  this->error.title = "SELECT ERROR";
 	  this->error.msg = "Table tablename doesn't exist;";
 	  break;
 	default:
