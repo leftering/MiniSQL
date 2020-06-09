@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CATALOG_H_
-#define CATALOG_H_
+#ifndef INDEX_H
+#define INDEX_H
 
 #include "pch.h"
 #include "bplustree.h"
