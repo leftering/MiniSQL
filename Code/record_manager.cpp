@@ -248,7 +248,7 @@ void RecordManager::remove4block(BYTE* data, int record_id, int col_num)
 	for (short i = start_ptr; i > free_ptr; i--) {
 		data[i] = data[i - record_size];
 	}
-	for (short i = 2 * record_id + 1; i <= 2 * data[0] + 1; i+=2) {
+	for (short i = 3; i <= 2 * data[0] + 1; i+=2) {
 		short sizei;
 		memcpy(&sizei, data + i + 2, sizeof(short));
 		sizei += record_size;
