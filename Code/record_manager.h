@@ -30,7 +30,7 @@ public:
 	// Check if record satisfy all conditions
 	bool check(Tuple record, std::vector<Where_clause> wheres, std::vector<int> logic);
 	bool check_unique(Tuple record);
-private:
+public:
 
 	template<typename T> bool cmp(T a, T b, std::string op) {
 		if (op == "=")
