@@ -375,6 +375,7 @@ void delete_scope_int(string table_name, string attributename, int lowkey, int u
     bptree<int>* aimtree;
     aimtree = t->find_int_tree(table_name, attributename);
     aimtree->deletescope(lowkey, upkey);
+    write_to_file_int(aimtree);
 }
 
 void delete_scope_string(string table_name, string attributename, string lowkey, string upkey)
@@ -382,12 +383,15 @@ void delete_scope_string(string table_name, string attributename, string lowkey,
     bptree<string>* aimtree;
     aimtree = t->find_string_tree(table_name, attributename);
     aimtree->deletescope(lowkey, upkey);
+    write_to_file_string(aimtree);
 }
 
 void delete_scope_float(string table_name, string attributename, float lowkey, float upkey)
 {
     bptree<float>* aimtree = NULL;
+    aimtree = t->find_float_tree(table_name, attributename);
     aimtree->deletescope(lowkey, upkey);
+    write_to_file_float(aimtree);
 }
 
 //写文件，读文件，从buffer创建初始索引。
@@ -1149,7 +1153,7 @@ bptree<int>* type_tablelist::find_int_tree(string filename, string attributename
 bptree<string>* type_tablelist::find_string_tree(string filename, string attributename)
 {
     int i;
-    cout << 1 << endl;
+    // cout << 1 << endl;
     for (i = 0; i < string_treelist.size(); i++)
     {
         if (string_treelist[i]->index_filename == filename && (string_treelist[i]->index_attributename == attributename))
@@ -1157,7 +1161,7 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
             return string_treelist[i];
         }
     }
-    cout << 2 << endl;
+    // cout << 2 << endl;
     string file_name;//这个才是存储的文件名
     file_name = filename + "#" + attributename + ".tree";
     ifstream fin(file_name.c_str());
@@ -1166,11 +1170,11 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
         fin.close();
         bptree<string>* newtree = read_from_file_string(file_name);
         t->string_treelist.push_back(newtree);
-        cout << 3.5 << endl;
+       //  cout << 3.5 << endl;
         return newtree;
     }
     else {
-        cout << 3 << endl;
+        // cout << 3 << endl;
         return NULL;
     }
 }

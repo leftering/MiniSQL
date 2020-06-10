@@ -416,7 +416,7 @@ int RecordManager::insert(Tuple record)
 				{
 					if (T.col[k].have_index == true)
 					{
-						cout << "true have index" << endl;
+						// cout << "true have index" << endl;
 						if (T.col[k].col_type == 0)
 							insert_index_int(T.table_name, T.col[k].col_name, record.getData()[k].datai, nadd);
 						else if (T.col[k].col_type == 1)
@@ -425,7 +425,7 @@ int RecordManager::insert(Tuple record)
 							insert_index_string(T.table_name, T.col[k].col_name, record.getData()[k].datas, nadd);
 					}
 				}
-				cout << "inset_index" << endl;
+				// cout << "inset_index" << endl;
 				//index over
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
 				return 1;
@@ -488,9 +488,13 @@ std::string get_ith_value(table_info T, BYTE record[], int i)
 		s = to_string(value);
 	}
 	else {
-		char value[255];
+		char* value = new char[record[i]];
 		memcpy(value, record + offset, record[i]);
-		s = value;
+		int a = record[i];
+		for (int i = 0; i < a; i++) {
+			s = s + value[i];
+		}
+		delete[]value;
 	}
 	return s;
 }
@@ -500,7 +504,7 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 	int cnt = 0;
 	table_info T = In.table;
 	std::string table_name = T.table_name;
-	cout << "remove" << endl;
+	// cout << "remove" << endl;
 	bool flag = false;
 	std::vector<int> col_id;
 	for (int i = 0; i < T.col_num; i++) {
@@ -524,7 +528,7 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 				break;
 			}
 		}
-		cout << "remove2" << endl;
+		// cout << "remove2" << endl;
 		address naddr = NULL;
 		int direction = 0;
 		if (wheres[where_index].operation == ">" || wheres[where_index].operation == ">=") {
@@ -538,10 +542,10 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 			naddr = find_addr_equal(T, T.col[attr_index].col_name, wheres[where_index], attr_index);
 			direction = 2;
 		}
-		cout << "remove2.5" << endl;
+		// cout << "remove2.5" << endl;
 		wheres.erase(wheres.begin() + where_index);
 		if(logic.size()>0)logic.pop_back();
-		cout << "remove3" << endl;
+		// cout << "remove3" << endl;
 		if (naddr == NULL) {
 			return 0;
 		}
@@ -583,7 +587,7 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 					naddr = NULL;
 				}
 			}
-			cout << "may be over" << endl;
+			// cout << "may be over" << endl;
 		}
 		return cnt;
 	}

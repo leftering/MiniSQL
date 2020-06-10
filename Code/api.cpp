@@ -108,7 +108,7 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 	std::vector<Tuple> tuples;
 	int cnt = record_manager.select(col_ids, w_clause, logic, &tuples);
 	finish = clock();
-	if (cnt <= 0) {
+	if (cnt < 0) {
 		return false;
 	}
 	static table_info T;
