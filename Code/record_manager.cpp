@@ -31,7 +31,7 @@ bool RecordManager::check(Tuple record, std::vector<Where_clause> wheres, std::v
 			if (!cmp(record.getData()[index].dataf, std::stof(wherei.value), wherei.operation)) {
 				flags[i] = false;
 			}
-
+			
 		}
 		else {
 			if (!cmp(record.getData()[index].datas, wherei.value, wherei.operation)) {
