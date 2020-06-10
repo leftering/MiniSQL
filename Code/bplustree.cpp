@@ -1,8 +1,7 @@
 #include "bplustree.h"
 address create_addr()
 {
-	address x;
-	x = new struct addr;
+	address x = new struct addr;
 	x->block_id = -1;
 	x->record_id = -1;
 	x->last_addr = NULL;

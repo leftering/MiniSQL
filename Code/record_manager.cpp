@@ -103,11 +103,11 @@ address RecordManager::find_addr_equal(table_info T, std::string attributename, 
 address RecordManager::find_addr_low(table_info T, std::string attributename, Where_clause where, int attr_index)
 {
 	address naddr = NULL;
-	if (T.col[attr_index].col_type = COL_INT) {
+	if (T.col[attr_index].col_type == COL_INT) {
 		int low_bound = std::stoi(where.value);
 		naddr = find_scope_int_low(T.table_name, T.col[attr_index].col_name, low_bound);
 	}
-	else if (T.col[attr_index].col_type = COL_FLOAT) {
+	else if (T.col[attr_index].col_type == COL_FLOAT) {
 		float low_bound = std::stof(where.value);
 		naddr = find_scope_float_low(T.table_name, T.col[attr_index].col_name, low_bound);
 	}
@@ -366,7 +366,6 @@ int RecordManager::insert(Tuple record)
 		if (free_space >= (record_size + 2)) {
 			if (check_unique(T, record)) {
 				insert2block(data, record.getData(), record_size, free_space);
-				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
 				//if there is a index, insert it
 				int k;
 				address nadd = create_addr();
@@ -385,6 +384,7 @@ int RecordManager::insert(Tuple record)
 					}
 				}
 				//index over
+				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
 				return 1;
 				break;
 			}
@@ -503,7 +503,6 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 				Tuple tuple = read2tuple(recordi, T);
 				if (check(tuple, wheres, logic)) {
 					remove4block(blocki_data, naddr->record_id, T.col_num);
-					buffer_manager.modifyPage(buffer_manager.getPageId(table_name, naddr->block_id));
 					cnt++;
 					for (int i = 0; i < T.col_num; i++) {
 						if (T.col[i].have_index == true) {
@@ -521,6 +520,7 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 							}
 						}
 					}
+					buffer_manager.modifyPage(buffer_manager.getPageId(table_name, naddr->block_id));
 				}
 				if (direction) {
 					naddr = naddr->last_addr;

@@ -7,8 +7,5 @@
 #define INF 65535
 #define RECORDPATH "../record/"
 #define MAXBUFFERSIZE 100
-#define rootstate 2
-#define interstate 1
-#define leafstate 0
 
 #endif
