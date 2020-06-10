@@ -1205,18 +1205,22 @@ void type_tablelist::write_all_tree_to_file()
         write_to_file_string(this->string_treelist[i]);
     }
 }
-
-int create_index_from_record(string index_name, string tablename, string attributename)//����index
+//修改了创建函数
+int create_index_from_record(string index_name, string tablename, string attributename)//建立index
 {
-    if (t->find_int_tree(tablename, attributename) != NULL)return 0;//���֮ǰ�������������Ͳ���������ļ���
-    //û������������record���൱�ڳ�ʼ״̬����Ҫɨ���ȡ��
+    if (t->find_int_tree(tablename, attributename) != NULL)return 0;//如果之前建立过索引，就不读了这个文件。
+    //没建立过索引的record，相当于初始状态，需要扫描读取。
     int i, j, k;
     int treebuild = 0;
     int blocknum;
+    int type = 0;
+    bptree<int>* aimtreeint = NULL;
+    bptree<float>* aimtreefloat = NULL;
+    bptree<string>* aimtreestring = NULL;
     In.table.get_table_info(tablename);
-    Block* temppage;//������block�ĵ�ַ����ʱָ��
-    BYTE* tempdata;//������block��data�ĵ�ַ����ʱָ��
-    BYTE* temprecord;//��ŵ�ǰrecord�ĵ�ַ����ʱָ��
+    Block* temppage;//存放这个block的地址的临时指针
+    BYTE* tempdata;//存放这个block的data的地址的临时指针
+    BYTE* temprecord;//存放当前record的地址的临时指针
     blocknum = buffer_manager.getBlockNum(tablename);
     for (k = 0; k < In.table.col_num; k++)
     {
@@ -1224,15 +1228,18 @@ int create_index_from_record(string index_name, string tablename, string attribu
         {
             if (In.table.col[k].col_type == 0)
             {
-                t->create_tree_int(index_name, tablename, attributename, 'i');
+                type = 0;
+                aimtreeint = t->create_tree_int(index_name, tablename, attributename, 'i');
             }
             else if (In.table.col[k].col_type == 1)
             {
-                t->create_tree_float(index_name, tablename, attributename, 'f');
+                type = 1;
+                aimtreefloat = t->create_tree_float(index_name, tablename, attributename, 'f');
             }
             else if (In.table.col[k].col_type == 2)
             {
-                t->create_tree_string(index_name, tablename, attributename, 's');
+                type = 2;
+                aimtreestring = t->create_tree_string(index_name, tablename, attributename, 's');
             }
             break;
         }
@@ -1250,33 +1257,45 @@ int create_index_from_record(string index_name, string tablename, string attribu
             address tempaddr = create_addr();
             tempaddr->block_id = i;
             tempaddr->record_id = j;
-            temprecord = temppage->getRecord(j);//���������µĵ�ַ�����ڽ�������
+            temprecord = temppage->getRecord(j);//遍历生成新的地址，用于建立索引
             Tuple temptuple = record_manager.read2tuple(temprecord, In.table);
             for (k = 0; k < In.table.col_num; k++)
             {
                 if (In.table.col[k].col_name == attributename)
                 {
-                    if (temptuple.getData()[k].type == -2)
+                    if (type == 0)
                     {
                         key1 = temptuple.getData()[k].datai;
-                        insert_index_int(tablename, attributename, key1, tempaddr);
+                        aimtreeint->insertindex(key1, tempaddr);
                     }
-                    else if (temptuple.getData()[k].type == -1)
+                    else if (type == 1)
                     {
                         key3 = temptuple.getData()[k].dataf;
-                        insert_index_float(tablename, attributename, key3, tempaddr);
+                        aimtreefloat->insertindex(key3, tempaddr);
                     }
-                    else if (temptuple.getData()[k].type >= 0)
+                    else if (type == 2)
                     {
                         key2 = temptuple.getData()[k].datas;
-                        insert_index_string(tablename, attributename, key2, tempaddr);
+                        aimtreestring->insertindex(key2, tempaddr);
                     }
                 }
             }
         }
     }
+    if (type == 0)
+    {
+        write_to_file_int(aimtreeint);
+    }
+    else if (type == 1)
+    {
+        write_to_file_float(aimtreefloat);
+    }
+    else if (type == 2)
+    {
+        write_to_file_string(aimtreestring);
+    }
     return 1;
-    //���ļ����õ�block��������ַ��Ȼ��õ�ÿ����ַ��Ӧ��record�е�key�����㹻����һ�������ˡ�
+    //读文件，得到block，遍历地址，然后得到每个地址对应的record中的key，就足够建立一个索引了。
 }
 
 int drop_index(string index_name)
