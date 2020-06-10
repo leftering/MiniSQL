@@ -1,7 +1,7 @@
 #ifndef PCH_H_
 #define PCH_H_
 
-//#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <iostream>
 #include <string>
@@ -18,7 +18,7 @@ using namespace std;
 
 typedef struct addr* address;
 struct addr
-{//介于之前发生过的问题，如果该结构里面的buf不能正确产生值，可以考虑使用static
+{
 	int block_id;//page is block.
 	int record_id;//record_id;
 	address last_addr;

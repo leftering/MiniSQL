@@ -66,7 +66,7 @@ int type_tablelist::drop_tree_int(string indexname, string table_name, string at
     }
     filename = table_name + "#" + attribute_name + ".tree";
     ifstream fin(filename.c_str());
-    if (fin.is_open())//有文件
+    if (fin.is_open())//���ļ�
     {
         if (remove(filename.c_str()))return 0;
     }
@@ -94,7 +94,7 @@ int type_tablelist::drop_tree_float(string indexname, string table_name, string 
     }
     filename = table_name + "#" + attribute_name + ".tree";
     ifstream fin(filename.c_str());
-    if (fin.is_open())//有文件
+    if (fin.is_open())//���ļ�
     {
         if (remove(filename.c_str()))return 0;
     }
@@ -122,7 +122,7 @@ int type_tablelist::drop_tree_string(string indexname, string table_name, string
     }
     filename = table_name + "#" + attribute_name + ".tree";
     ifstream fin(filename.c_str());
-    if (fin.is_open())//有文件
+    if (fin.is_open())//���ļ�
     {
         if (remove(filename.c_str()))return 0;
     }
@@ -130,7 +130,7 @@ int type_tablelist::drop_tree_string(string indexname, string table_name, string
 }
 
 //please use t as a extern global variable
-//非范围查找，插入，删除
+//�Ƿ�Χ���ң����룬ɾ��
 int insert_index_int(string table_name, string attributename, int key, address a)
 {
     bptree<int>* aimtree;
@@ -154,7 +154,6 @@ int insert_index_string(string table_name, string attributename, string key, add
     if (aimtree != NULL)
     {
         aimtree->insertindex(key, a);
-        cout << "insert succeeded" << endl;
         return 1;
     }
     else if (aimtree == NULL)
@@ -282,8 +281,8 @@ address find_index_float(string table_name, string attributename, float key)
 }
 
 //scope
-//范围查找函数：由于需要返回两个边界，上界和下界，因此直接考虑调用了两个函数。且注意，前闭后开，返回的low是包含在所需空间里的，返回的up是不包含的。
-//范围删除函数，无返回值，直接一次输入，但是参数同样需要表名、属性名、上界和下界。且同样是前闭后开。
+//��Χ���Һ�����������Ҫ���������߽磬�Ͻ���½磬���ֱ�ӿ��ǵ�����������������ע�⣬ǰ�պ󿪣����ص�low�ǰ���������ռ���ģ����ص�up�ǲ������ġ�
+//��Χɾ���������޷���ֵ��ֱ��һ�����룬���ǲ���ͬ����Ҫ���������������Ͻ���½硣��ͬ����ǰ�պ󿪡�
 address find_scope_int_low(string table_name, string attributename, int key)
 {
     bptree<int>* aimtree;
@@ -294,7 +293,6 @@ address find_scope_int_low(string table_name, string attributename, int key)
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -309,7 +307,6 @@ address find_scope_int_up(string table_name, string attributename, int key)
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 
@@ -325,7 +322,6 @@ address find_scope_string_low(string table_name, string attributename, string ke
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -340,7 +336,6 @@ address find_scope_string_up(string table_name, string attributename, string key
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -355,7 +350,6 @@ address find_scope_float_low(string table_name, string attributename, float key)
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -370,9 +364,8 @@ address find_scope_float_up(string table_name, string attributename, float key)
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
-    }//如果是空的，查找应该得到null
+    }//����ǿյģ�����Ӧ�õõ�null
 }
 
 void delete_scope_int(string table_name, string attributename, int lowkey, int upkey)
@@ -395,7 +388,7 @@ void delete_scope_float(string table_name, string attributename, float lowkey, f
     aimtree->deletescope(lowkey, upkey);
 }
 
-//写文件，读文件，从buffer创建初始索引。
+//д�ļ������ļ�����buffer������ʼ������
 void write_to_file_int(bptree<int>* tree)
 {
     int i;
@@ -407,7 +400,7 @@ void write_to_file_int(bptree<int>* tree)
     vector<indexnode<int>*> nodes;
     nodes.push_back(tree->rootnode);
     indexnode<int>* curn;
-    int nodenum = 0;//用于记录在文件中这是第几个结点。
+    int nodenum = 0;//���ڼ�¼���ļ������ǵڼ�����㡣
     int addrnum = 0;
     while (nodes.size() != 0)
     {
@@ -474,13 +467,13 @@ bptree<int>* read_from_file_int(string filename)
     float input3;
     int nodepos;
     int state_change = 0;
-    address lastone = NULL;//用来处理addr链表的关系。
-    int currkey;//用来处理map的关系
-    //0就是没有状态，1是准备接收nodenum，2是准备接收结点类型，3是准备接收sibling
-    //4是准备接收子内容
-    //5是children过渡状态，6是准备接收children
-    //7是page过渡状态，8是准备接收page，9是page2过渡状态，10是准备接收page的二状态
-    //11是key
+    address lastone = NULL;//��������addr�����Ĺ�ϵ��
+    int currkey;//��������map�Ĺ�ϵ
+    //0����û��״̬��1��׼������nodenum��2��׼�����ս�����ͣ�3��׼������sibling
+    //4��׼������������
+    //5��children����״̬��6��׼������children
+    //7��page����״̬��8��׼������page��9��page2����״̬��10��׼������page�Ķ�״̬
+    //11��key
     string tablename;
     string attributename;
     for (i = 0; i < filename.length(); i++)
@@ -504,7 +497,7 @@ bptree<int>* read_from_file_int(string filename)
     input2 = "tempfile";
     tree = new bptree<int>(input2, tablename, attributename, 'i');
 
-    //记得对addr链表的处理和对map的处理。
+    //�ǵö�addr�����Ĵ����Ͷ�map�Ĵ�����
     ifstream fin(filename.c_str());
     if (!fin.is_open()) {
         cout << "Can't find the file, please check the file name." << endl;
@@ -555,7 +548,7 @@ bptree<int>* read_from_file_int(string filename)
         }
         else if (state_change == 4)
         {
-            fin >> ch;//这里不同类型的可能会不同
+            fin >> ch;//���ﲻͬ���͵Ŀ��ܻ᲻ͬ
             if (ch == '<')
             {
                 state_change = 11;
@@ -649,7 +642,7 @@ void write_to_file_float(bptree<float>* tree)
     vector<indexnode<float>*> nodes;
     nodes.push_back(tree->rootnode);
     indexnode<float>* curn;
-    int nodenum = 0;//用于记录在文件中这是第几个结点。
+    int nodenum = 0;//���ڼ�¼���ļ������ǵڼ�����㡣
     int addrnum = 0;
     while (nodes.size() != 0)
     {
@@ -716,13 +709,13 @@ bptree<float>* read_from_file_float(string filename)
     float input3;
     int nodepos;
     int state_change = 0;
-    address lastone = NULL;//用来处理addr链表的关系。
-    float currkey;//用来处理map的关系
-    //0就是没有状态，1是准备接收nodenum，2是准备接收结点类型，3是准备接收sibling
-    //4是准备接收子内容
-    //5是children过渡状态，6是准备接收children
-    //7是page过渡状态，8是准备接收page，9是page2过渡状态，10是准备接收page的二状态
-    //11是key
+    address lastone = NULL;//��������addr�����Ĺ�ϵ��
+    float currkey;//��������map�Ĺ�ϵ
+    //0����û��״̬��1��׼������nodenum��2��׼�����ս�����ͣ�3��׼������sibling
+    //4��׼������������
+    //5��children����״̬��6��׼������children
+    //7��page����״̬��8��׼������page��9��page2����״̬��10��׼������page�Ķ�״̬
+    //11��key
     string tablename;
     string attributename;
     for (i = 0; i < filename.length(); i++)
@@ -741,12 +734,12 @@ bptree<float>* read_from_file_float(string filename)
             }
         }
     }
-    int node_number;//记录节点的数量，
+    int node_number;//��¼�ڵ��������
     bptree<float>* tree;
     input2 = "xxx";
     tree = new bptree<float>(input2, tablename, attributename, 'f');
     //
-    //记得对addr链表的处理和对map的处理。
+    //�ǵö�addr�����Ĵ����Ͷ�map�Ĵ�����
     ifstream fin(filename.c_str());
     if (!fin.is_open()) {
         cout << "Can't find the file, please check the file name." << endl;
@@ -797,7 +790,7 @@ bptree<float>* read_from_file_float(string filename)
         }
         else if (state_change == 4)
         {
-            fin >> ch;//这里不同类型的可能会不同
+            fin >> ch;//���ﲻͬ���͵Ŀ��ܻ᲻ͬ
             if (ch == '<')
             {
                 state_change = 11;
@@ -890,7 +883,7 @@ void write_to_file_string(bptree<string>* tree)
     vector<indexnode<string>*> nodes;
     nodes.push_back(tree->rootnode);
     indexnode<string>* curn;
-    int nodenum = 0;//用于记录在文件中这是第几个结点。
+    int nodenum = 0;//���ڼ�¼���ļ������ǵڼ�����㡣
     int addrnum = 0;
     while (nodes.size() != 0)
     {
@@ -958,13 +951,13 @@ bptree<string>* read_from_file_string(string filename)
     float input3;
     int nodepos;
     int state_change = 0;
-    address lastone = NULL;//用来处理addr链表的关系。
-    string currkey;//用来处理map的关系
-    //0就是没有状态，1是准备接收nodenum，2是准备接收结点类型，3是准备接收sibling
-    //4是准备接收子内容
-    //5是children过渡状态，6是准备接收children
-    //7是page过渡状态，8是准备接收page，9是page2过渡状态，10是准备接收page的二状态
-    //11是key
+    address lastone = NULL;//��������addr�����Ĺ�ϵ��
+    string currkey;//��������map�Ĺ�ϵ
+    //0����û��״̬��1��׼������nodenum��2��׼�����ս�����ͣ�3��׼������sibling
+    //4��׼������������
+    //5��children����״̬��6��׼������children
+    //7��page����״̬��8��׼������page��9��page2����״̬��10��׼������page�Ķ�״̬
+    //11��key
     string tablename;
     string attributename;
     for (i = 0; i < filename.length(); i++)
@@ -988,7 +981,7 @@ bptree<string>* read_from_file_string(string filename)
     input2 = "xxx";
     tree = new bptree<string>(input2, tablename, attributename, 's');
     //
-    //记得对addr链表的处理和对map的处理。
+    //�ǵö�addr�����Ĵ����Ͷ�map�Ĵ�����
     ifstream fin(filename.c_str());
     if (!fin.is_open()) {
         cout << "Can't find the file, please check the file name." << endl;
@@ -1039,7 +1032,7 @@ bptree<string>* read_from_file_string(string filename)
         }
         else if (state_change == 4)
         {
-            fin >> ch;//这里不同类型的可能会不同
+            fin >> ch;//���ﲻͬ���͵Ŀ��ܻ᲻ͬ
             if (ch == '<')
             {
                 state_change = 11;
@@ -1139,7 +1132,7 @@ bptree<int>* type_tablelist::find_int_tree(string filename, string attributename
             return int_treelist[i];
         }
     }
-    string file_name;//这个才是存储的文件名
+    string file_name;//������Ǵ洢���ļ���
     file_name = filename + "#" + attributename + ".tree";
     ifstream fin(file_name.c_str());
     if (fin.is_open())
@@ -1161,7 +1154,7 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
             return string_treelist[i];
         }
     }
-    string file_name;//这个才是存储的文件名
+    string file_name;//������Ǵ洢���ļ���
     file_name = filename + "#" + attributename + ".tree";
     ifstream fin(file_name.c_str());
     if (fin.is_open())
@@ -1183,7 +1176,7 @@ bptree<float>* type_tablelist::find_float_tree(string filename, string attribute
             return float_treelist[i];
         }
     }
-    string file_name;//这个才是存储的文件名
+    string file_name;//������Ǵ洢���ļ���
     file_name = filename + "#" + attributename + ".tree";
     ifstream fin(file_name.c_str());
     if (fin.is_open())
@@ -1195,7 +1188,7 @@ bptree<float>* type_tablelist::find_float_tree(string filename, string attribute
     }
     else return NULL;
 }
-//程序结束时调用。可以在全局变量的析构里面。
+//�������ʱ���á�������ȫ�ֱ������������档
 void type_tablelist::write_all_tree_to_file()
 {
     int i;
@@ -1213,17 +1206,17 @@ void type_tablelist::write_all_tree_to_file()
     }
 }
 
-int create_index_from_record(string index_name, string tablename, string attributename)//建立index
+int create_index_from_record(string index_name, string tablename, string attributename)//����index
 {
-    if (t->find_int_tree(tablename, attributename) != NULL)return 0;//如果之前建立过索引，就不读了这个文件。
-    //没建立过索引的record，相当于初始状态，需要扫描读取。
+    if (t->find_int_tree(tablename, attributename) != NULL)return 0;//���֮ǰ�������������Ͳ���������ļ���
+    //û������������record���൱�ڳ�ʼ״̬����Ҫɨ���ȡ��
     int i, j, k;
     int treebuild = 0;
     int blocknum;
     In.table.get_table_info(tablename);
-    Block* temppage;//存放这个block的地址的临时指针
-    BYTE* tempdata;//存放这个block的data的地址的临时指针
-    BYTE* temprecord;//存放当前record的地址的临时指针
+    Block* temppage;//������block�ĵ�ַ����ʱָ��
+    BYTE* tempdata;//������block��data�ĵ�ַ����ʱָ��
+    BYTE* temprecord;//��ŵ�ǰrecord�ĵ�ַ����ʱָ��
     blocknum = buffer_manager.getBlockNum(tablename);
     for (k = 0; k < In.table.col_num; k++)
     {
@@ -1257,7 +1250,7 @@ int create_index_from_record(string index_name, string tablename, string attribu
             address tempaddr = create_addr();
             tempaddr->block_id = i;
             tempaddr->record_id = j;
-            temprecord = temppage->getRecord(j);//遍历生成新的地址，用于建立索引
+            temprecord = temppage->getRecord(j);//���������µĵ�ַ�����ڽ�������
             Tuple temptuple = record_manager.read2tuple(temprecord, In.table);
             for (k = 0; k < In.table.col_num; k++)
             {
@@ -1283,7 +1276,7 @@ int create_index_from_record(string index_name, string tablename, string attribu
         }
     }
     return 1;
-    //读文件，得到block，遍历地址，然后得到每个地址对应的record中的key，就足够建立一个索引了。
+    //���ļ����õ�block��������ַ��Ȼ��õ�ÿ����ַ��Ӧ��record�е�key�����㹻����һ�������ˡ�
 }
 
 int drop_index(string index_name)

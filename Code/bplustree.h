@@ -99,7 +99,6 @@ bptree<K>::bptree(string indexname, string index_filename, string index_attribut
 	this->indexname = indexname;
 	this->index_filename = index_filename;
 	ofstream out((this->indexname + ".txt").c_str());
-	out << this->data_type << endl;
 	out << index_filename << endl;
 	out << index_attributename << endl;
 	out.close();
