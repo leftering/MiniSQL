@@ -219,10 +219,50 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 					naddr = naddr->next_addr;
 				}
 				else {
-					cout << "index select" << endl;
+					// cout << "index select" << endl;
 					naddr = NULL;
 				}
 			}
+		}
+		return cnt;
+	}
+
+	else if (col_id.size() != 0) {
+		int id = col_id[0];
+		address naddr = NULL;
+		if (T.col[id].col_type == COL_INT) {
+			naddr = find_scope_int_low(table_name, T.col[id].col_name, -2147483648);
+		}
+		else if (T.col[id].col_type == COL_FLOAT) {
+			naddr = find_scope_float_low(table_name, T.col[id].col_name, -3.4e38);
+		}
+		else {
+			naddr = find_scope_string_low(table_name, T.col[id].col_name, "");
+		}
+		while (naddr != NULL) {
+			Block* blocki = buffer_manager.getPage(table_name, naddr->block_id);
+			BYTE* recordi = (*blocki).getRecord(naddr->record_id);
+			Tuple tuple = read2tuple(recordi, T);
+			if (!check(tuple, wheres, logic)) {
+				tuple.setDeleted();
+			}
+			else {
+				int index = col_ids.size() - 1;
+				if (index + 1 != T.col_num && index >= 0) {
+					for (int k = T.col_num - 1; k >= 0; k--) {
+						if (index >= 0 && k == col_ids[index]) {
+							index--;
+							continue;
+						}
+						else {
+							tuple.eraseData(k);
+						}
+					}
+				}
+				cnt++;
+			}
+			tuples->push_back(tuple);
+			naddr = naddr->next_addr;
 		}
 		return cnt;
 	}
