@@ -82,9 +82,27 @@ Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 	return tuple;
 }
 
+address RecordManager::find_addr_equal(table_info T, std::string attributename, Where_clause where, int attr_index)
+{
+	address naddr = NULL;
+	if (T.col[attr_index].col_type = COL_INT) {
+		int key = std::stoi(where.value);
+		naddr = find_index_int(T.table_name, T.col[attr_index].col_name, key);
+	}
+	else if (T.col[attr_index].col_type = COL_FLOAT) {
+		float key = std::stof(where.value);
+		naddr = find_index_float(T.table_name, T.col[attr_index].col_name, key);
+	}
+	else {
+		std::string key = where.value;
+		naddr = find_index_string(T.table_name, T.col[attr_index].col_name, key);
+	}
+	return naddr;
+}
+
 address RecordManager::find_addr_low(table_info T, std::string attributename, Where_clause where, int attr_index)
 {
-	address naddr = create_addr();
+	address naddr = NULL;
 	if (T.col[attr_index].col_type = COL_INT) {
 		int low_bound = std::stoi(where.value);
 		naddr = find_scope_int_low(T.table_name, T.col[attr_index].col_name, low_bound);
@@ -102,7 +120,7 @@ address RecordManager::find_addr_low(table_info T, std::string attributename, Wh
 
 address RecordManager::find_addr_up(table_info T, std::string attributename, Where_clause where, int attr_index)
 {
-	address naddr = create_addr() ;
+	address naddr;
 	if (T.col[attr_index].col_type = COL_INT) {
 		int low_bound = std::stoi(where.value);
 		naddr = find_scope_int_up(T.table_name, T.col[attr_index].col_name, low_bound);
@@ -129,6 +147,7 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 	for (int i = 0; i < T.col_num; i++) {
 		if (T.col[i].have_index == true) {
 			col_id.push_back(i);
+			cout << "find have_index" << endl;
 			flag = true;
 		}
 	}
@@ -140,6 +159,7 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 				if (wheres[j].attr == T.col[col_id[i]].col_name) {
 					where_index = j;
 					attr_index = col_id[i];
+					cout << wheres[j].attr << endl;
 					break;
 				}
 			}
@@ -147,7 +167,7 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 				break;
 			}
 		}
-		address naddr = create_addr();
+		address naddr = NULL;
 		int direction = 0;
 		if (wheres[where_index].operation == ">" || wheres[where_index].operation == ">=") {
 			naddr = find_addr_low(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
@@ -155,6 +175,10 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 		else if (wheres[where_index].operation == "<" || wheres[where_index].operation == "<=") {
 			naddr = find_addr_up(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
 			direction = 1;
+		}
+		else if (wheres[where_index].operation == "=") {
+			naddr = find_addr_equal(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
+			direction = 2;
 		}
 		wheres.erase(wheres.begin() + where_index);
 		logic.pop_back();
@@ -185,11 +209,15 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 					cnt++;
 				}
 				tuples->push_back(tuple);
-				if (direction) {
+				if (direction == 1) {
 					naddr = naddr->last_addr;
 				}
-				else {
+				else if(direction == 0){
 					naddr = naddr->next_addr;
+				}
+				else {
+					cout << "index select" << endl;
+					naddr = NULL;
 				}
 			}
 		}
@@ -411,7 +439,7 @@ std::string get_ith_value(table_info T, BYTE record[], int i)
 		s = to_string(value);
 	}
 	else {
-		char* value;
+		char* value = NULL;
 		memcpy(value, record + offset, record[i]);
 		s = value;
 	}
@@ -447,7 +475,7 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 				break;
 			}
 		}
-		address naddr = create_addr();
+		address naddr =	NULL;
 		int direction = 0;
 		if (wheres[where_index].operation == ">" || wheres[where_index].operation == ">=") {
 			naddr = find_addr_low(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
