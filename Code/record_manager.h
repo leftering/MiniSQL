@@ -51,6 +51,7 @@ private:
 	};
 	void insert2block(BYTE* data, std::vector<Data> records, short record_size, short free_space);
 	void remove4block(BYTE* data, int record_id, int col_num);
+	address find_addr_equal(table_info T, std::string attributename, Where_clause where, int attr_index);
 	address find_addr_low(table_info T, std::string attributename, Where_clause where, int attr_index);
 	address find_addr_up(table_info T, std::string attributename, Where_clause where, int attr_index);
 };

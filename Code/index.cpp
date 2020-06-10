@@ -18,30 +18,30 @@ type_tablelist::~type_tablelist()
 
 bptree<int>* type_tablelist::create_tree_int(string indexname, string table_name, string attributename, char type)
 {
-    this->int_treelist.push_back(0);
-    bptree<int>* x;
+    bptree<int>* x = NULL;
     x = new bptree<int>(indexname, table_name, attributename, 'i');
+    this->int_treelist.push_back(x);
     this->int_treelist[int_treelist.size() - 1] = x;
     // cout<<"in the create_tree_int: x = "<<x.index_filename<<"-"<<x.index_attributename<<"-"<<x.rootnode->NodeState<<endl;
     // cout<<"in the create_tree_int: int_treelist["<<int_treelist.size()-1 <<"] = "<<int_treelist[int_treelist.size()-1]->index_filename;
     // cout<<"-"<<int_treelist[int_treelist.size()-1]->index_attributename<<"-"<<int_treelist[int_treelist.size()-1]->rootnode->NodeState<<endl;
-    return int_treelist[int_treelist.size() - 1];
+    return x;
 }
 bptree<string>* type_tablelist::create_tree_string(string indexname, string table_name, string attributename, char type)
 {
-    this->string_treelist.push_back(0);
     bptree<string>* x;
     x = new bptree<string>(indexname, table_name, attributename, 's');
+    this->string_treelist.push_back(x);
     this->string_treelist[string_treelist.size() - 1] = x;
-    return string_treelist[string_treelist.size() - 1];
+    return x;
 }
 bptree<float>* type_tablelist::create_tree_float(string indexname, string table_name, string attributename, char type)
 {
-    this->float_treelist.push_back(0);
     bptree<float>* x;
     x = new bptree<float>(indexname, table_name, attributename, 'f');
+    this->float_treelist.push_back(x);
     this->float_treelist[float_treelist.size() - 1] = x;
-    return float_treelist[float_treelist.size() - 1];
+    return x;
 }
 
 int type_tablelist::drop_tree_int(string indexname, string table_name, string attribute_name)
@@ -138,7 +138,7 @@ int insert_index_int(string table_name, string attributename, int key, address a
     if (aimtree != NULL)
     {
         aimtree->insertindex(key, a);
-        cout << "insert succeeded" << endl;
+        write_to_file_int(aimtree);
         return 1;
     }
     else if (aimtree == NULL)
@@ -155,7 +155,7 @@ int insert_index_string(string table_name, string attributename, string key, add
     if (aimtree != NULL)
     {
         aimtree->insertindex(key, a);
-        cout << "insert success" << endl;
+        write_to_file_string(aimtree);
         return 1;
     }
     else if (aimtree == NULL)
@@ -172,7 +172,7 @@ int insert_index_float(string table_name, string attributename, float key, addre
     if (aimtree != NULL)
     {
         aimtree->insertindex(key, a);
-        cout << "insert succeeded" << endl;
+        write_to_file_float(aimtree);
         return 1;
     }
     else if (aimtree == NULL)
@@ -191,6 +191,7 @@ int delete_index_int(string table_name, string attributename, int key)
 
         aimtree->deleteindex(key);
         cout << "delete succeeded" << endl;
+        write_to_file_int(aimtree);
         return 1;
     }
     else if (aimtree == NULL)
@@ -208,6 +209,7 @@ int delete_index_string(string table_name, string attributename, string key)
     {
         aimtree->deleteindex(key);
         cout << "delete succeeded" << endl;
+        write_to_file_string(aimtree);
         return 1;
     }
     else if (aimtree == NULL)
@@ -225,6 +227,7 @@ int delete_index_float(string table_name, string attributename, float key)
     {
         aimtree->deleteindex(key);
         cout << "delete succeeded" << endl;
+        write_to_file_float(aimtree);
         return 1;
     }
     else if (aimtree == NULL)
@@ -240,7 +243,6 @@ address find_index_int(string table_name, string attributename, int key)
     aimtree = t->find_int_tree(table_name, attributename);
     if (aimtree != NULL)
     {
-        cout << "select succeeded" << endl;
         return aimtree->find_index_of_key(key);
     }
     else if (aimtree == NULL)
@@ -252,11 +254,10 @@ address find_index_int(string table_name, string attributename, int key)
 
 address find_index_string(string table_name, string attributename, string key)
 {
-    bptree<string>* aimtree;
+    bptree<string>* aimtree = NULL;
     aimtree = t->find_string_tree(table_name, attributename);
     if (aimtree != NULL)
     {
-        cout << "select succeeded" << endl;
         return aimtree->find_index_of_key(key);
     }
     else if (aimtree == NULL)
@@ -272,7 +273,6 @@ address find_index_float(string table_name, string attributename, float key)
     aimtree = t->find_float_tree(table_name, attributename);
     if (aimtree != NULL)
     {
-        cout << "select succeeded" << endl;
         return aimtree->find_index_of_key(key);
     }
     else if (aimtree == NULL)
@@ -295,7 +295,6 @@ address find_scope_int_low(string table_name, string attributename, int key)
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -310,7 +309,6 @@ address find_scope_int_up(string table_name, string attributename, int key)
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 
@@ -326,7 +324,6 @@ address find_scope_string_low(string table_name, string attributename, string ke
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -341,7 +338,6 @@ address find_scope_string_up(string table_name, string attributename, string key
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -356,7 +352,6 @@ address find_scope_float_low(string table_name, string attributename, float key)
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -371,7 +366,6 @@ address find_scope_float_up(string table_name, string attributename, float key)
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
         return NULL;
     }//如果是空的，查找应该得到null
 }
@@ -386,12 +380,13 @@ void delete_scope_int(string table_name, string attributename, int lowkey, int u
 void delete_scope_string(string table_name, string attributename, string lowkey, string upkey)
 {
     bptree<string>* aimtree;
+    aimtree = t->find_string_tree(table_name, attributename);
     aimtree->deletescope(lowkey, upkey);
 }
 
 void delete_scope_float(string table_name, string attributename, float lowkey, float upkey)
 {
-    bptree<float>* aimtree;
+    bptree<float>* aimtree = NULL;
     aimtree->deletescope(lowkey, upkey);
 }
 
@@ -501,7 +496,7 @@ bptree<int>* read_from_file_int(string filename)
     }
     int node_number;
     bptree<int>* tree;
-    input2 = "xxx";
+    input2 = "tempfile";
     tree = new bptree<int>(input2, tablename, attributename, 'i');
 
     //记得对addr链表的处理和对map的处理。
@@ -584,7 +579,7 @@ bptree<int>* read_from_file_int(string filename)
         else if (state_change == 6)
         {
             fin >> input1;
-            nodearr[nodepos]->children.push_back(0);
+            nodearr[nodepos]->children.push_back(NULL);
             nodearr[nodepos]->children[nodearr[nodepos]->children.size() - 1] = nodearr[input1];
             nodearr[input1]->parent = nodearr[nodepos];
             state_change = 4;
@@ -600,7 +595,7 @@ bptree<int>* read_from_file_int(string filename)
         else if (state_change == 8)
         {
             fin >> input1;
-            nodearr[nodepos]->page.push_back(0);
+            nodearr[nodepos]->page.push_back(NULL);
             nodearr[nodepos]->page[nodearr[nodepos]->page.size() - 1] = new struct addr;
             nodearr[nodepos]->page[nodearr[nodepos]->page.size() - 1]->block_id = input1;
             state_change = 9;
@@ -627,7 +622,7 @@ bptree<int>* read_from_file_int(string filename)
         else if (state_change == 11)
         {
             fin >> input1;
-            nodearr[nodepos]->key.push_back(0);
+            nodearr[nodepos]->key.push_back(input1);
             nodearr[nodepos]->key[nodearr[nodepos]->key.size() - 1] = input1;
             currkey = nodearr[nodepos]->key[nodearr[nodepos]->key.size() - 1];
             state_change = 4;
@@ -826,7 +821,7 @@ bptree<float>* read_from_file_float(string filename)
         else if (state_change == 6)
         {
             fin >> input1;
-            nodearr[nodepos]->children.push_back(0);
+            nodearr[nodepos]->children.push_back(NULL);
             nodearr[nodepos]->children[nodearr[nodepos]->children.size() - 1] = nodearr[input1];
             state_change = 4;
         }
@@ -841,7 +836,7 @@ bptree<float>* read_from_file_float(string filename)
         else if (state_change == 8)
         {
             fin >> input1;
-            nodearr[nodepos]->page.push_back(0);
+            nodearr[nodepos]->page.push_back(NULL);
             nodearr[nodepos]->page[nodearr[nodepos]->page.size() - 1] = new struct addr;
             nodearr[nodepos]->page[nodearr[nodepos]->page.size() - 1]->block_id = input1;
             state_change = 9;
@@ -868,7 +863,7 @@ bptree<float>* read_from_file_float(string filename)
         else if (state_change == 11)
         {
             fin >> input3;
-            nodearr[nodepos]->key.push_back(0);
+            nodearr[nodepos]->key.push_back(input3);
             nodearr[nodepos]->key[nodearr[nodepos]->key.size() - 1] = input3;
             currkey = nodearr[nodepos]->key[nodearr[nodepos]->key.size() - 1];
             state_change = 4;
@@ -1068,7 +1063,7 @@ bptree<string>* read_from_file_string(string filename)
         else if (state_change == 6)
         {
             fin >> input1;
-            nodearr[nodepos]->children.push_back(0);
+            nodearr[nodepos]->children.push_back(NULL);
             nodearr[nodepos]->children[nodearr[nodepos]->children.size() - 1] = nodearr[input1];
             state_change = 4;
         }
@@ -1083,7 +1078,7 @@ bptree<string>* read_from_file_string(string filename)
         else if (state_change == 8)
         {
             fin >> input1;
-            nodearr[nodepos]->page.push_back(0);
+            nodearr[nodepos]->page.push_back(NULL);
             nodearr[nodepos]->page[nodearr[nodepos]->page.size() - 1] = new struct addr;
             nodearr[nodepos]->page[nodearr[nodepos]->page.size() - 1]->block_id = input1;
             state_change = 9;
@@ -1118,7 +1113,7 @@ bptree<string>* read_from_file_string(string filename)
             //     fin>>ch;
             // }
             fin >> input2;
-            nodearr[nodepos]->key.push_back(0);
+            nodearr[nodepos]->key.push_back(input2);
             nodearr[nodepos]->key[nodearr[nodepos]->key.size() - 1] = input2;
             currkey = nodearr[nodepos]->key[nodearr[nodepos]->key.size() - 1];
             state_change = 4;
@@ -1154,6 +1149,7 @@ bptree<int>* type_tablelist::find_int_tree(string filename, string attributename
 bptree<string>* type_tablelist::find_string_tree(string filename, string attributename)
 {
     int i;
+    cout << 1 << endl;
     for (i = 0; i < string_treelist.size(); i++)
     {
         if (string_treelist[i]->index_filename == filename && (string_treelist[i]->index_attributename == attributename))
@@ -1161,6 +1157,7 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
             return string_treelist[i];
         }
     }
+    cout << 2 << endl;
     string file_name;//这个才是存储的文件名
     file_name = filename + "#" + attributename + ".tree";
     ifstream fin(file_name.c_str());
@@ -1169,9 +1166,13 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
         fin.close();
         bptree<string>* newtree = read_from_file_string(file_name);
         t->string_treelist.push_back(newtree);
+        cout << 3.5 << endl;
         return newtree;
     }
-    else return NULL;
+    else {
+        cout << 3 << endl;
+        return NULL;
+    }
 }
 bptree<float>* type_tablelist::find_float_tree(string filename, string attributename)
 {
@@ -1220,6 +1221,10 @@ int create_index_from_record(string index_name, string tablename, string attribu
     int i, j, k;
     int treebuild = 0;
     int blocknum;
+    int type = 0;
+    bptree<int>* aimtreeint = NULL;
+    bptree<float>* aimtreefloat = NULL;
+    bptree<string>* aimtreestring = NULL;
     In.table.get_table_info(tablename);
     Block* temppage;//存放这个block的地址的临时指针
     BYTE* tempdata;//存放这个block的data的地址的临时指针
@@ -1231,15 +1236,18 @@ int create_index_from_record(string index_name, string tablename, string attribu
         {
             if (In.table.col[k].col_type == 0)
             {
-                t->create_tree_int(index_name, tablename, attributename, 'i');
+                type = 0;
+                aimtreeint = t->create_tree_int(index_name, tablename, attributename, 'i');
             }
             else if (In.table.col[k].col_type == 1)
             {
-                t->create_tree_float(index_name, tablename, attributename, 'f');
+                type = 1;
+                aimtreefloat = t->create_tree_float(index_name, tablename, attributename, 'f');
             }
             else if (In.table.col[k].col_type == 2)
             {
-                t->create_tree_string(index_name, tablename, attributename, 's');
+                type = 2;
+                aimtreestring = t->create_tree_string(index_name, tablename, attributename, 's');
             }
             break;
         }
@@ -1263,24 +1271,36 @@ int create_index_from_record(string index_name, string tablename, string attribu
             {
                 if (In.table.col[k].col_name == attributename)
                 {
-                    if (temptuple.getData()[k].type == -2)
+                    if (type == 0)
                     {
                         key1 = temptuple.getData()[k].datai;
-                        insert_index_int(tablename, attributename, key1, tempaddr);
+                        aimtreeint->insertindex(key1, tempaddr);
                     }
-                    else if (temptuple.getData()[k].type == -1)
+                    else if (type == 1)
                     {
                         key3 = temptuple.getData()[k].dataf;
-                        insert_index_float(tablename, attributename, key3, tempaddr);
+                        aimtreefloat->insertindex(key3, tempaddr);
                     }
-                    else if (temptuple.getData()[k].type >= 0)
+                    else if (type == 2)
                     {
                         key2 = temptuple.getData()[k].datas;
-                        insert_index_string(tablename, attributename, key2, tempaddr);
+                        aimtreestring->insertindex(key2, tempaddr);
                     }
                 }
             }
         }
+    }
+    if (type == 0)
+    {
+        write_to_file_int(aimtreeint);
+    }
+    else if (type == 1)
+    {
+        write_to_file_float(aimtreefloat);
+    }
+    else if (type == 2)
+    {
+        write_to_file_string(aimtreestring);
     }
     return 1;
     //读文件，得到block，遍历地址，然后得到每个地址对应的record中的key，就足够建立一个索引了。
@@ -1294,9 +1314,14 @@ int drop_index(string index_name)
     int result = 0;
     ifstream fin((index_name + ".txt").c_str());
     if (!fin.is_open()) { cout << "can't find the index" << endl; return 0; }
-    fin >> type;
     fin >> tablename;
     fin >> attributename;
+    fin.close();
+    if (t->find_int_tree(tablename, attributename) != NULL)type = 'i';
+    else if (t->find_string_tree(tablename, attributename) != NULL)type = 's';
+    else if (t->find_float_tree(tablename, attributename) != NULL)type = 'f';
+    else type = 'x';
+    remove((index_name + ".txt").c_str());
     if (type == 'i')
     {
         result = t->drop_tree_int(index_name, tablename, attributename);
@@ -1308,6 +1333,11 @@ int drop_index(string index_name)
     else if (type == 's')
     {
         result = t->drop_tree_string(index_name, tablename, attributename);
+    }
+    else
+    {
+        result = 0;
+        cout << "can't find the index" << endl;
     }
     return result;
 }

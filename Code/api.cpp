@@ -152,7 +152,7 @@ int api_delete(string table_name, vector<Where_clause> w_clouse, vector<int> log
 	}
 	return true;
 }
-
+ 
 
 bool is_unique(string table_name, string col_name) {
   table_info table;

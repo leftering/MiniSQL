@@ -59,7 +59,11 @@ void Interpreter::read_operation() {
 				T.get_table_info(table_name);
 				int k;for(k = 0;k<T.col_num;k++)
 				{
-					if(T.col[k].col_name == col_name)T.col[k].have_index = true;
+					if (T.col[k].col_name == col_name) { 
+						T.col[k].have_index = true; 
+						T.write_table_info();
+						break;
+					}
 				}
 				int create_index_result;
 				create_index_result = create_index_from_record(index_name,table_name,col_name);
@@ -107,14 +111,18 @@ void Interpreter::read_operation() {
 				ifstream fin((index_name+".txt").c_str());
 				int ftype;
 				string ftable_name,fattributename;
-				fin>>ftype>>ftable_name>>fattributename;
+				fin>>ftable_name>>fattributename;
+				fin.close();
 				table_info T;
 				T.get_table_info(ftable_name);
 				int k;for(k = 0;k<T.col_num;k++)
 				{
-					if(T.col[k].col_name == fattributename)T.col[k].have_index = false;
+					if (T.col[k].col_name == fattributename)
+					{
+						T.col[k].have_index = false;
+						T.write_table_info();
+					}
 				}
-				fin.close();
 				//drop index:
 				int drop_index_result;
 				drop_index_result = drop_index(index_name);

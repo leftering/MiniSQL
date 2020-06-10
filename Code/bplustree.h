@@ -3,7 +3,7 @@
 #define rootstate 2
 #define interstate 1
 #define leafstate 0
-#define nodecapacity 6//how many keys in a node of B+tree 
+#define nodecapacity 25//how many keys in a node of B+tree 
 //同一个地址必须只能建立一次索引
 //data in block is in char, so the value is char 
 
@@ -99,7 +99,6 @@ bptree<K>::bptree(string indexname, string index_filename, string index_attribut
 	this->indexname = indexname;
 	this->index_filename = index_filename;
 	ofstream out((this->indexname + ".txt").c_str());
-	out << this->data_type << endl;
 	out << index_filename << endl;
 	out << index_attributename << endl;
 	out.close();
@@ -280,6 +279,7 @@ void bptree<K>::refresh()
 	indexnode<K>* curr;
 	orig = findsmallest(temp);
 	curr = orig;
+	cout << "refresh Begin" << endl;
 	while (orig != NULL)
 	{
 		while (curr->NodeState != rootstate && curr->parent != NULL)
@@ -321,6 +321,7 @@ void bptree<K>::refresh()
 	}
 	// cout<<"in the refresh : "<<rootnode->key[0]<<endl;
 	// cout<<"refresh over"<<endl;
+	cout << "refresh END@@@" << endl;
 }
 
 template <class K>
@@ -369,13 +370,13 @@ void bptree<K>::insertindex(K k, address a)
 		{
 			// cout<<"ori: > k"<<endl;
 			int j;
-			temp->page.push_back(0);
+			temp->page.push_back(a);
 			for (j = temp->page.size() - 1; j > i; j--)
 			{
 				temp->page[j] = temp->page[j - 1];
 			}
 			temp->page[i] = a;
-			temp->key.push_back(0);
+			temp->key.push_back(k);
 			for (j = temp->key.size() - 1; j > i; j--)
 			{
 				temp->key[j] = temp->key[j - 1];
@@ -442,8 +443,8 @@ void bptree<K>::split(indexnode<K>* temp)
 		// cout<<breakpoint<<"$$"<<sizechange<<endl;
 		for (i = breakpoint; i < sizechange; i++)
 		{
-			newnode->key.push_back(temp->key[0]);
-			newnode->page.push_back(temp->page[0]);
+			newnode->key.push_back(temp->key[i]);
+			newnode->page.push_back(temp->page[i]);
 			newnode->key[i - breakpoint] = temp->key[i];
 			newnode->page[i - breakpoint] = temp->page[i];
 
@@ -458,10 +459,17 @@ void bptree<K>::split(indexnode<K>* temp)
 		// cout<<"not stop"<<endl;
 		newnode->NodeState = leafstate;
 		newnode->parent = temp->parent;
-		newnode->sibling = temp->sibling;
-		temp->sibling = newnode;
-		newnode->parent->children.push_back(0);
-		newnode->parent->key.push_back(0);
+		if (newnode != temp->sibling&&temp->sibling != temp)
+		{
+			newnode->sibling = temp->sibling;
+			temp->sibling = newnode;
+		}
+		else {
+			newnode->sibling = NULL;
+			temp->sibling = newnode;
+		}
+		newnode->parent->children.push_back(newnode);
+		newnode->parent->key.push_back(newnode->key[0]);
 		// cout<<"not stop"<<endl;
 		for (j = newnode->parent->children.size() - 1; j >= 0; j--)
 		{
@@ -506,11 +514,18 @@ void bptree<K>::split(indexnode<K>* temp)
 		root->NodeState = rootstate;
 		temp->parent = root;
 		newnode->parent = root;
-		newnode->sibling = NULL;
-		temp->sibling = newnode;
+		if (newnode != temp->sibling&&temp->sibling != temp)
+		{
+			newnode->sibling = temp->sibling;
+			temp->sibling = newnode;
+		}
+		else {
+			newnode->sibling = NULL;
+			temp->sibling = newnode;
+		}
 		root->children.push_back(temp);
 		root->children.push_back(newnode);
-		root->key.push_back(temp->key[0]);
+		root->key.push_back(newnode->key[0]);
 		root->children[0] = temp;
 		root->children[1] = newnode;
 		root->key[0] = newnode->key[0];
@@ -525,13 +540,13 @@ void bptree<K>::split(indexnode<K>* temp)
 		// cout<<breakpoint<<"$$"<<sizechange<<endl;
 		for (i = breakpoint; i < sizechange + 1; i++)
 		{
-			newnode->children.push_back(0);
+			newnode->children.push_back(temp->children[i]);
 			newnode->children[i - breakpoint] = temp->children[i];
 
 			temp->children[i]->parent = newnode;
 			if (i != sizechange)
 			{
-				newnode->key.push_back(0);
+				newnode->key.push_back(temp->key[i]);
 				newnode->key[i - breakpoint] = temp->key[i];
 			}
 		}
@@ -548,11 +563,18 @@ void bptree<K>::split(indexnode<K>* temp)
 		temp->NodeState = interstate;
 		temp->parent = root;
 		newnode->parent = root;
-		newnode->sibling = NULL;
-		temp->sibling = newnode;
-		root->children.push_back(0);
-		root->children.push_back(0);
-		root->key.push_back(0);
+		if (newnode != temp->sibling&&temp->sibling != temp)
+		{
+			newnode->sibling = temp->sibling;
+			temp->sibling = newnode;
+		}
+		else {
+			newnode->sibling = NULL;
+			temp->sibling = newnode;
+		}
+		root->children.push_back(temp);
+		root->children.push_back(newnode);
+		root->key.push_back(newnode->key[0]);
 		root->children[0] = temp;
 		root->children[1] = newnode;
 		root->key[0] = newnode->key[0];
@@ -567,10 +589,10 @@ void bptree<K>::split(indexnode<K>* temp)
 		// cout<<breakpoint<<"$$"<<sizechange<<endl;
 		for (i = breakpoint; i < sizechange + 1; i++)
 		{
-			newnode->children.push_back(0);
+			newnode->children.push_back(temp->children[i]);
 			if (i != sizechange)
 			{
-				newnode->key.push_back(0);
+				newnode->key.push_back(temp->key[i]);
 				newnode->key[i - breakpoint] = temp->key[i];
 			}
 			newnode->children[i - breakpoint] = temp->children[i];
@@ -583,10 +605,17 @@ void bptree<K>::split(indexnode<K>* temp)
 		}
 		newnode->NodeState = interstate;
 		newnode->parent = temp->parent;
-		newnode->sibling = temp->sibling;
-		temp->sibling = newnode;
-		newnode->parent->children.push_back(0);
-		newnode->parent->key.push_back(0);
+		if (newnode != temp->sibling&&temp->sibling != temp)
+		{
+			newnode->sibling = temp->sibling;
+			temp->sibling = newnode;
+		}
+		else {
+			newnode->sibling = NULL;
+			temp->sibling = newnode;
+		}
+		newnode->parent->children.push_back(newnode);
+		newnode->parent->key.push_back(newnode->key[0]);
 		for (j = newnode->parent->children.size() - 1; j >= 0; j--)
 		{
 			if (newnode->parent->children[j - 1] != temp)
@@ -682,6 +711,13 @@ void bptree<K>::deletescope(K lowk, K upk)
 		deleteindex(currkey);
 		currkey = ak[curraddr];
 	}
+	while (ak[curraddr] == ak[curraddr->next_addr])
+	{
+		curraddr = curraddr->next_addr;
+	}
+	curraddr = curraddr->next_addr;
+	deleteindex(currkey);
+	currkey = ak[curraddr];
 }
 
 template <class K>
@@ -723,8 +759,8 @@ template <class K>
 void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 {
 	int i, j, child_num, key_num;
-	indexnode<K>* mergenode;
-	indexnode<K>* secnode;
+	indexnode<K>* mergenode = NULL;
+	indexnode<K>* secnode = NULL;
 	this->nodenumber--;
 	if (temp->NodeState == rootstate)
 	{
@@ -753,29 +789,32 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 	}
 	// if(mergenode != NULL) cout<<"mergenode : "<<mergenode->key[0]<<endl;
 	// if(secnode != NULL)cout<<"secnode : "<<secnode->key[0]<<endl;
-	child_num = mergenode->children.size();
-	key_num = mergenode->key.size();
+	if (mergenode != NULL) {
+		child_num = mergenode->children.size();
+		key_num = mergenode->key.size();
+	}
 	if (mergenode->NodeState == leafstate)
 	{
 		for (i = 0; i < secnode->key.size(); i++)
 		{
-			mergenode->page.push_back(0);
-			mergenode->key.push_back(0);
+			mergenode->page.push_back(secnode->page[i]);
+			mergenode->key.push_back(secnode->key[i]);
 			mergenode->page[key_num + i] = secnode->page[i];
 			mergenode->key[key_num + i] = secnode->key[i];
 		}
 	}
 	else if (mergenode->NodeState != leafstate)
 	{
+		if(secnode != NULL)
 		for (i = 0; i < secnode->children.size(); i++)
 		{
-			mergenode->key.push_back(0);
-			mergenode->children.push_back(0);
+			mergenode->key.push_back(secnode->key[0]);
+			mergenode->children.push_back(secnode->children[0]);
 			if (i == 0)
 			{
 				mergenode->key[key_num] = secnode->key[0];
 			}
-			else mergenode->key[key_num + i] = secnode->key[i - 1];
+			else mergenode->key[key_num + i] = secnode->key[i - 1];//?
 			mergenode->children[child_num + i] = secnode->children[i];
 			secnode->children[i]->parent = mergenode;
 		}
