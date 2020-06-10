@@ -205,12 +205,12 @@ int delete_index_string(string table_name, string attributename, string key)
     if (aimtree != NULL)
     {
         aimtree->deleteindex(key);
-        cout << "delete succeeded" << endl;
+        // cout << "delete succeeded" << endl;
         return 1;
     }
     else if (aimtree == NULL)
     {
-        cout << "delete failed" << endl;
+        // cout << "delete failed" << endl;
         return 0;
     }
 }
@@ -222,12 +222,12 @@ int delete_index_float(string table_name, string attributename, float key)
     if (aimtree != NULL)
     {
         aimtree->deleteindex(key);
-        cout << "delete succeeded" << endl;
+        // cout << "delete succeeded" << endl;
         return 1;
     }
     else if (aimtree == NULL)
     {
-        cout << "delete failed" << endl;
+        // cout << "delete failed" << endl;
         return 0;
     }
 }
@@ -238,12 +238,12 @@ address find_index_int(string table_name, string attributename, int key)
     aimtree = t->find_int_tree(table_name, attributename);
     if (aimtree != NULL)
     {
-        cout << "select succeeded" << endl;
+        // cout << "select succeeded" << endl;
         return aimtree->find_index_of_key(key);
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
+        // cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -254,12 +254,12 @@ address find_index_string(string table_name, string attributename, string key)
     aimtree = t->find_string_tree(table_name, attributename);
     if (aimtree != NULL)
     {
-        cout << "select succeeded" << endl;
+        // cout << "select succeeded" << endl;
         return aimtree->find_index_of_key(key);
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
+        // cout << "select failed" << endl;
         return NULL;
     }
 }
@@ -270,12 +270,12 @@ address find_index_float(string table_name, string attributename, float key)
     aimtree = t->find_float_tree(table_name, attributename);
     if (aimtree != NULL)
     {
-        cout << "select succeeded" << endl;
+        // cout << "select succeeded" << endl;
         return aimtree->find_index_of_key(key);
     }
     else if (aimtree == NULL)
     {
-        cout << "select failed" << endl;
+        // cout << "select failed" << endl;
         return NULL;
     }
 }

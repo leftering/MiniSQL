@@ -147,26 +147,26 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 	for (int i = 0; i < T.col_num; i++) {
 		if (T.col[i].have_index == true) {
 			col_id.push_back(i);
-			// cout << "find have_index" << endl;
-			flag = true;
 		}
 	}
-	if (flag && (logic.size() == 0 || logic[0] == 1)) {
-		int where_index, attr_index;
-		for (int i = 0; i < col_id.size(); i++) {
-			int j;
-			for (j = 0; j < wheres.size(); j++) {
-				if (wheres[j].attr == T.col[col_id[i]].col_name) {
-					where_index = j;
-					attr_index = col_id[i];
-					// cout << wheres[j].attr << endl;
-					break;
-				}
-			}
-			if (j < wheres.size()) {
+
+	int where_index, attr_index;
+	for (int i = 0; i < col_id.size(); i++) {
+		int j;
+		for (j = 0; j < wheres.size(); j++) {
+			if (wheres[j].attr == T.col[col_id[i]].col_name) {
+				where_index = j;
+				attr_index = col_id[i];
+				flag = true;
 				break;
 			}
 		}
+		if (j < wheres.size()) {
+			break;
+		}
+	}
+
+	if (flag && (logic.size() == 0 || logic[0] == 1)) {
 		address naddr = NULL;
 		int direction = 0;
 		if (wheres[where_index].operation == ">" || wheres[where_index].operation == ">=") {
@@ -321,14 +321,16 @@ bool RecordManager::check_unique(table_info T, Tuple record)
 				}
 				whr.value = record.getData()[i].datas;
 			}
-			if (T.col[i].have_index = false) {
+			if (T.col[i].have_index == false) {
 				whr.operation = "=";
 				wheres.push_back(whr);
 				logic.push_back(0);
 			}
 		}
 	}
-	logic.pop_back();
+	if (logic.size() > 0) {
+		logic.pop_back();
+	}
 	std::vector<Tuple> tuples;
 	if (select(col_ids, wheres, logic, &tuples) != 0) {
 		return false;
