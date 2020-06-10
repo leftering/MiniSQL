@@ -75,6 +75,7 @@ Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 			memcpy(r, record + offset, size);
 			std::string s(r, size);
 			data.datas = s;
+			delete[]r;
 		}
 		offset += size;
 		tuple.addData(data);
@@ -550,7 +551,7 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 				BYTE* blocki_data = (*blocki).getData();
 				BYTE* recordi = (*blocki).getRecord(naddr->record_id);
 				Tuple tuple = read2tuple(recordi, T);
-				if (check(tuple, wheres, logic)) {
+				if (check(tuple, wheres, logic)) { 
 					remove4block(blocki_data, naddr->record_id, T.col_num);
 					cnt++;
 					for (int i = 0; i < T.col_num; i++) {
@@ -571,7 +572,7 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 					}
 					buffer_manager.modifyPage(buffer_manager.getPageId(table_name, naddr->block_id));
 				}
-				if (direction) {
+				if (direction == 1) {
 					naddr = naddr->last_addr;
 				}
 				else if(direction == 0){
