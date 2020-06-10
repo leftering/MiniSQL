@@ -85,11 +85,11 @@ Tuple RecordManager::read2tuple(BYTE* record, table_info T)
 address RecordManager::find_addr_equal(table_info T, std::string attributename, Where_clause where, int attr_index)
 {
 	address naddr = NULL;
-	if (T.col[attr_index].col_type = COL_INT) {
+	if (T.col[attr_index].col_type == COL_INT) {
 		int key = std::stoi(where.value);
 		naddr = find_index_int(T.table_name, T.col[attr_index].col_name, key);
 	}
-	else if (T.col[attr_index].col_type = COL_FLOAT) {
+	else if (T.col[attr_index].col_type == COL_FLOAT) {
 		float key = std::stof(where.value);
 		naddr = find_index_float(T.table_name, T.col[attr_index].col_name, key);
 	}
@@ -147,7 +147,7 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 	for (int i = 0; i < T.col_num; i++) {
 		if (T.col[i].have_index == true) {
 			col_id.push_back(i);
-			cout << "find have_index" << endl;
+			// cout << "find have_index" << endl;
 			flag = true;
 		}
 	}
@@ -159,7 +159,7 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 				if (wheres[j].attr == T.col[col_id[i]].col_name) {
 					where_index = j;
 					attr_index = col_id[i];
-					cout << wheres[j].attr << endl;
+					// cout << wheres[j].attr << endl;
 					break;
 				}
 			}
@@ -170,18 +170,21 @@ int RecordManager::select(std::vector<int>col_ids, std::vector<Where_clause>wher
 		address naddr = NULL;
 		int direction = 0;
 		if (wheres[where_index].operation == ">" || wheres[where_index].operation == ">=") {
-			naddr = find_addr_low(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
+			naddr = find_addr_low(T, T.col[attr_index].col_name, wheres[where_index], attr_index);
 		}
 		else if (wheres[where_index].operation == "<" || wheres[where_index].operation == "<=") {
-			naddr = find_addr_up(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
+			naddr = find_addr_up(T, T.col[attr_index].col_name, wheres[where_index], attr_index);
 			direction = 1;
 		}
 		else if (wheres[where_index].operation == "=") {
-			naddr = find_addr_equal(T, T.col[col_id[attr_index]].col_name, wheres[where_index], attr_index);
+			naddr = find_addr_equal(T, T.col[attr_index].col_name, wheres[where_index], attr_index);
 			direction = 2;
 		}
 		wheres.erase(wheres.begin() + where_index);
-		logic.pop_back();
+		if (logic.size() >= 1) {
+			logic.pop_back();
+		}
+		
 		if (naddr == NULL) {
 			return 0;
 		}
@@ -296,7 +299,6 @@ bool RecordManager::check_unique(table_info T, Tuple record)
 	std::vector<int>logic;
 	std::vector<int> col_ids;
 	for (int i = 0; i < col_num; i++) {
-		bool flag = true;
 		if (T.col[i].primary_key == true || T.col[i].unique == true) {
 			Where_clause whr;
 			whr.attr = T.col[i].col_name;
@@ -319,9 +321,11 @@ bool RecordManager::check_unique(table_info T, Tuple record)
 				}
 				whr.value = record.getData()[i].datas;
 			}
-			whr.operation = "=";
-			wheres.push_back(whr);
-			logic.push_back(0);
+			if (T.col[i].have_index = false) {
+				whr.operation = "=";
+				wheres.push_back(whr);
+				logic.push_back(0);
+			}
 		}
 	}
 	logic.pop_back();
@@ -371,11 +375,11 @@ int RecordManager::insert(Tuple record)
 					if(T.col[k].have_index == true)
 					{
 						if(T.col[k].col_type == 0)
-						insert_index_int(T.table_name,T.col[k].col_name,record.getData()[k].datai,nadd);
+							insert_index_int(T.table_name,T.col[k].col_name,record.getData()[k].datai,nadd);
 						else if(T.col[k].col_type == 1)
-						insert_index_float(T.table_name,T.col[k].col_name,record.getData()[k].dataf,nadd);
+							insert_index_float(T.table_name,T.col[k].col_name,record.getData()[k].dataf,nadd);
 						else if(T.col[k].col_type == 2)
-						insert_index_string(T.table_name,T.col[k].col_name,record.getData()[k].datas,nadd);
+							insert_index_string(T.table_name,T.col[k].col_name,record.getData()[k].datas,nadd);
 					}
 				}
 				//index over

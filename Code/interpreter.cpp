@@ -62,6 +62,8 @@ void Interpreter::read_operation() {
 					if (T.col[k].col_name == col_name) { 
 						T.col[k].have_index = true; 
 						cout << "have_index changed" << endl;
+						T.write_table_info();
+						break;
 					}
 				}
 				int create_index_result;
