@@ -488,9 +488,13 @@ std::string get_ith_value(table_info T, BYTE record[], int i)
 		s = to_string(value);
 	}
 	else {
-		char value[255];
+		char* value = new char[record[i]];
 		memcpy(value, record + offset, record[i]);
-		s = value;
+		int a = record[i];
+		for (int i = 0; i < a; i++) {
+			s = s + value[i];
+		}
+		delete[]value;
 	}
 	return s;
 }
