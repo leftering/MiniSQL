@@ -3,7 +3,7 @@
 #include "tuple.h"
 #include "define.h"
 
-extern clock_t finish;
+extern clock_t finish, start;
 
 bool create_table(Interpreter* in) {
 	if (in->table.write_table_info()) {

@@ -19,6 +19,7 @@ Interpreter::Interpreter() {
 }
 
 Interpreter::~Interpreter() {}
+
 clock_t start, finish;
 
 void Interpreter::read_operation() {
@@ -26,8 +27,8 @@ void Interpreter::read_operation() {
 	string command;
 	int position = 0;
 	getline(cin, command, ';'); // command = SQL sentence
-	if (command.length() < 3)		return;
-	 //cout << "Command: " << command << ";" << endl;
+	if (command.length() < 3)
+	  return;
 	start = clock();
 	transform(command.begin(), command.end(), command.begin(), tolower);	// all words in lowercase
 	string operation = get_word(command, position); // get first word ( 'create', 'drop', 'select', 'delete', 'insert', 'execfile', 'quit' )
@@ -171,6 +172,7 @@ void Interpreter::read_operation() {
 			this->status = ERROR;
 			this->operation = EMPTY;
 			this->set_error(2007);
+			finish = clock();
 		}
 	}
 	else if (strcmp(operation.c_str(), "delete") == 0) {	// delete
@@ -480,7 +482,7 @@ void Interpreter::log_status(clock_t start, clock_t finish) {
 		cout << "ERROR: " << this->error.code << " " << this->error.title << endl;
 		cout << "message: " << this->error.msg << endl << endl;
 	}
-	  cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
+	cout << "( " << ((finish - start) / (double)CLOCKS_PER_SEC) << " Sec" << " )" << endl << endl;
 }
 
 void Interpreter::set_error(int code) {
