@@ -3,6 +3,8 @@
 #include "tuple.h"
 #include "define.h"
 
+extern clock_t finish;
+
 bool create_table(Interpreter* in) {
 	if (in->table.write_table_info()) {
 		std::string filename = RECORDPATH + in->table.table_name + ".data";
@@ -105,6 +107,7 @@ bool api_select(string table_name, vector<int> col_ids, vector<Where_clause> w_c
 	//call select in record manager here;
 	std::vector<Tuple> tuples;
 	int cnt = record_manager.select(col_ids, w_clause, logic, &tuples);
+	finish = clock();
 	if (cnt <= 0) {
 		return false;
 	}

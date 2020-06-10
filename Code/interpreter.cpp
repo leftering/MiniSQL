@@ -87,6 +87,8 @@ void Interpreter::read_operation() {
 			this->operation = EMPTY;
 			this->set_error(2003); //syntax error create;
 		}
+		finish = clock();
+
 	}
 	else if (strcmp(operation.c_str(), "drop") == 0) {
 		string drop_type = get_word(command, position);
@@ -141,6 +143,8 @@ void Interpreter::read_operation() {
 			this->operation = EMPTY;
 			this->set_error(2008);
 		}
+		finish = clock();
+
 	}
 	else if (strcmp(operation.c_str(), "select") == 0) {	// select
 		string str_star = get_word(command, position);
@@ -185,6 +189,8 @@ void Interpreter::read_operation() {
 			this->status = ERROR;
 			this->operation = EMPTY;
 			this->set_error(2007);
+			finish = clock();
+
 		}
 	}
 	else if (strcmp(operation.c_str(), "delete") == 0) {	// delete
@@ -220,6 +226,8 @@ void Interpreter::read_operation() {
 			this->operation = EMPTY;
 			this->set_error(2006);
 		}
+		finish = clock();
+
 	}
 	else if (strcmp(operation.c_str(), "insert") == 0) {	// insert
 		string str_into = get_word(command, position);
@@ -262,6 +270,7 @@ void Interpreter::read_operation() {
 			this->operation = EMPTY;
 			this->set_error(2005);
 		}
+		finish = clock();
 	}
 	else if (strcmp(operation.c_str(), "execfile") == 0) {  // execfile
 		string file_name = get_word(command, position); // get file name
@@ -273,17 +282,21 @@ void Interpreter::read_operation() {
 			this->operation = EMPTY;
 			this->set_error(2004);
 		}
+		finish = clock();
+
 	}
 	else if (strcmp(operation.c_str(), "quit") == 0) {  // quit
 		this->operation = QUIT;
 		this->status = FINISH;
+		finish = clock();
 	}
 	else {
 		this->status = ERROR;
 		this->operation = EMPTY;
 		this->set_error(2000);
+		finish = clock();
+
 	}
-	finish = clock();
 	this->log_status(start, finish);
 }
 

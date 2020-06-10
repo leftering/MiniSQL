@@ -11,7 +11,6 @@ public:
 	operation_type operation;
 	table_info table;
 	vector<Where_clause> w_clouse;
-	clock_t start, finish;
 	DB_exception error;
 
 	void read_operation(); // read sql sentense
