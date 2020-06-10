@@ -279,7 +279,7 @@ void bptree<K>::refresh()
 	indexnode<K>* curr;
 	orig = findsmallest(temp);
 	curr = orig;
-	cout << "refresh Begin" << endl;
+	// cout << "refresh Begin" << endl;
 	while (orig != NULL)
 	{
 		while (curr->NodeState != rootstate && curr->parent != NULL)
@@ -321,7 +321,7 @@ void bptree<K>::refresh()
 	}
 	// cout<<"in the refresh : "<<rootnode->key[0]<<endl;
 	// cout<<"refresh over"<<endl;
-	cout << "refresh END@@@" << endl;
+	// cout << "refresh END@@@" << endl;
 }
 
 template <class K>
