@@ -157,14 +157,28 @@ void Interpreter::read_operation() {
 				logic.clear();
 				this->w_clouse.clear();
 				get_where(where_clause, &this->w_clouse, &logic);
-				api_select(table_name, col_ids, this->w_clouse, logic);
-				this->operation = SELECT;
+				if (!api_select(table_name, col_ids, this->w_clouse, logic)) {
+				  this->status = ERROR;
+				  this->operation = EMPTY;
+				  this->set_error(2017);
+				  finish = clock();
+				}
+				else {
+				  this->operation = SELECT;
+				}
 			}
 			else {  // select without where
 				vector<Where_clause> wheres;
 				vector<int>logic;
-				api_select(table_name, col_ids, wheres, logic);
-				this->operation = SELECT;
+				if (!api_select(table_name, col_ids, this->w_clouse, logic)) {
+				  this->status = ERROR;
+				  this->operation = EMPTY;
+				  this->set_error(2017);
+				  finish = clock();
+				}
+				else {
+				  this->operation = SELECT;
+				}
 			}
 		}
 		else {
@@ -550,6 +564,10 @@ void Interpreter::set_error(int code) {
 	case 2016:
 	  this->error.title = "CREATE INDEX ERROR";
 	  this->error.msg = "Not unique key;";
+	  break;
+	case 2017:
+	  this->error.title = "SELECT ERROR";
+	  this->error.msg = "table not exist;";
 	  break;
 	default:
 		this->error.title = "UNKNOWN ERROR";
