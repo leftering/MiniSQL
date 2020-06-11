@@ -3,7 +3,7 @@
 #define rootstate 2
 #define interstate 1
 #define leafstate 0
-#define nodecapacity 26//how many keys in a node of B+tree 
+#define nodecapacity 25//how many keys in a node of B+tree 
 //同一个地址必须只能建立一次索引
 //data in block is in char, so the value is char 
 
