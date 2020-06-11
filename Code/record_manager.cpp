@@ -597,15 +597,14 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 		Block* blocki = buffer_manager.getPage(table_name, i);
 		BYTE* blocki_data = (*blocki).getData();
 		int record_num = blocki_data[0];
-		for (int j = 1; j <= record_num; j++) {
+		for (int j = record_num; j >= 1; j--) {
 			BYTE* recordj = (*blocki).getRecord(j);
 			Tuple tuple = read2tuple(recordj, T);
-			if (check(tuple, wheres, logic)) {
+			if (wheres.size() == 0 || check(tuple, wheres, logic)) {
 				remove4block(blocki_data, j, T.col_num);
 				buffer_manager.modifyPage(buffer_manager.getPageId(table_name, i));
 				record_num = blocki_data[0];
 				cnt++;
-				j--;
 			}
 		}
 	}
