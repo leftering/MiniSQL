@@ -190,8 +190,8 @@ int delete_index_int(string table_name, string attributename, int key)
     {
 
         aimtree->deleteindex(key);
-        cout << "delete succeeded" << endl;
         write_to_file_int(aimtree);
+        cout << "delete succeeded" << endl;
         return 1;
     }
     else if (aimtree == NULL)
@@ -207,9 +207,10 @@ int delete_index_string(string table_name, string attributename, string key)
     aimtree = t->find_string_tree(table_name, attributename);
     if (aimtree != NULL)
     {
+        cout << "@@" << attributename << " " << key << endl;
         aimtree->deleteindex(key);
-        cout << "delete succeeded" << endl;
         write_to_file_string(aimtree);
+        cout << "delete succeeded" << endl;
         return 1;
     }
     else if (aimtree == NULL)
@@ -226,8 +227,8 @@ int delete_index_float(string table_name, string attributename, float key)
     if (aimtree != NULL)
     {
         aimtree->deleteindex(key);
-        cout << "delete succeeded" << endl;
         write_to_file_float(aimtree);
+        cout << "delete succeeded" << endl;
         return 1;
     }
     else if (aimtree == NULL)
@@ -1153,7 +1154,7 @@ bptree<int>* type_tablelist::find_int_tree(string filename, string attributename
 bptree<string>* type_tablelist::find_string_tree(string filename, string attributename)
 {
     int i;
-    // cout << 1 << endl;
+    cout << 1 << endl;
     for (i = 0; i < string_treelist.size(); i++)
     {
         if (string_treelist[i]->index_filename == filename && (string_treelist[i]->index_attributename == attributename))
@@ -1161,7 +1162,7 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
             return string_treelist[i];
         }
     }
-    // cout << 2 << endl;
+    cout << 2 << endl;
     string file_name;//这个才是存储的文件名
     file_name = filename + "#" + attributename + ".tree";
     ifstream fin(file_name.c_str());
@@ -1170,11 +1171,11 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
         fin.close();
         bptree<string>* newtree = read_from_file_string(file_name);
         t->string_treelist.push_back(newtree);
-        //  cout << 3.5 << endl;
+        cout << 3.5 << endl;
         return newtree;
     }
     else {
-        // cout << 3 << endl;
+        cout << 3 << endl;
         return NULL;
     }
 }
@@ -1325,7 +1326,7 @@ int drop_index(string index_name)
     else if (t->find_string_tree(tablename, attributename) != NULL)type = 's';
     else if (t->find_float_tree(tablename, attributename) != NULL)type = 'f';
     else type = 'x';
-    //remove((index_name + ".txt").c_str());//重复了
+    remove((index_name + ".txt").c_str());
     if (type == 'i')
     {
         result = t->drop_tree_int(index_name, tablename, attributename);
