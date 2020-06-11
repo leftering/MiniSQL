@@ -1,4 +1,4 @@
-ï»¿#include "index.h"
+#include "index.h"
 extern type_tablelist a_table_list;//index
 extern type_tablelist* t;
 type_tablelist::type_tablelist()
@@ -66,7 +66,7 @@ int type_tablelist::drop_tree_int(string indexname, string table_name, string at
     }
     filename = table_name + "#" + attribute_name + ".tree";
     ifstream fin(filename.c_str());
-    if (fin.is_open())//æœ‰æ–‡ä»¶
+    if (fin.is_open())//ÓĞÎÄ¼ş
     {
         if (remove(filename.c_str()))return 0;
     }
@@ -94,7 +94,7 @@ int type_tablelist::drop_tree_float(string indexname, string table_name, string 
     }
     filename = table_name + "#" + attribute_name + ".tree";
     ifstream fin(filename.c_str());
-    if (fin.is_open())//æœ‰æ–‡ä»¶
+    if (fin.is_open())//ÓĞÎÄ¼ş
     {
         if (remove(filename.c_str()))return 0;
     }
@@ -106,7 +106,10 @@ int type_tablelist::drop_tree_string(string indexname, string table_name, string
     string filename;
     filename = indexname + ".txt";
     result = remove(filename.c_str());
-    if (result == 1)return 0;
+    if (result == 1)
+    {
+        return 0;
+    }
     int i, j;
     for (i = 0; i < string_treelist.size(); i++)
     {
@@ -122,15 +125,19 @@ int type_tablelist::drop_tree_string(string indexname, string table_name, string
     }
     filename = table_name + "#" + attribute_name + ".tree";
     ifstream fin(filename.c_str());
-    if (fin.is_open())//æœ‰æ–‡ä»¶
+    if (fin.is_open())//ÓĞÎÄ¼ş
     {
-        if (remove(filename.c_str()))return 0;
+        fin.close();
+        if (remove(filename.c_str())) { 
+            return 0;
+        }
     }
+    else fin.close();
     return 1;
 }
 
 //please use t as a extern global variable
-//éèŒƒå›´æŸ¥æ‰¾ï¼Œæ’å…¥ï¼Œåˆ é™¤
+//·Ç·¶Î§²éÕÒ£¬²åÈë£¬É¾³ı
 int insert_index_int(string table_name, string attributename, int key, address a)
 {
     bptree<int>* aimtree;
@@ -190,8 +197,8 @@ int delete_index_int(string table_name, string attributename, int key)
     {
 
         aimtree->deleteindex(key);
-        write_to_file_int(aimtree);
         cout << "delete succeeded" << endl;
+        write_to_file_int(aimtree);
         return 1;
     }
     else if (aimtree == NULL)
@@ -207,10 +214,9 @@ int delete_index_string(string table_name, string attributename, string key)
     aimtree = t->find_string_tree(table_name, attributename);
     if (aimtree != NULL)
     {
-        // cout << "@@" << attributename << " " << key << endl;
         aimtree->deleteindex(key);
-        write_to_file_string(aimtree);
         cout << "delete succeeded" << endl;
+        write_to_file_string(aimtree);
         return 1;
     }
     else if (aimtree == NULL)
@@ -227,8 +233,8 @@ int delete_index_float(string table_name, string attributename, float key)
     if (aimtree != NULL)
     {
         aimtree->deleteindex(key);
-        write_to_file_float(aimtree);
         cout << "delete succeeded" << endl;
+        write_to_file_float(aimtree);
         return 1;
     }
     else if (aimtree == NULL)
@@ -284,8 +290,8 @@ address find_index_float(string table_name, string attributename, float key)
 }
 
 //scope
-//èŒƒå›´æŸ¥æ‰¾å‡½æ•°ï¼šç”±äºéœ€è¦è¿”å›ä¸¤ä¸ªè¾¹ç•Œï¼Œä¸Šç•Œå’Œä¸‹ç•Œï¼Œå› æ­¤ç›´æ¥è€ƒè™‘è°ƒç”¨äº†ä¸¤ä¸ªå‡½æ•°ã€‚ä¸”æ³¨æ„ï¼Œå‰é—­åå¼€ï¼Œè¿”å›çš„lowæ˜¯åŒ…å«åœ¨æ‰€éœ€ç©ºé—´é‡Œçš„ï¼Œè¿”å›çš„upæ˜¯ä¸åŒ…å«çš„ã€‚
-//èŒƒå›´åˆ é™¤å‡½æ•°ï¼Œæ— è¿”å›å€¼ï¼Œç›´æ¥ä¸€æ¬¡è¾“å…¥ï¼Œä½†æ˜¯å‚æ•°åŒæ ·éœ€è¦è¡¨åã€å±æ€§åã€ä¸Šç•Œå’Œä¸‹ç•Œã€‚ä¸”åŒæ ·æ˜¯å‰é—­åå¼€ã€‚
+//·¶Î§²éÕÒº¯Êı£ºÓÉÓÚĞèÒª·µ»ØÁ½¸ö±ß½ç£¬ÉÏ½çºÍÏÂ½ç£¬Òò´ËÖ±½Ó¿¼ÂÇµ÷ÓÃÁËÁ½¸öº¯Êı¡£ÇÒ×¢Òâ£¬Ç°±Õºó¿ª£¬·µ»ØµÄlowÊÇ°üº¬ÔÚËùĞè¿Õ¼äÀïµÄ£¬·µ»ØµÄupÊÇ²»°üº¬µÄ¡£
+//·¶Î§É¾³ıº¯Êı£¬ÎŞ·µ»ØÖµ£¬Ö±½ÓÒ»´ÎÊäÈë£¬µ«ÊÇ²ÎÊıÍ¬ÑùĞèÒª±íÃû¡¢ÊôĞÔÃû¡¢ÉÏ½çºÍÏÂ½ç¡£ÇÒÍ¬ÑùÊÇÇ°±Õºó¿ª¡£
 address find_scope_int_low(string table_name, string attributename, int key)
 {
     bptree<int>* aimtree;
@@ -368,7 +374,7 @@ address find_scope_float_up(string table_name, string attributename, float key)
     else if (aimtree == NULL)
     {
         return NULL;
-    }//å¦‚æœæ˜¯ç©ºçš„ï¼ŒæŸ¥æ‰¾åº”è¯¥å¾—åˆ°null
+    }//Èç¹ûÊÇ¿ÕµÄ£¬²éÕÒÓ¦¸ÃµÃµ½null
 }
 
 void delete_scope_int(string table_name, string attributename, int lowkey, int upkey)
@@ -395,7 +401,7 @@ void delete_scope_float(string table_name, string attributename, float lowkey, f
     write_to_file_float(aimtree);
 }
 
-//å†™æ–‡ä»¶ï¼Œè¯»æ–‡ä»¶ï¼Œä»bufferåˆ›å»ºåˆå§‹ç´¢å¼•ã€‚
+//Ğ´ÎÄ¼ş£¬¶ÁÎÄ¼ş£¬´Óbuffer´´½¨³õÊ¼Ë÷Òı¡£
 void write_to_file_int(bptree<int>* tree)
 {
     int i;
@@ -407,7 +413,7 @@ void write_to_file_int(bptree<int>* tree)
     vector<indexnode<int>*> nodes;
     nodes.push_back(tree->rootnode);
     indexnode<int>* curn;
-    int nodenum = 0;//ç”¨äºè®°å½•åœ¨æ–‡ä»¶ä¸­è¿™æ˜¯ç¬¬å‡ ä¸ªç»“ç‚¹ã€‚
+    int nodenum = 0;//ÓÃÓÚ¼ÇÂ¼ÔÚÎÄ¼şÖĞÕâÊÇµÚ¼¸¸ö½áµã¡£
     int addrnum = 0;
     while (nodes.size() != 0)
     {
@@ -474,13 +480,13 @@ bptree<int>* read_from_file_int(string filename)
     float input3;
     int nodepos;
     int state_change = 0;
-    address lastone = NULL;//ç”¨æ¥å¤„ç†addré“¾è¡¨çš„å…³ç³»ã€‚
-    int currkey;//ç”¨æ¥å¤„ç†mapçš„å…³ç³»
-    //0å°±æ˜¯æ²¡æœ‰çŠ¶æ€ï¼Œ1æ˜¯å‡†å¤‡æ¥æ”¶nodenumï¼Œ2æ˜¯å‡†å¤‡æ¥æ”¶ç»“ç‚¹ç±»å‹ï¼Œ3æ˜¯å‡†å¤‡æ¥æ”¶sibling
-    //4æ˜¯å‡†å¤‡æ¥æ”¶å­å†…å®¹
-    //5æ˜¯childrenè¿‡æ¸¡çŠ¶æ€ï¼Œ6æ˜¯å‡†å¤‡æ¥æ”¶children
-    //7æ˜¯pageè¿‡æ¸¡çŠ¶æ€ï¼Œ8æ˜¯å‡†å¤‡æ¥æ”¶pageï¼Œ9æ˜¯page2è¿‡æ¸¡çŠ¶æ€ï¼Œ10æ˜¯å‡†å¤‡æ¥æ”¶pageçš„äºŒçŠ¶æ€
-    //11æ˜¯key
+    address lastone = NULL;//ÓÃÀ´´¦ÀíaddrÁ´±íµÄ¹ØÏµ¡£
+    int currkey;//ÓÃÀ´´¦ÀímapµÄ¹ØÏµ
+    //0¾ÍÊÇÃ»ÓĞ×´Ì¬£¬1ÊÇ×¼±¸½ÓÊÕnodenum£¬2ÊÇ×¼±¸½ÓÊÕ½áµãÀàĞÍ£¬3ÊÇ×¼±¸½ÓÊÕsibling
+    //4ÊÇ×¼±¸½ÓÊÕ×ÓÄÚÈİ
+    //5ÊÇchildren¹ı¶É×´Ì¬£¬6ÊÇ×¼±¸½ÓÊÕchildren
+    //7ÊÇpage¹ı¶É×´Ì¬£¬8ÊÇ×¼±¸½ÓÊÕpage£¬9ÊÇpage2¹ı¶É×´Ì¬£¬10ÊÇ×¼±¸½ÓÊÕpageµÄ¶ş×´Ì¬
+    //11ÊÇkey
     string tablename;
     string attributename;
     for (i = 0; i < filename.length(); i++)
@@ -500,20 +506,19 @@ bptree<int>* read_from_file_int(string filename)
         }
     }
     int node_number;
-    bptree<int>* tree;
-    input2 = "tempfile";
-    tree = new bptree<int>(input2, tablename, attributename, 'i');
+    
 
-    //è®°å¾—å¯¹addré“¾è¡¨çš„å¤„ç†å’Œå¯¹mapçš„å¤„ç†ã€‚
+    //¼ÇµÃ¶ÔaddrÁ´±íµÄ´¦ÀíºÍ¶ÔmapµÄ´¦Àí¡£
     ifstream fin(filename.c_str());
     if (!fin.is_open()) {
         cout << "Can't find the file, please check the file name." << endl;
         return NULL;
     }
     fin >> node_number;
-    tree->nodenumber = node_number;
     fin >> input2;
-    tree->indexname = input2;
+    bptree<int>* tree;
+    tree = new bptree<int>(input2, tablename, attributename, 'i');
+    tree->nodenumber = node_number;
     indexnode<int>** nodearr;
     nodearr = new indexnode<int> * [node_number];
     for (i = 0; i < node_number; i++)
@@ -555,7 +560,7 @@ bptree<int>* read_from_file_int(string filename)
         }
         else if (state_change == 4)
         {
-            fin >> ch;//è¿™é‡Œä¸åŒç±»å‹çš„å¯èƒ½ä¼šä¸åŒ
+            fin >> ch;//ÕâÀï²»Í¬ÀàĞÍµÄ¿ÉÄÜ»á²»Í¬
             if (ch == '<')
             {
                 state_change = 11;
@@ -649,7 +654,7 @@ void write_to_file_float(bptree<float>* tree)
     vector<indexnode<float>*> nodes;
     nodes.push_back(tree->rootnode);
     indexnode<float>* curn;
-    int nodenum = 0;//ç”¨äºè®°å½•åœ¨æ–‡ä»¶ä¸­è¿™æ˜¯ç¬¬å‡ ä¸ªç»“ç‚¹ã€‚
+    int nodenum = 0;//ÓÃÓÚ¼ÇÂ¼ÔÚÎÄ¼şÖĞÕâÊÇµÚ¼¸¸ö½áµã¡£
     int addrnum = 0;
     while (nodes.size() != 0)
     {
@@ -716,13 +721,13 @@ bptree<float>* read_from_file_float(string filename)
     float input3;
     int nodepos;
     int state_change = 0;
-    address lastone = NULL;//ç”¨æ¥å¤„ç†addré“¾è¡¨çš„å…³ç³»ã€‚
-    float currkey;//ç”¨æ¥å¤„ç†mapçš„å…³ç³»
-    //0å°±æ˜¯æ²¡æœ‰çŠ¶æ€ï¼Œ1æ˜¯å‡†å¤‡æ¥æ”¶nodenumï¼Œ2æ˜¯å‡†å¤‡æ¥æ”¶ç»“ç‚¹ç±»å‹ï¼Œ3æ˜¯å‡†å¤‡æ¥æ”¶sibling
-    //4æ˜¯å‡†å¤‡æ¥æ”¶å­å†…å®¹
-    //5æ˜¯childrenè¿‡æ¸¡çŠ¶æ€ï¼Œ6æ˜¯å‡†å¤‡æ¥æ”¶children
-    //7æ˜¯pageè¿‡æ¸¡çŠ¶æ€ï¼Œ8æ˜¯å‡†å¤‡æ¥æ”¶pageï¼Œ9æ˜¯page2è¿‡æ¸¡çŠ¶æ€ï¼Œ10æ˜¯å‡†å¤‡æ¥æ”¶pageçš„äºŒçŠ¶æ€
-    //11æ˜¯key
+    address lastone = NULL;//ÓÃÀ´´¦ÀíaddrÁ´±íµÄ¹ØÏµ¡£
+    float currkey;//ÓÃÀ´´¦ÀímapµÄ¹ØÏµ
+    //0¾ÍÊÇÃ»ÓĞ×´Ì¬£¬1ÊÇ×¼±¸½ÓÊÕnodenum£¬2ÊÇ×¼±¸½ÓÊÕ½áµãÀàĞÍ£¬3ÊÇ×¼±¸½ÓÊÕsibling
+    //4ÊÇ×¼±¸½ÓÊÕ×ÓÄÚÈİ
+    //5ÊÇchildren¹ı¶É×´Ì¬£¬6ÊÇ×¼±¸½ÓÊÕchildren
+    //7ÊÇpage¹ı¶É×´Ì¬£¬8ÊÇ×¼±¸½ÓÊÕpage£¬9ÊÇpage2¹ı¶É×´Ì¬£¬10ÊÇ×¼±¸½ÓÊÕpageµÄ¶ş×´Ì¬
+    //11ÊÇkey
     string tablename;
     string attributename;
     for (i = 0; i < filename.length(); i++)
@@ -741,21 +746,19 @@ bptree<float>* read_from_file_float(string filename)
             }
         }
     }
-    int node_number;//è®°å½•èŠ‚ç‚¹çš„æ•°é‡ï¼Œ
-    bptree<float>* tree;
-    input2 = "xxx";
-    tree = new bptree<float>(input2, tablename, attributename, 'f');
+    int node_number;//¼ÇÂ¼½ÚµãµÄÊıÁ¿£¬
     //
-    //è®°å¾—å¯¹addré“¾è¡¨çš„å¤„ç†å’Œå¯¹mapçš„å¤„ç†ã€‚
+    //¼ÇµÃ¶ÔaddrÁ´±íµÄ´¦ÀíºÍ¶ÔmapµÄ´¦Àí¡£
     ifstream fin(filename.c_str());
     if (!fin.is_open()) {
         cout << "Can't find the file, please check the file name." << endl;
         return NULL;
     }
     fin >> node_number;
-    tree->nodenumber = node_number;
     fin >> input2;
-    tree->indexname = input2;
+    bptree<float>* tree;
+    tree = new bptree<float>(input2, tablename, attributename, 'f');
+    tree->nodenumber = node_number;
     indexnode<float>** nodearr;
     nodearr = new indexnode<float> * [node_number];
     for (i = 0; i < node_number; i++)
@@ -797,7 +800,7 @@ bptree<float>* read_from_file_float(string filename)
         }
         else if (state_change == 4)
         {
-            fin >> ch;//è¿™é‡Œä¸åŒç±»å‹çš„å¯èƒ½ä¼šä¸åŒ
+            fin >> ch;//ÕâÀï²»Í¬ÀàĞÍµÄ¿ÉÄÜ»á²»Í¬
             if (ch == '<')
             {
                 state_change = 11;
@@ -890,7 +893,7 @@ void write_to_file_string(bptree<string>* tree)
     vector<indexnode<string>*> nodes;
     nodes.push_back(tree->rootnode);
     indexnode<string>* curn;
-    int nodenum = 0;//ç”¨äºè®°å½•åœ¨æ–‡ä»¶ä¸­è¿™æ˜¯ç¬¬å‡ ä¸ªç»“ç‚¹ã€‚
+    int nodenum = 0;//ÓÃÓÚ¼ÇÂ¼ÔÚÎÄ¼şÖĞÕâÊÇµÚ¼¸¸ö½áµã¡£
     int addrnum = 0;
     while (nodes.size() != 0)
     {
@@ -958,13 +961,13 @@ bptree<string>* read_from_file_string(string filename)
     float input3;
     int nodepos;
     int state_change = 0;
-    address lastone = NULL;//ç”¨æ¥å¤„ç†addré“¾è¡¨çš„å…³ç³»ã€‚
-    string currkey;//ç”¨æ¥å¤„ç†mapçš„å…³ç³»
-    //0å°±æ˜¯æ²¡æœ‰çŠ¶æ€ï¼Œ1æ˜¯å‡†å¤‡æ¥æ”¶nodenumï¼Œ2æ˜¯å‡†å¤‡æ¥æ”¶ç»“ç‚¹ç±»å‹ï¼Œ3æ˜¯å‡†å¤‡æ¥æ”¶sibling
-    //4æ˜¯å‡†å¤‡æ¥æ”¶å­å†…å®¹
-    //5æ˜¯childrenè¿‡æ¸¡çŠ¶æ€ï¼Œ6æ˜¯å‡†å¤‡æ¥æ”¶children
-    //7æ˜¯pageè¿‡æ¸¡çŠ¶æ€ï¼Œ8æ˜¯å‡†å¤‡æ¥æ”¶pageï¼Œ9æ˜¯page2è¿‡æ¸¡çŠ¶æ€ï¼Œ10æ˜¯å‡†å¤‡æ¥æ”¶pageçš„äºŒçŠ¶æ€
-    //11æ˜¯key
+    address lastone = NULL;//ÓÃÀ´´¦ÀíaddrÁ´±íµÄ¹ØÏµ¡£
+    string currkey;//ÓÃÀ´´¦ÀímapµÄ¹ØÏµ
+    //0¾ÍÊÇÃ»ÓĞ×´Ì¬£¬1ÊÇ×¼±¸½ÓÊÕnodenum£¬2ÊÇ×¼±¸½ÓÊÕ½áµãÀàĞÍ£¬3ÊÇ×¼±¸½ÓÊÕsibling
+    //4ÊÇ×¼±¸½ÓÊÕ×ÓÄÚÈİ
+    //5ÊÇchildren¹ı¶É×´Ì¬£¬6ÊÇ×¼±¸½ÓÊÕchildren
+    //7ÊÇpage¹ı¶É×´Ì¬£¬8ÊÇ×¼±¸½ÓÊÕpage£¬9ÊÇpage2¹ı¶É×´Ì¬£¬10ÊÇ×¼±¸½ÓÊÕpageµÄ¶ş×´Ì¬
+    //11ÊÇkey
     string tablename;
     string attributename;
     for (i = 0; i < filename.length(); i++)
@@ -988,7 +991,7 @@ bptree<string>* read_from_file_string(string filename)
     input2 = "xxx";
     tree = new bptree<string>(input2, tablename, attributename, 's');
     //
-    //è®°å¾—å¯¹addré“¾è¡¨çš„å¤„ç†å’Œå¯¹mapçš„å¤„ç†ã€‚
+    //¼ÇµÃ¶ÔaddrÁ´±íµÄ´¦ÀíºÍ¶ÔmapµÄ´¦Àí¡£
     ifstream fin(filename.c_str());
     if (!fin.is_open()) {
         cout << "Can't find the file, please check the file name." << endl;
@@ -1039,7 +1042,7 @@ bptree<string>* read_from_file_string(string filename)
         }
         else if (state_change == 4)
         {
-            fin >> ch;//è¿™é‡Œä¸åŒç±»å‹çš„å¯èƒ½ä¼šä¸åŒ
+            fin >> ch;//ÕâÀï²»Í¬ÀàĞÍµÄ¿ÉÄÜ»á²»Í¬
             if (ch == '<')
             {
                 state_change = 11;
@@ -1139,7 +1142,7 @@ bptree<int>* type_tablelist::find_int_tree(string filename, string attributename
             return int_treelist[i];
         }
     }
-    string file_name;//è¿™ä¸ªæ‰æ˜¯å­˜å‚¨çš„æ–‡ä»¶å
+    string file_name;//Õâ¸ö²ÅÊÇ´æ´¢µÄÎÄ¼şÃû
     file_name = filename + "#" + attributename + ".tree";
     ifstream fin(file_name.c_str());
     if (fin.is_open())
@@ -1163,7 +1166,7 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
         }
     }
     // cout << 2 << endl;
-    string file_name;//è¿™ä¸ªæ‰æ˜¯å­˜å‚¨çš„æ–‡ä»¶å
+    string file_name;//Õâ¸ö²ÅÊÇ´æ´¢µÄÎÄ¼şÃû
     file_name = filename + "#" + attributename + ".tree";
     ifstream fin(file_name.c_str());
     if (fin.is_open())
@@ -1171,7 +1174,7 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
         fin.close();
         bptree<string>* newtree = read_from_file_string(file_name);
         t->string_treelist.push_back(newtree);
-        // cout << 3.5 << endl;
+       //  cout << 3.5 << endl;
         return newtree;
     }
     else {
@@ -1189,7 +1192,7 @@ bptree<float>* type_tablelist::find_float_tree(string filename, string attribute
             return float_treelist[i];
         }
     }
-    string file_name;//è¿™ä¸ªæ‰æ˜¯å­˜å‚¨çš„æ–‡ä»¶å
+    string file_name;//Õâ¸ö²ÅÊÇ´æ´¢µÄÎÄ¼şÃû
     file_name = filename + "#" + attributename + ".tree";
     ifstream fin(file_name.c_str());
     if (fin.is_open())
@@ -1201,7 +1204,7 @@ bptree<float>* type_tablelist::find_float_tree(string filename, string attribute
     }
     else return NULL;
 }
-//ç¨‹åºç»“æŸæ—¶è°ƒç”¨ã€‚å¯ä»¥åœ¨å…¨å±€å˜é‡çš„ææ„é‡Œé¢ã€‚
+//³ÌĞò½áÊøÊ±µ÷ÓÃ¡£¿ÉÒÔÔÚÈ«¾Ö±äÁ¿µÄÎö¹¹ÀïÃæ¡£
 void type_tablelist::write_all_tree_to_file()
 {
     int i;
@@ -1219,10 +1222,10 @@ void type_tablelist::write_all_tree_to_file()
     }
 }
 
-int create_index_from_record(string index_name, string tablename, string attributename)//å»ºç«‹index
+int create_index_from_record(string index_name, string tablename, string attributename)//½¨Á¢index
 {
-    if (t->find_int_tree(tablename, attributename) != NULL)return 0;//å¦‚æœä¹‹å‰å»ºç«‹è¿‡ç´¢å¼•ï¼Œå°±ä¸è¯»äº†è¿™ä¸ªæ–‡ä»¶ã€‚
-    //æ²¡å»ºç«‹è¿‡ç´¢å¼•çš„recordï¼Œç›¸å½“äºåˆå§‹çŠ¶æ€ï¼Œéœ€è¦æ‰«æè¯»å–ã€‚
+    if (t->find_int_tree(tablename, attributename) != NULL)return 0;//Èç¹ûÖ®Ç°½¨Á¢¹ıË÷Òı£¬¾Í²»¶ÁÁËÕâ¸öÎÄ¼ş¡£
+    //Ã»½¨Á¢¹ıË÷ÒıµÄrecord£¬Ïàµ±ÓÚ³õÊ¼×´Ì¬£¬ĞèÒªÉ¨Ãè¶ÁÈ¡¡£
     int i, j, k;
     int treebuild = 0;
     int blocknum;
@@ -1231,9 +1234,9 @@ int create_index_from_record(string index_name, string tablename, string attribu
     bptree<float>* aimtreefloat = NULL;
     bptree<string>* aimtreestring = NULL;
     In.table.get_table_info(tablename);
-    Block* temppage;//å­˜æ”¾è¿™ä¸ªblockçš„åœ°å€çš„ä¸´æ—¶æŒ‡é’ˆ
-    BYTE* tempdata;//å­˜æ”¾è¿™ä¸ªblockçš„dataçš„åœ°å€çš„ä¸´æ—¶æŒ‡é’ˆ
-    BYTE* temprecord;//å­˜æ”¾å½“å‰recordçš„åœ°å€çš„ä¸´æ—¶æŒ‡é’ˆ
+    Block* temppage;//´æ·ÅÕâ¸öblockµÄµØÖ·µÄÁÙÊ±Ö¸Õë
+    BYTE* tempdata;//´æ·ÅÕâ¸öblockµÄdataµÄµØÖ·µÄÁÙÊ±Ö¸Õë
+    BYTE* temprecord;//´æ·Åµ±Ç°recordµÄµØÖ·µÄÁÙÊ±Ö¸Õë
     blocknum = buffer_manager.getBlockNum(tablename);
     for (k = 0; k < In.table.col_num; k++)
     {
@@ -1270,7 +1273,7 @@ int create_index_from_record(string index_name, string tablename, string attribu
             address tempaddr = create_addr();
             tempaddr->block_id = i;
             tempaddr->record_id = j;
-            temprecord = temppage->getRecord(j);//éå†ç”Ÿæˆæ–°çš„åœ°å€ï¼Œç”¨äºå»ºç«‹ç´¢å¼•
+            temprecord = temppage->getRecord(j);//±éÀúÉú³ÉĞÂµÄµØÖ·£¬ÓÃÓÚ½¨Á¢Ë÷Òı
             Tuple temptuple = record_manager.read2tuple(temprecord, In.table);
             for (k = 0; k < In.table.col_num; k++)
             {
@@ -1308,12 +1311,12 @@ int create_index_from_record(string index_name, string tablename, string attribu
         write_to_file_string(aimtreestring);
     }
     return 1;
-    //è¯»æ–‡ä»¶ï¼Œå¾—åˆ°blockï¼Œéå†åœ°å€ï¼Œç„¶åå¾—åˆ°æ¯ä¸ªåœ°å€å¯¹åº”çš„recordä¸­çš„keyï¼Œå°±è¶³å¤Ÿå»ºç«‹ä¸€ä¸ªç´¢å¼•äº†ã€‚
+    //¶ÁÎÄ¼ş£¬µÃµ½block£¬±éÀúµØÖ·£¬È»ºóµÃµ½Ã¿¸öµØÖ·¶ÔÓ¦µÄrecordÖĞµÄkey£¬¾Í×ã¹»½¨Á¢Ò»¸öË÷ÒıÁË¡£
 }
 
 int drop_index(string index_name)
 {
-    char type;
+    int type = -1;
     string tablename;
     string attributename;
     int result = 0;
@@ -1321,30 +1324,29 @@ int drop_index(string index_name)
     if (!fin.is_open()) { cout << "can't find the index" << endl; return 0; }
     fin >> tablename;
     fin >> attributename;
+    fin >> type;
     fin.close();
-    if (t->find_int_tree(tablename, attributename) != NULL)type = 'i';
-    else if (t->find_string_tree(tablename, attributename) != NULL)type = 's';
-    else if (t->find_float_tree(tablename, attributename) != NULL)type = 'f';
-    else type = 'x';
-    remove((index_name + ".txt").c_str());
-    if (type == 'i')
+    cout << type << endl;
+    remove((index_name + ".txt").c_str());//ÖØ¸´ÁË
+    if (type == 0)
     {
         result = t->drop_tree_int(index_name, tablename, attributename);
     }
-    else if (type == 'f')
+    else if (type == 1)
     {
         result = t->drop_tree_float(index_name, tablename, attributename);
     }
-    else if (type == 's')
+    else if (type == 2)
     {
+        cout << "keyi" << endl;
         result = t->drop_tree_string(index_name, tablename, attributename);
     }
     else
     {
+        cout << "wokao" << endl;
         result = 0;
-        cout << "can't find the index" << endl;
     }
     return result;
 }
-//æ•°æ®åº“ç¨‹åºç»“æŸçš„æ—¶å€™éœ€è¦ææ„tæŒ‡å‘çš„type_tablelistï¼Œä»è€Œä¿å­˜æ‰€æœ‰çš„æ ‘ã€‚
-//åƒä¸‡æ³¨æ„ï¼ï¼ï¼ï¼åŒä¸€ä¸ªaddrï¼Œä¸€å®šä¸èƒ½æ’å…¥ä¸¤æ¬¡ï¼ï¼ï¼ä¸ç„¶ä¼šæ­»æ‰ã€‚å·²ç»å°½å¯èƒ½é¿å…äº†ã€‚è¯·åœ¨å¤–éƒ¨æ ¼å¤–æ·»åŠ ä¸€ä¸ªåˆ¤æ–­ç¨‹åºï¼Œå¦‚æœè¿™ä¸ªåœ°å€æ’å…¥è¿‡äº†ï¼Œä¸€å®šä¸è¦å†æ’å…¥äº†ã€‚
+//Êı¾İ¿â³ÌĞò½áÊøµÄÊ±ºòĞèÒªÎö¹¹tÖ¸ÏòµÄtype_tablelist£¬´Ó¶ø±£´æËùÓĞµÄÊ÷¡£
+//Ç§Íò×¢Òâ£¡£¡£¡£¡Í¬Ò»¸öaddr£¬Ò»¶¨²»ÄÜ²åÈëÁ½´Î£¡£¡£¡²»È»»áËÀµô¡£ÒÑ¾­¾¡¿ÉÄÜ±ÜÃâÁË¡£ÇëÔÚÍâ²¿¸ñÍâÌí¼ÓÒ»¸öÅĞ¶Ï³ÌĞò£¬Èç¹ûÕâ¸öµØÖ·²åÈë¹ıÁË£¬Ò»¶¨²»ÒªÔÙ²åÈëÁË¡£

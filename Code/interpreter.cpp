@@ -122,9 +122,9 @@ void Interpreter::read_operation() {
 					if (T.col[k].col_name == fattributename)
 					{
 						T.col[k].have_index = false;
-						T.write_table_info();
 					}
 				}
+				T.write_table_info();
 				//drop index:
 				int drop_index_result;
 				drop_index_result = drop_index(index_name);
@@ -247,6 +247,7 @@ void Interpreter::read_operation() {
 				this->set_error(2012);
 				return;
 		  }
+		  In.table.get_table_info(table_name);
 		  int code = insert_record(values, i);
 		  if (code == 1) {
 			this->operation = INSERT;

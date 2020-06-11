@@ -3,7 +3,7 @@
 #define rootstate 2
 #define interstate 1
 #define leafstate 0
-#define nodecapacity 25//how many keys in a node of B+tree 
+#define nodecapacity 26//how many keys in a node of B+tree 
 //同一个地址必须只能建立一次索引
 //data in block is in char, so the value is char 
 
@@ -95,11 +95,16 @@ int bptree<K>::check_nodestate(indexnode<K>* cnode)
 template <class K>
 bptree<K>::bptree(string indexname, string index_filename, string index_attributename, char datatype)
 {
+	int type = 0;
+	if (datatype == 'i')type = 0;
+	else if (datatype == 'f')type = 1;
+	else type = 2;
 	this->indexname = indexname;
 	this->index_filename = index_filename;
 	ofstream out((this->indexname + ".txt").c_str());
 	out << index_filename << endl;
 	out << index_attributename << endl;
+	out << type << endl;
 	out.close();
 	this->index_attributename = index_attributename;
 	this->data_type = datatype;
@@ -124,7 +129,7 @@ bptree<K>::~bptree()
 template <class K>
 address bptree<K>::find_index_of_key(K k)
 {
-	// cout << "find_index_of_key" << endl;
+	//cout << "find_index_of_key" << endl;
 	indexnode<K>* temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -166,7 +171,7 @@ address bptree<K>::find_index_of_key(K k)
 template <class K>
 address bptree<K>::lowerbound_of_key(K k)
 {
-	// cout << "lowerbound_of_key" << endl;
+	//cout<<"lowerbound_of_key"<<endl;
 	indexnode<K>* temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -197,7 +202,7 @@ address bptree<K>::lowerbound_of_key(K k)
 		{
 			aim_id = i;
 			aim = temp;
-			// cout << "low find the key:" << temp->key[i] << endl;
+			//cout << "low find the key:" <<temp->key[i] << endl;
 			return temp->page[i];
 		}
 		else if (temp->key[temp->key.size() - 1] < k)
@@ -205,7 +210,7 @@ address bptree<K>::lowerbound_of_key(K k)
 			if (temp->sibling == NULL)break;
 			aim = temp->sibling;
 			aim_id = 0;
-			// cout << "low find the key:" << temp->sibling->key[0] << endl;
+			//cout << "low find the key:" << temp->sibling->key[0] << endl;
 			return temp->sibling->page[0];//修改过，
 		}
 	}
@@ -217,7 +222,7 @@ address bptree<K>::lowerbound_of_key(K k)
 template <class K>
 address bptree<K>::upperbound_of_key(K k)
 {
-	// cout << "upperbound_of_key" << endl;
+	//cout<<"upperbound_of_key"<<endl;
 	indexnode<K>* temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -294,10 +299,6 @@ void bptree<K>::refresh()
 				// cout<<"for"<<endl;
 				if (temp == curr)
 				{
-					// cout<<"hit"<<endl<<temp->key[0]<<endl;
-					// cout<<curr->key[0]<<endl;
-					// cout<<orig->key[0]<<endl;
-					// cout<<"now is the no."<<i<<endl;
 					break;
 				}
 
@@ -330,7 +331,7 @@ void bptree<K>::refresh()
 template <class K>
 void bptree<K>::insertindex(K k, address a)
 {
-	// cout << "insert_index" << endl;
+	//cout << "insert_index" << endl;
 	if (indexed[a] == 1)return;
 	indexed[a] = 1;
 	if (ak[a] != k)ak[a] = k;
@@ -463,7 +464,7 @@ void bptree<K>::split(indexnode<K>* temp)
 		// cout<<"not stop"<<endl;
 		newnode->NodeState = leafstate;
 		newnode->parent = temp->parent;
-		if (newnode != temp->sibling && temp->sibling != temp)
+		if (newnode != temp->sibling&&temp->sibling != temp)
 		{
 			newnode->sibling = temp->sibling;
 			temp->sibling = newnode;
@@ -518,7 +519,7 @@ void bptree<K>::split(indexnode<K>* temp)
 		root->NodeState = rootstate;
 		temp->parent = root;
 		newnode->parent = root;
-		if (newnode != temp->sibling && temp->sibling != temp)
+		if (newnode != temp->sibling&&temp->sibling != temp)
 		{
 			newnode->sibling = temp->sibling;
 			temp->sibling = newnode;
@@ -567,7 +568,7 @@ void bptree<K>::split(indexnode<K>* temp)
 		temp->NodeState = interstate;
 		temp->parent = root;
 		newnode->parent = root;
-		if (newnode != temp->sibling && temp->sibling != temp)
+		if (newnode != temp->sibling&&temp->sibling != temp)
 		{
 			newnode->sibling = temp->sibling;
 			temp->sibling = newnode;
@@ -609,7 +610,7 @@ void bptree<K>::split(indexnode<K>* temp)
 		}
 		newnode->NodeState = interstate;
 		newnode->parent = temp->parent;
-		if (newnode != temp->sibling && temp->sibling != temp)
+		if (newnode != temp->sibling&&temp->sibling != temp)
 		{
 			newnode->sibling = temp->sibling;
 			temp->sibling = newnode;
@@ -694,7 +695,7 @@ void bptree<K>::deleteindex(K k)
 template <class K>
 void bptree<K>::deletescope(K lowk, K upk)
 {
-	// cout << "delete_scope" << endl;
+	//cout << "delete_scope" << endl;
 	address templow;
 	address tempup;
 	address curraddr;
@@ -811,19 +812,19 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 	}
 	else if (mergenode->NodeState != leafstate)
 	{
-		if (secnode != NULL)
-			for (i = 0; i < secnode->children.size(); i++)
+		if(secnode != NULL)
+		for (i = 0; i < secnode->children.size(); i++)
+		{
+			mergenode->key.push_back(secnode->key[0]);
+			mergenode->children.push_back(secnode->children[0]);
+			if (i == 0)
 			{
-				mergenode->key.push_back(secnode->key[0]);
-				mergenode->children.push_back(secnode->children[0]);
-				if (i == 0)
-				{
-					mergenode->key[key_num] = secnode->key[0];
-				}
-				else mergenode->key[key_num + i] = secnode->key[i - 1];//?
-				mergenode->children[child_num + i] = secnode->children[i];
-				secnode->children[i]->parent = mergenode;
+				mergenode->key[key_num] = secnode->key[0];
 			}
+			else mergenode->key[key_num + i] = secnode->key[i - 1];//?
+			mergenode->children[child_num + i] = secnode->children[i];
+			secnode->children[i]->parent = mergenode;
+		}
 	}
 	mergenode->sibling = secnode->sibling;
 	//对parent也要修改。
@@ -866,3 +867,5 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 //16是第一个大于等于16的，19是第一个大于18的，这就是返回值的前闭后开的意思，这么写有利于循环的写法
 //范围选择必须要给定两个范围，所以必要的时候，需要设置该类型变量下的无穷大的数。
 //范围删除是在范围选择的基础上写的，但是注意，范围删除没有返回值，按照上面的举例，会删掉16,17,18，即所有【16,18】的值。
+
+
