@@ -1170,7 +1170,7 @@ bptree<string>* type_tablelist::find_string_tree(string filename, string attribu
         fin.close();
         bptree<string>* newtree = read_from_file_string(file_name);
         t->string_treelist.push_back(newtree);
-       //  cout << 3.5 << endl;
+        //  cout << 3.5 << endl;
         return newtree;
     }
     else {
@@ -1325,7 +1325,7 @@ int drop_index(string index_name)
     else if (t->find_string_tree(tablename, attributename) != NULL)type = 's';
     else if (t->find_float_tree(tablename, attributename) != NULL)type = 'f';
     else type = 'x';
-    remove((index_name + ".txt").c_str());
+    //remove((index_name + ".txt").c_str());//重复了
     if (type == 'i')
     {
         result = t->drop_tree_int(index_name, tablename, attributename);

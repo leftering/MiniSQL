@@ -3,7 +3,7 @@
 #define rootstate 2
 #define interstate 1
 #define leafstate 0
-#define nodecapacity 25//how many keys in a node of B+tree 
+#define nodecapacity 26//how many keys in a node of B+tree 
 //同一个地址必须只能建立一次索引
 //data in block is in char, so the value is char 
 
@@ -69,7 +69,6 @@ public:
 public:
 	bptree(string indexname, string index_filename, string index_attributename, char datatype);
 	~bptree();
-	void disposetree(void);
 	//void updateblock(indexnode<K>* unode);//?
 	void insertindex(K key, address a);
 	void deleteindex(K k);
@@ -125,6 +124,7 @@ bptree<K>::~bptree()
 template <class K>
 address bptree<K>::find_index_of_key(K k)
 {
+	cout << "find_index_of_key" << endl;
 	indexnode<K>* temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -166,7 +166,7 @@ address bptree<K>::find_index_of_key(K k)
 template <class K>
 address bptree<K>::lowerbound_of_key(K k)
 {
-	// cout<<"lowerbound_of_key"<<endl;
+	cout << "lowerbound_of_key" << endl;
 	indexnode<K>* temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -197,12 +197,15 @@ address bptree<K>::lowerbound_of_key(K k)
 		{
 			aim_id = i;
 			aim = temp;
+			cout << "low find the key:" << temp->key[i] << endl;
 			return temp->page[i];
 		}
 		else if (temp->key[temp->key.size() - 1] < k)
 		{
+			if (temp->sibling == NULL)break;
 			aim = temp->sibling;
 			aim_id = 0;
+			cout << "low find the key:" << temp->sibling->key[0] << endl;
 			return temp->sibling->page[0];//修改过，
 		}
 	}
@@ -214,7 +217,7 @@ address bptree<K>::lowerbound_of_key(K k)
 template <class K>
 address bptree<K>::upperbound_of_key(K k)
 {
-	// cout<<"upperbound_of_key"<<endl;
+	cout << "upperbound_of_key" << endl;
 	indexnode<K>* temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -327,6 +330,7 @@ void bptree<K>::refresh()
 template <class K>
 void bptree<K>::insertindex(K k, address a)
 {
+	cout << "insert_index" << endl;
 	if (indexed[a] == 1)return;
 	indexed[a] = 1;
 	if (ak[a] != k)ak[a] = k;
@@ -459,7 +463,7 @@ void bptree<K>::split(indexnode<K>* temp)
 		// cout<<"not stop"<<endl;
 		newnode->NodeState = leafstate;
 		newnode->parent = temp->parent;
-		if (newnode != temp->sibling&&temp->sibling != temp)
+		if (newnode != temp->sibling && temp->sibling != temp)
 		{
 			newnode->sibling = temp->sibling;
 			temp->sibling = newnode;
@@ -514,7 +518,7 @@ void bptree<K>::split(indexnode<K>* temp)
 		root->NodeState = rootstate;
 		temp->parent = root;
 		newnode->parent = root;
-		if (newnode != temp->sibling&&temp->sibling != temp)
+		if (newnode != temp->sibling && temp->sibling != temp)
 		{
 			newnode->sibling = temp->sibling;
 			temp->sibling = newnode;
@@ -563,7 +567,7 @@ void bptree<K>::split(indexnode<K>* temp)
 		temp->NodeState = interstate;
 		temp->parent = root;
 		newnode->parent = root;
-		if (newnode != temp->sibling&&temp->sibling != temp)
+		if (newnode != temp->sibling && temp->sibling != temp)
 		{
 			newnode->sibling = temp->sibling;
 			temp->sibling = newnode;
@@ -605,7 +609,7 @@ void bptree<K>::split(indexnode<K>* temp)
 		}
 		newnode->NodeState = interstate;
 		newnode->parent = temp->parent;
-		if (newnode != temp->sibling&&temp->sibling != temp)
+		if (newnode != temp->sibling && temp->sibling != temp)
 		{
 			newnode->sibling = temp->sibling;
 			temp->sibling = newnode;
@@ -640,6 +644,7 @@ void bptree<K>::split(indexnode<K>* temp)
 template <class K>
 void bptree<K>::deleteindex(K k)
 {
+	cout << "delete_index" << endl;
 	indexnode<K>* temp;
 	temp = (this->rootnode);
 	int i = 0;
@@ -689,6 +694,7 @@ void bptree<K>::deleteindex(K k)
 template <class K>
 void bptree<K>::deletescope(K lowk, K upk)
 {
+	cout << "delete_scope" << endl;
 	address templow;
 	address tempup;
 	address curraddr;
@@ -805,19 +811,19 @@ void bptree<K>::merge(indexnode<K>* temp)//merge完了可能还要再split
 	}
 	else if (mergenode->NodeState != leafstate)
 	{
-		if(secnode != NULL)
-		for (i = 0; i < secnode->children.size(); i++)
-		{
-			mergenode->key.push_back(secnode->key[0]);
-			mergenode->children.push_back(secnode->children[0]);
-			if (i == 0)
+		if (secnode != NULL)
+			for (i = 0; i < secnode->children.size(); i++)
 			{
-				mergenode->key[key_num] = secnode->key[0];
+				mergenode->key.push_back(secnode->key[0]);
+				mergenode->children.push_back(secnode->children[0]);
+				if (i == 0)
+				{
+					mergenode->key[key_num] = secnode->key[0];
+				}
+				else mergenode->key[key_num + i] = secnode->key[i - 1];//?
+				mergenode->children[child_num + i] = secnode->children[i];
+				secnode->children[i]->parent = mergenode;
 			}
-			else mergenode->key[key_num + i] = secnode->key[i - 1];//?
-			mergenode->children[child_num + i] = secnode->children[i];
-			secnode->children[i]->parent = mergenode;
-		}
 	}
 	mergenode->sibling = secnode->sibling;
 	//对parent也要修改。
