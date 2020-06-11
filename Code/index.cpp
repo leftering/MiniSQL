@@ -106,10 +106,6 @@ int type_tablelist::drop_tree_string(string indexname, string table_name, string
     string filename;
     filename = indexname + ".txt";
     result = remove(filename.c_str());
-    if (result == 1)
-    {
-        return 0;
-    }
     int i, j;
     for (i = 0; i < string_treelist.size(); i++)
     {
@@ -128,9 +124,6 @@ int type_tablelist::drop_tree_string(string indexname, string table_name, string
     if (fin.is_open())//спнд╪Ч
     {
         fin.close();
-        if (remove(filename.c_str())) { 
-            return 0;
-        }
     }
     else fin.close();
     return 1;
