@@ -124,9 +124,11 @@ int type_tablelist::drop_tree_string(string indexname, string table_name, string
     if (fin.is_open())//спнд╪Ч
     {
         fin.close();
+        remove(filename.c_str());
+        return 1;
     }
     else fin.close();
-    return 1;
+    return 0;
 }
 
 //please use t as a extern global variable
