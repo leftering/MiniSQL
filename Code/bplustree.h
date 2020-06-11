@@ -124,7 +124,7 @@ bptree<K>::~bptree()
 template <class K>
 address bptree<K>::find_index_of_key(K k)
 {
-	cout << "find_index_of_key" << endl;
+	// cout << "find_index_of_key" << endl;
 	indexnode<K>* temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -166,7 +166,7 @@ address bptree<K>::find_index_of_key(K k)
 template <class K>
 address bptree<K>::lowerbound_of_key(K k)
 {
-	cout << "lowerbound_of_key" << endl;
+	// cout << "lowerbound_of_key" << endl;
 	indexnode<K>* temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -197,7 +197,7 @@ address bptree<K>::lowerbound_of_key(K k)
 		{
 			aim_id = i;
 			aim = temp;
-			cout << "low find the key:" << temp->key[i] << endl;
+			// cout << "low find the key:" << temp->key[i] << endl;
 			return temp->page[i];
 		}
 		else if (temp->key[temp->key.size() - 1] < k)
@@ -205,7 +205,7 @@ address bptree<K>::lowerbound_of_key(K k)
 			if (temp->sibling == NULL)break;
 			aim = temp->sibling;
 			aim_id = 0;
-			cout << "low find the key:" << temp->sibling->key[0] << endl;
+			// cout << "low find the key:" << temp->sibling->key[0] << endl;
 			return temp->sibling->page[0];//修改过，
 		}
 	}
@@ -217,7 +217,7 @@ address bptree<K>::lowerbound_of_key(K k)
 template <class K>
 address bptree<K>::upperbound_of_key(K k)
 {
-	cout << "upperbound_of_key" << endl;
+	// cout << "upperbound_of_key" << endl;
 	indexnode<K>* temp;
 	temp = this->rootnode;
 	int i = 0;
@@ -330,7 +330,7 @@ void bptree<K>::refresh()
 template <class K>
 void bptree<K>::insertindex(K k, address a)
 {
-	cout << "insert_index" << endl;
+	// cout << "insert_index" << endl;
 	if (indexed[a] == 1)return;
 	indexed[a] = 1;
 	if (ak[a] != k)ak[a] = k;
@@ -644,7 +644,7 @@ void bptree<K>::split(indexnode<K>* temp)
 template <class K>
 void bptree<K>::deleteindex(K k)
 {
-	cout << "delete_index" << endl;
+	//cout << "delete_index" << endl;
 	indexnode<K>* temp;
 	temp = (this->rootnode);
 	int i = 0;
@@ -694,7 +694,7 @@ void bptree<K>::deleteindex(K k)
 template <class K>
 void bptree<K>::deletescope(K lowk, K upk)
 {
-	cout << "delete_scope" << endl;
+	// cout << "delete_scope" << endl;
 	address templow;
 	address tempup;
 	address curraddr;
