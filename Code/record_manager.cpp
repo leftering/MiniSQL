@@ -505,6 +505,18 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 	table_info T = In.table;
 	std::string table_name = T.table_name;
 	// cout << "remove" << endl;
+
+	if (wheres.size() == 0) {
+		vector<int> col_ids;
+		vector<Tuple> tuples;
+		vector<int> logic;
+		int cnt = select(col_ids, wheres, logic, &tuples);
+		string filename = RECORDPATH + table_name + ".data";
+		FILE* fp = fopen(filename.c_str(), "w");
+		fclose(fp);
+		return 9834;
+	}
+
 	bool flag = false;
 	std::vector<int> col_id;
 	for (int i = 0; i < T.col_num; i++) {
