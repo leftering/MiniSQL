@@ -383,12 +383,13 @@ int RecordManager::insert(Tuple record)
 {
 	static table_info T = In.table;
 	std::string table_name = T.table_name;
+	T.get_table_info(table_name);
 	int col_num = T.col_num;
 	short record_size = 0;
 	for (int i = 0; i < col_num; i++) {
 		int type = record.getData()[i].type;
 		if (type == -2) {
-			record_size += sizeof(int);
+			record_size += sizeof(int); 
 		}
 		else if (type == -1) {
 			record_size += sizeof(float);
