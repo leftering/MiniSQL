@@ -514,7 +514,7 @@ int RecordManager::remove(std::vector<Where_clause>wheres, std::vector<int>logic
 		string filename = RECORDPATH + table_name + ".data";
 		FILE* fp = fopen(filename.c_str(), "w");
 		fclose(fp);
-		return 9834;
+		return cnt;
 	}
 
 	bool flag = false;
